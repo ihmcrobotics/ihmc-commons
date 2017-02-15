@@ -1,10 +1,9 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.19'
+   id "com.jfrog.bintray" version "1.7.3"
 }
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 
 sourceCompatibility = 1.8
 version = '0.9.0'
@@ -14,7 +13,20 @@ project.ext.vcsUrl = 'https://github.com/ihmcrobotics/ihmc-commons'
 project.ext.licenseURL = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
 project.ext.licenseName = 'Apache License, Version 2.0'
 project.ext.bintrayLicenseName = 'Apache-2.0'
-project.ext.publicationName = 'ihmc-commons'
+project.ext.mainPublicationName = 'ihmc-commons'
+project.ext.testingPublicationName = 'ihmc-commons-testing'
+project.ext.publishCommonsMain = project.hasProperty('publish_commons_main') ? project.publish_commons_main : false
+project.ext.publishCommonsTesting = project.hasProperty('publish_commons_testing') ? project.publish_commons_testing : false
+if (project.ext.publishCommonsTesting)
+{
+   project.ext.publicationName = project.ext.testingPublicationName
+}
+else
+{
+   project.ext.publicationName = project.ext.mainPublicationName
+}
+
+println project.ext.publicationName
 
 jar {
    manifest {
@@ -28,6 +40,42 @@ jar {
               'Bundle-Version': project.version,
               'Bundle-License': project.ext.licenseURL,
               'Bundle-Vendor': 'IHMC')
+   }
+}
+
+project.sourceSets {
+   if (project.ext.publishCommonsTesting)
+   {
+      main {
+         java {
+            srcDirs = ['testing']
+         }
+      }
+   }
+   else if (project.ext.publishCommonsMain)
+   {
+      main {
+         java {
+            srcDirs = ['src']
+         }
+      }
+   }
+   else
+   {
+      main {
+         java {
+            srcDirs = ['src', 'testing']
+         }
+      }
+      test {
+         java {
+            srcDirs = ['test']
+         }
+
+         resources {
+            srcDirs = ['testResources']
+         }
+      }
    }
 }
 
@@ -66,8 +114,8 @@ publishing {
 }
 
 bintray {
-   user = bintray_user
-   key = bintray_key
+   user = project.hasProperty('bintray_user') ? project.bintray_user : 'invalid'
+   key = project.hasProperty('bintray_key') ? project.bintray_key : 'invalid'
 
    dryRun = false
    publish = false
@@ -81,8 +129,8 @@ bintray {
       desc = project.name
 
       websiteUrl = project.ext.vcsUrl
-      issueTrackerUrl = '${project.ext.vcsUrl}/issues'
-      vcsUrl = '${project.ext.vcsUrl}.git'
+      issueTrackerUrl = project.ext.vcsUrl + '/issues'
+      vcsUrl = project.ext.vcsUrl + '.git'
 
       licenses = [project.ext.bintrayLicenseName]
       labels = ['ihmc', 'java']
@@ -90,9 +138,9 @@ bintray {
 
       version {
          name = project.ext.fullVersion
-         desc = '${project.name} v${project.ext.fullVersion}'
+         desc = project.name + ' v' + project.ext.fullVersion
          released = new Date()
-         vcsTag = 'v${project.version}'
+         vcsTag = 'v' + project.version
       }
    }
 }
@@ -101,16 +149,44 @@ repositories {
    mavenCentral()
    jcenter()
    mavenLocal()
+   maven {
+      url 'http://dl.bintray.com/ihmcrobotics/maven-vendor'
+   }
+   maven {
+      url 'http://dl.bintray.com/ihmcrobotics/maven-release'
+   }
+   maven {
+      url 'http://clojars.org/repo/'
+   }
+   maven {
+      url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
+   }
+   maven {
+      url 'https://oss.sonatype.org/content/repositories/snapshots'
+   }
+   maven {
+      url 'https://artifactory.ihmc.us/artifactory/releases/'
+   }
+   maven {
+      url 'https://artifactory.ihmc.us/artifactory/thirdparty/'
+   }
 }
 
-repositories ihmc.ihmcDefaultArtifactProxies()
-
 dependencies {
-   compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
 
-   testCompile group: 'junit', name: 'junit', version: '4.11'
-   testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-   testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+   if (project.ext.publishCommonsTesting)
+   {
+      compile group: 'junit', name: 'junit', version: '4.11'
+      compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+      compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+      compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.0'
+   }
+   else if (!project.ext.publishCommonsMain)
+   {
+      testCompile group: 'junit', name: 'junit', version: '4.11'
+      testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+      testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+   }
 }
