@@ -27,3 +27,11 @@ testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: 'latest'
 - Support for mutation testing and displaying the results in your browser.
 - Tools for running parallel continuous integration tests in the cloud.
 - Extra assertions. (assertSerializable, assertExceptionThrown, etc.)
+
+### Contributing
+
+This library aims to be small, lightweight, and stable with minimal dependencies. Pull requests will be heavily reviewed.
+
+### License
+
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
