@@ -3,8 +3,6 @@ IHMC Commons
 
 Useful tools and utilities that extend Java, Apache Commons Lang, and Apache Commons IO to make them a little more accessible and non-intrusive.
 
-Separate distributions are available for compile and test dependency.
-
 ### Getting Started
 
 Artifacts are hosted on Bintray at https://bintray.com/ihmcrobotics/maven-release/ihmc-commons
