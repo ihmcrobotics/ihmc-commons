@@ -1,0 +1,116 @@
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.19'
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+sourceCompatibility = 1.8
+version = '0.9.0'
+
+project.ext.fullVersion = version
+project.ext.vcsUrl = 'https://github.com/ihmcrobotics/ihmc-commons'
+project.ext.licenseURL = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+project.ext.licenseName = 'Apache License, Version 2.0'
+project.ext.bintrayLicenseName = 'Apache-2.0'
+project.ext.publicationName = 'ihmc-commons'
+
+jar {
+   manifest {
+      attributes(
+              'Created-By': 'IHMC Gradle Build Script',
+              'Implementation-Title': project.name,
+              'Implementation-Version': project.version,
+              'Implementation-Vendor': 'IHMC',
+
+              'Bundle-Name': project.ext.publicationName,
+              'Bundle-Version': project.version,
+              'Bundle-License': project.ext.licenseURL,
+              'Bundle-Vendor': 'IHMC')
+   }
+}
+
+task sourceJar(type: Jar) {
+   from sourceSets.main.allJava
+}
+
+publishing {
+   publications {
+      mavenJava(MavenPublication) {
+         groupId 'us.ihmc'
+         artifactId project.ext.publicationName
+         version project.ext.fullVersion
+         from components.java
+
+         pom.withXml {
+            asNode().children().last() + {
+               resolveStrategy = Closure.DELEGATE_FIRST
+               name project.name
+               url project.ext.vcsUrl
+               licenses {
+                  license {
+                     name project.ext.licenseName
+                     url project.ext.licenseURL
+                     distribution 'repo'
+                  }
+               }
+            }
+         }
+
+         artifact sourceJar {
+            classifier 'sources'
+         }
+      }
+   }
+}
+
+bintray {
+   user = bintray_user
+   key = bintray_key
+
+   dryRun = false
+   publish = false
+
+   publications = ['mavenJava']
+
+   pkg {
+      repo = 'maven-release'
+      name = project.ext.publicationName
+      userOrg = 'ihmcrobotics'
+      desc = project.name
+
+      websiteUrl = project.ext.vcsUrl
+      issueTrackerUrl = '${project.ext.vcsUrl}/issues'
+      vcsUrl = '${project.ext.vcsUrl}.git'
+
+      licenses = [project.ext.bintrayLicenseName]
+      labels = ['ihmc', 'java']
+      publicDownloadNumbers = true
+
+      version {
+         name = project.ext.fullVersion
+         desc = '${project.name} v${project.ext.fullVersion}'
+         released = new Date()
+         vcsTag = 'v${project.version}'
+      }
+   }
+}
+
+repositories {
+   mavenCentral()
+   jcenter()
+   mavenLocal()
+}
+
+repositories ihmc.ihmcDefaultArtifactProxies()
+
+dependencies {
+   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+   compile group: 'commons-io', name: 'commons-io', version: '2.4'
+
+   testCompile group: 'junit', name: 'junit', version: '4.11'
+   testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+}
