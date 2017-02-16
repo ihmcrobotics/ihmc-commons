@@ -1,0 +1,183 @@
+plugins {
+   id "com.jfrog.bintray" version "1.7.3"
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = 1.8
+version = '0.9.0'
+
+project.ext.fullVersion = version
+project.ext.vcsUrl = 'https://github.com/ihmcrobotics/ihmc-commons'
+project.ext.licenseURL = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+project.ext.licenseName = 'Apache License, Version 2.0'
+project.ext.bintrayLicenseName = 'Apache-2.0'
+project.ext.mainPublicationName = 'ihmc-commons'
+project.ext.testingPublicationName = 'ihmc-commons-testing'
+project.ext.publishCommonsMain = project.hasProperty('publish_commons_main') ? project.publish_commons_main : false
+project.ext.publishCommonsTesting = project.hasProperty('publish_commons_testing') ? project.publish_commons_testing : false
+if (project.ext.publishCommonsTesting)
+{
+   project.ext.publicationName = project.ext.testingPublicationName
+}
+else
+{
+   project.ext.publicationName = project.ext.mainPublicationName
+}
+
+println project.ext.publicationName
+
+jar {
+   manifest {
+      attributes(
+              'Created-By': 'IHMC Gradle Build Script',
+              'Implementation-Title': project.name,
+              'Implementation-Version': project.version,
+              'Implementation-Vendor': 'IHMC',
+
+              'Bundle-Name': project.ext.publicationName,
+              'Bundle-Version': project.version,
+              'Bundle-License': project.ext.licenseURL,
+              'Bundle-Vendor': 'IHMC')
+   }
+}
+
+project.sourceSets {
+   if (project.ext.publishCommonsTesting)
+   {
+      main {
+         java {
+            srcDirs = ['testing']
+         }
+      }
+   }
+   else if (project.ext.publishCommonsMain)
+   {
+      main {
+         java {
+            srcDirs = ['src']
+         }
+      }
+   }
+   else
+   {
+      main {
+         java {
+            srcDirs = ['src', 'testing']
+         }
+      }
+      test {
+         java {
+            srcDirs = ['test']
+         }
+
+         resources {
+            srcDirs = ['testResources']
+         }
+      }
+   }
+}
+
+task sourceJar(type: Jar) {
+   from sourceSets.main.allJava
+}
+
+publishing {
+   publications {
+      mavenJava(MavenPublication) {
+         groupId 'us.ihmc'
+         artifactId project.ext.publicationName
+         version project.ext.fullVersion
+         from components.java
+
+         pom.withXml {
+            asNode().children().last() + {
+               resolveStrategy = Closure.DELEGATE_FIRST
+               name project.name
+               url project.ext.vcsUrl
+               licenses {
+                  license {
+                     name project.ext.licenseName
+                     url project.ext.licenseURL
+                     distribution 'repo'
+                  }
+               }
+            }
+         }
+
+         artifact sourceJar {
+            classifier 'sources'
+         }
+      }
+   }
+}
+
+bintray {
+   user = project.hasProperty('bintray_user') ? project.bintray_user : 'invalid'
+   key = project.hasProperty('bintray_key') ? project.bintray_key : 'invalid'
+
+   dryRun = false
+   publish = false
+
+   publications = ['mavenJava']
+
+   pkg {
+      repo = 'maven-release'
+      name = project.ext.publicationName
+      userOrg = 'ihmcrobotics'
+      desc = project.name
+
+      websiteUrl = project.ext.vcsUrl
+      issueTrackerUrl = project.ext.vcsUrl + '/issues'
+      vcsUrl = project.ext.vcsUrl + '.git'
+
+      licenses = [project.ext.bintrayLicenseName]
+      labels = ['ihmc', 'java']
+      publicDownloadNumbers = true
+
+      version {
+         name = project.ext.fullVersion
+         desc = project.name + ' v' + project.ext.fullVersion
+         released = new Date()
+         vcsTag = 'v' + project.version
+      }
+   }
+}
+
+repositories {
+   mavenCentral()
+   jcenter()
+   mavenLocal()
+   maven {
+      url 'http://dl.bintray.com/ihmcrobotics/maven-vendor'
+   }
+   maven {
+      url 'http://dl.bintray.com/ihmcrobotics/maven-release'
+   }
+   maven {
+      url 'http://clojars.org/repo/'
+   }
+   maven {
+      url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
+   }
+   maven {
+      url 'https://oss.sonatype.org/content/repositories/snapshots'
+   }
+   maven {
+      url 'https://artifactory.ihmc.us/artifactory/releases/'
+   }
+   maven {
+      url 'https://artifactory.ihmc.us/artifactory/thirdparty/'
+   }
+}
+
+dependencies {
+
+   if (project.ext.publishCommonsTesting)
+   {
+   }
+   else if (!project.ext.publishCommonsMain)
+   {
+   }
+}
