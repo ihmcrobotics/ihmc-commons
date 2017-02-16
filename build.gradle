@@ -83,6 +83,10 @@ task sourceJar(type: Jar) {
    from sourceSets.main.allJava
 }
 
+task javaDocJar(type: Jar, dependsOn: javadoc) {
+   from javadoc.destinationDir
+}
+
 publishing {
    publications {
       mavenJava(MavenPublication) {
@@ -108,6 +112,10 @@ publishing {
 
          artifact sourceJar {
             classifier 'sources'
+         }
+
+         artifact javaDocJar {
+            classifier 'javadoc'
          }
       }
    }
