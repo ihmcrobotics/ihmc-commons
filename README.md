@@ -9,8 +9,8 @@ Artifacts are hosted on Bintray at https://bintray.com/ihmcrobotics/maven-releas
 
 In your `build.gradle`:
 ```groovy
-compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.0'
-testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.0'
+compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
+testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 ```
 
 ### What's Included
