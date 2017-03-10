@@ -3,7 +3,7 @@ package us.ihmc.commons.exception;
 import us.ihmc.commons.PrintTools;
 
 /**
- * Create awareness, expliciness, and ease of handling exceptions in default or common ways.
+ * Create awareness, explicitness, and ease of handling exceptions in default or common ways.
  */
 public enum DefaultExceptionHandler
 {
