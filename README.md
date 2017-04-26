@@ -7,9 +7,11 @@ Useful tools and utilities that extend Java, Apache Commons Lang, and Apache Com
 
 Artifacts are hosted on Bintray at https://bintray.com/ihmcrobotics/maven-release/ihmc-commons
 
+[ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/ihmc-commons/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/ihmc-commons/_latestVersion)
+
 In your `build.gradle`:
 ```groovy
-compile group: 'us.ihmc', name: 'ihmc-commons', version: '[ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/ihmc-commons/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/ihmc-commons/_latestVersion)'
+compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
 testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 ```
 
