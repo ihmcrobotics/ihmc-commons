@@ -6,7 +6,7 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.8
-version = '0.9.1-alpha'
+version = '0.9.3-alpha'
 
 project.ext.fullVersion = version
 project.ext.vcsUrl = 'https://github.com/ihmcrobotics/ihmc-commons'

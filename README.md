@@ -9,7 +9,7 @@ Artifacts are hosted on Bintray at https://bintray.com/ihmcrobotics/maven-releas
 
 In your `build.gradle`:
 ```groovy
-compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
+compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.3-alpha'
 testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 ```
 
@@ -21,6 +21,7 @@ testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alph
 - Common paths to support IHMC conventions.
 - Commonly needed conversions. (Data information units, etc.)
 - Tool for printing log-level style messages that show class name and line number.
+- Epsilons for explicitness and convenience.
 
 ###### Testing Distribution
 
