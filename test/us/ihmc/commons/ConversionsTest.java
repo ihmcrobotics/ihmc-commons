@@ -245,12 +245,16 @@ public class ConversionsTest
    public void testMagnitudeToDecibels()
    {
       double epsilon = 1e-10;
-      assertEquals(20.0, Conversions.convertMagnitudeToDecibels(10.0), epsilon);
-      assertEquals(40.0, Conversions.convertMagnitudeToDecibels(100.0), epsilon);
-      assertEquals(28.691378080683975, Conversions.convertMagnitudeToDecibels(27.2), epsilon);
+      assertEquals(20.0, Conversions.amplitudeToDecibels(10.0), epsilon);
+      assertEquals(40.0, Conversions.amplitudeToDecibels(100.0), epsilon);
+      assertEquals(28.691378080683975, Conversions.amplitudeToDecibels(27.2), epsilon);
 
       double[] magnitudes = new double[] {10.0, 100.0, 27.2};
-      double[] decibels = Conversions.convertMagnitudeToDecibels(magnitudes);
+      double[] decibels = new double[magnitudes.length];
+      for (int i = 0; i < magnitudes.length; i++)
+      {
+         decibels[i] = Conversions.amplitudeToDecibels(magnitudes[i]);
+      }
 
       assertEquals(20.0, decibels[0], epsilon);
       assertEquals(40.0, decibels[1], epsilon);
@@ -263,7 +267,7 @@ public class ConversionsTest
    public void testNaN()
    {
       double magnitude = -1.0;
-      double decibels = Conversions.convertMagnitudeToDecibels(magnitude);
+      double decibels = Conversions.amplitudeToDecibels(magnitude);
       assertTrue(Double.isNaN(decibels));
    }
 
@@ -272,32 +276,31 @@ public class ConversionsTest
    public void testNegativeInfinity()
    {
       double magnitude = 0.0;
-      double decibels = Conversions.convertMagnitudeToDecibels(magnitude);
+      double decibels = Conversions.amplitudeToDecibels(magnitude);
       assertTrue(Double.isInfinite(decibels));
    }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testRadiansToDegrees()
+   public void testMinutesSecondsConversions()
    {
-      double[] phaseInRadians = new double[] {0.0, Math.PI / 4.0, Math.PI, Math.PI * 2.0, Math.PI * 4.0};
-      double[] phaseInDegrees = Conversions.convertRadianToDegrees(phaseInRadians);
-
-      double epsilon = 1e-10;
-      assertEquals(0.0, phaseInDegrees[0], epsilon);
-      assertEquals(45.0, phaseInDegrees[1], epsilon);
-      assertEquals(180.0, phaseInDegrees[2], epsilon);
-      assertEquals(360.0, phaseInDegrees[3], epsilon);
-      assertEquals(720.0, phaseInDegrees[4], epsilon);
-
-      phaseInRadians = new double[] {-0.0, -Math.PI / 4.0, -Math.PI, -Math.PI * 2.0, -Math.PI * 4.0};
-      phaseInDegrees = Conversions.convertRadianToDegrees(phaseInRadians);
-
-      assertEquals(-0.0, phaseInDegrees[0], epsilon);
-      assertEquals(-45.0, phaseInDegrees[1], epsilon);
-      assertEquals(-180.0, phaseInDegrees[2], epsilon);
-      assertEquals(-360.0, phaseInDegrees[3], epsilon);
-      assertEquals(-720.0, phaseInDegrees[4], epsilon);
+      assertEquals("Not equal", 60.0, Conversions.minutesToSeconds(1.0), 1e-7);
+      assertEquals("Not equal", 12000.0, Conversions.minutesToSeconds(200.0), 1e-7);
+      assertEquals("Not equal", 1.0, Conversions.secondsToMinutes(60.0), 1e-7);
+      assertEquals("Not equal", 2.0, Conversions.secondsToMinutes(120.0), 1e-7);
+      assertEquals("Not equal", 1000.0, Conversions.secondsToMilliseconds(1.0), 1e-7);
+      assertEquals("Not equal", 1.0, Conversions.millisecondsToSeconds(1000.0), 1e-7);
+      assertEquals("Not equal", 1.0, Conversions.millisecondsToMinutes(60000.0), 1e-7);
+      assertEquals("Not equal", 1000000.0, Conversions.millisecondsToNanoseconds(1.0), 1e-7);
+      assertEquals("Not equal", 1000000000, Conversions.millisecondsToNanoseconds(1000), 1e-7);
+      assertEquals("Not equal", 1.0, Conversions.microsecondsToSeconds(1000000.0), 1e-7);
+      assertEquals("Not equal", 1000, Conversions.microsecondsToNanoseconds(1), 1e-7);
+      assertEquals("Not equal", 1000.0, Conversions.microsecondsToNanoseconds(1.0), 1e-7);
+      assertEquals("Not equal", 0.000001, Conversions.nanosecondsToMilliseconds(1.0), 1e-7);
+      assertEquals("Not equal", 1.0, Conversions.nanosecondsToMilliseconds(1000000), 1e-7);
+      assertEquals("Not equal", 1000, Conversions.nanosecondsToMicroseconds(1000000), 1e-7);
+      assertEquals("Not equal", 0.001, Conversions.nanosecondsToMicroseconds(1.0), 1e-7);
+      assertEquals("Not equal", 1, Conversions.nanosecondsToMicroseconds(1000), 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -305,7 +308,11 @@ public class ConversionsTest
    public void testRadiansPerSecondToHz()
    {
       double[] freqInRadPerSecond = new double[] {0.0, Math.PI / 4.0, Math.PI, Math.PI * 2.0, Math.PI * 4.0};
-      double[] freqInHz = Conversions.convertRadPerSecondToHz(freqInRadPerSecond);
+      double[] freqInHz = new double[freqInRadPerSecond.length];
+      for (int i = 0; i < freqInRadPerSecond.length; i++)
+      {
+         freqInHz[i] = Conversions.radiansPerSecondToHertz(freqInRadPerSecond[i]);
+      }
 
       double epsilon = 1e-10;
       assertEquals(0.0, freqInHz[0], epsilon);
@@ -315,7 +322,11 @@ public class ConversionsTest
       assertEquals(2.0, freqInHz[4], epsilon);
 
       freqInRadPerSecond = new double[] {-0.0, -Math.PI / 4.0, -Math.PI, -Math.PI * 2.0, -Math.PI * 4.0};
-      freqInHz = Conversions.convertRadPerSecondToHz(freqInRadPerSecond);
+      freqInHz = new double[freqInRadPerSecond.length];
+      for (int i = 0; i < freqInRadPerSecond.length; i++)
+      {
+         freqInHz[i] = Conversions.radiansPerSecondToHertz(freqInRadPerSecond[i]);
+      }
 
       assertEquals(-0.0, freqInHz[0], epsilon);
       assertEquals(-0.125, freqInHz[1], epsilon);
