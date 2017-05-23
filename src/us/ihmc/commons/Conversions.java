@@ -10,14 +10,17 @@ public class Conversions
    /** Number of bytes (B) in a kibibyte (KiB) */
    public static final int KIBIBYTES_TO_BYTES = 1024;
 
+   /** Number of bytes (B) in a mebibyte (MiB) */
+   public static final int MEBIBYTES_TO_BYTES = 1048576;
+
    /** Number of bytes (B) in a kilobyte (KB) */
    public static final int KILOBYTES_TO_BYTES = 1000;
 
-   private static long micro = 1000000;
+   /** Number of bytes (B) in a megabyte (MB) */
+   public static final int MEGABYTES_TO_BYTES = 1000000;
 
-   public static long nano = 1000000000;
-
-   private static long microToNano = nano / micro;
+   /** <p>2π.</p> Implemented as 2.0 * Math.PI */
+   public static final double TWO_PI = 2.0 * Math.PI;
 
    private Conversions()
    {
@@ -54,7 +57,7 @@ public class Conversions
     */
    public static int mebibytesToBytes(int mebibytes)
    {
-      return mebibytes * (int) Math.pow(KIBIBYTES_TO_BYTES, 2);
+      return mebibytes * MEBIBYTES_TO_BYTES;
    }
 
    /**
@@ -65,13 +68,13 @@ public class Conversions
     */
    public static int megabytesToBytes(int megabytes)
    {
-      return megabytes * (int) Math.pow(KILOBYTES_TO_BYTES, 2);
+      return megabytes * MEGABYTES_TO_BYTES;
    }
 
    /**
-    * <p>Convert minutes to seconds without losing precision.</p>
+    * <p>Convert minutes to seconds.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param minutes time in minutes
     * @return Time in seconds.
@@ -82,9 +85,9 @@ public class Conversions
    }
 
    /**
-    * <p>Convert seconds to minutes without losing precision.</p>
+    * <p>Convert seconds to minutes.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param seconds time in seconds
     * @return Time in minutes.
@@ -95,22 +98,22 @@ public class Conversions
    }
 
    /**
-    * <p>Convert seconds to milliseconds without losing precision.</p>
+    * <p>Convert seconds to milliseconds.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param seconds time in seconds
     * @return Time in milliseconds.
     */
-   public static int secondsToMilliseconds(double seconds)
+   public static double secondsToMilliseconds(double seconds)
    {
-      return (int) (seconds * 1000);
+      return seconds * 1e3;
    }
 
    /**
-     * <p>Convert seconds to nanoseconds without losing precision.</p>
+     * <p>Convert seconds to nanoseconds.</p>
      * 
-     * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
      * 
      * @param seconds time in seconds
      * @return Time in nanoseconds.
@@ -121,183 +124,183 @@ public class Conversions
    }
 
    /**
-    * <p>Convert milliseconds to minutes without losing precision.</p>
+    * <p>Convert milliseconds to minutes.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param milliseconds time in milliseconds
     * @return Time in minutes.
     */
-   public static double millisecondsToMinutes(long milliseconds)
+   public static double millisecondsToMinutes(double milliseconds)
    {
-      return (double) (milliseconds / 60000.0);
+      return milliseconds / 6e4;
    }
 
    /**
-    * <p>Convert milliseconds to seconds without losing precision.</p>
+    * <p>Convert milliseconds to seconds.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param milliseconds time in milliseconds
     * @return Time in seconds.
     */
-   public static double millisecondsToSeconds(long milliseconds)
+   public static double millisecondsToSeconds(double milliseconds)
    {
-      return (double) (milliseconds / 1000.0);
+      return milliseconds / 1e3;
    }
 
    /**
-    * <p>Convert milliseconds to nanoseconds without losing precision.</p>
+    * <p>Convert milliseconds to nanoseconds.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
+    * 
+    * @param timeInMilliSeconds time in milliseconds
+    * @return Time in nanoseconds.
+    */
+   public static long millisecondsToNanoseconds(double milliseconds)
+   {
+      return (long) (milliseconds * 1e6);
+   }
+
+   /**
+    * <p>Convert milliseconds to nanoseconds.</p>
+    * 
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param timeInMilliSeconds time in milliseconds
     * @return Time in nanoseconds.
     */
    public static long millisecondsToNanoseconds(long milliseconds)
    {
-      return ((long) milliseconds) * 1000000L;
+      return milliseconds * 1000000L;
    }
 
    /**
-    * <p>Convert microseconds to seconds without losing precision.</p>
+    * <p>Convert microseconds to seconds.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param microseconds time in microseconds
     * @return Time in seconds.
     */
-   public static double microsecondsToSeconds(long microseconds)
+   public static double microsecondsToSeconds(double microseconds)
    {
-      return ((double) microseconds) / 1e6;
+      return microseconds / 1e6;
    }
 
    /**
-    * <p>Convert microseconds to nanoseconds without losing precision.</p>
+    * <p>Convert microseconds to nanoseconds.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
+    * 
+    * @param microseconds time in microseconds
+    * @return Time in nanoseconds.
+    */
+   public static long microsecondsToNanoseconds(double microseconds)
+   {
+      return (long) (microseconds * 1e3);
+   }
+
+   /**
+    * <p>Convert microseconds to nanoseconds.</p>
+    * 
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param microseconds time in microseconds
     * @return Time in nanoseconds.
     */
    public static long microsecondsToNanoseconds(long microseconds)
    {
-      return microseconds * microToNano;
+      return microseconds * 1000L;
    }
 
-  /**
-    * <p>Convert nanoseconds to seconds without losing precision.</p>
+   /**
+    * <p>Convert nanoseconds to seconds.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param nanoseconds time in nanoseconds
     * @return Time in seconds.
     */
-    public static double nanosecondsToSeconds(long nanoseconds)
+   public static double nanosecondsToSeconds(long nanoseconds)
    {
-      return ((double) nanoseconds) / 1e9;
+      return nanoseconds / 1e9;
    }
 
-    /**
-    * <p>Convert nanoseconds to milliseconds without losing precision.</p>
-    * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
-    * 
-    * @param nanoseconds time in nanoseconds
-    * @return Time in milliseconds.
-    */
+   /**
+   * <p>Convert nanoseconds to milliseconds.</p>
+   * 
+   * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
+   * 
+   * @param nanoseconds time in nanoseconds
+   * @return Time in milliseconds.
+   */
    public static long nanosecondsToMilliseconds(long nanoseconds)
    {
       return nanoseconds / 1000000L;
    }
 
    /**
-    * <p>Convert nanoseconds to microseconds without losing precision.</p>
+   * <p>Convert nanoseconds to milliseconds.</p>
+   * 
+   * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
+   * 
+   * @param nanoseconds time in nanoseconds
+   * @return Time in milliseconds.
+   */
+   public static double nanosecondsToMilliseconds(double nanoseconds)
+   {
+      return nanoseconds / 1e6;
+   }
+
+   /**
+    * <p>Convert nanoseconds to microseconds.</p>
     * 
-    * <p>NOTE: These methods exist as an alternative to {@link TimeUnit} but that maintain precision.</p>
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
     * 
     * @param nanoseconds time in nanoseconds
     * @return Time in microseconds.
     */
    public static long nanosecondsToMicroseconds(long nanoseconds)
    {
-      return nanoseconds / microToNano;
-   }
-   
-   /**
-    * TODO: Clean and document me!
-    */
-   public static double[] convertRadPerSecondToHz(double[] freqInRadPerSecond)
-   {
-      double[] frequencyInHz = new double[freqInRadPerSecond.length];
-
-      for (int i = 0; i < freqInRadPerSecond.length; i++)
-      {
-         frequencyInHz[i] = convertRadPerSecondToHz(freqInRadPerSecond[i]);
-      }
-
-      return frequencyInHz;
+      return nanoseconds / 1000L;
    }
 
    /**
-    * TODO: Clean and document me!
+    * <p>Convert nanoseconds to microseconds.</p>
+    * 
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
+    * 
+    * @param nanoseconds time in nanoseconds
+    * @return Time in microseconds.
     */
-   public static double convertRadPerSecondToHz(double freqInRadPerSecond)
+   public static double nanosecondsToMicroseconds(double nanoseconds)
    {
-      double frequencyInHz = freqInRadPerSecond / (2.0 * Math.PI);
-
-      return frequencyInHz;
+      return nanoseconds / 1e3;
    }
 
    /**
-    * TODO: Clean and document me!
+    * <p>Convert angular velocity in radians per second (rad/s) to angular frequency in Hertz (Hz).</p>
+    * 
+    * @param angular velocity in rad/s
+    * @return Angular frequency in Hz.
     */
-   public static double[] convertRadianToDegrees(double[] phaseInRadian)
+   public static double radiansPerSecondToHertz(double radiansPerSecond)
    {
-      double[] phaseInDegrees = new double[phaseInRadian.length];
-
-      for (int i = 0; i < phaseInRadian.length; i++)
-      {
-         phaseInDegrees[i] = convertRadianToDegrees(phaseInRadian[i]);
-      }
-
-      return phaseInDegrees;
+      return radiansPerSecond / TWO_PI;
    }
 
    /**
-    * TODO: Clean and document me!
+    * <p>Convert the amplitude of a signal to decibels (dB) for use in Bode magnitude plots.</p>
+    * 
+    * <p>Implmented as 20 * log10(amplitude).</p>
+    * 
+    * @see https://en.wikipedia.org/wiki/Bode_plot
+    * @param amplitude of signal
+    * @return Magnitude of signal in dB.
     */
-   public static double convertRadianToDegrees(double phaseInRadian)
+   public static double amplitudeToDecibels(double amplitude)
    {
-      double phaseInDegrees = phaseInRadian * 180.0 / Math.PI;
-
-      return phaseInDegrees;
-   }
-
-   /**
-    * TODO: Clean and document me!
-    */
-   public static double[] convertMagnitudeToDecibels(double[] magnitudesInUnits)
-   {
-      int n = magnitudesInUnits.length;
-
-      double[] magnitudeInDecibels = new double[n];
-
-      for (int i = 0; i < n; i++)
-      {
-         magnitudeInDecibels[i] = convertMagnitudeToDecibels(magnitudesInUnits[i]);
-      }
-
-      return magnitudeInDecibels;
-   }
-
-   /**
-    * TODO: Clean and document me!
-    */
-   public static double convertMagnitudeToDecibels(double magnitudesInUnits)
-   {
-      double magnitudeInDecibels = 20.0 * Math.log10(magnitudesInUnits);
-
-      return magnitudeInDecibels;
+      return 20.0 * Math.log10(amplitude);
    }
 }
