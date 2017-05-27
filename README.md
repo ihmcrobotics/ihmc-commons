@@ -9,8 +9,8 @@ Artifacts are hosted on Bintray at https://bintray.com/ihmcrobotics/maven-releas
 
 In your `build.gradle`:
 ```groovy
-compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.3-alpha'
-testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.3-alpha'
+compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
+testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
 ```
 
 ### What's Included
@@ -18,7 +18,7 @@ testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.3-alph
 ###### Main Distribution
 
 - File and Path tools that interface using Java's NIO.2 API.
-- Common paths to support IHMC conventions.
+- Minimal Stopwatch with friendly API.
 - Commonly needed conversions. (Data information units, etc.)
 - Tool for printing log-level style messages that show class name and line number.
 - Epsilons for explicitness and convenience.
