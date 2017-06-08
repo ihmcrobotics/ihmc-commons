@@ -144,12 +144,12 @@ public class PathToolsTest
 	
 	private static final Path createFakeJavaPath()
 	{
-	   String[] split = PathTools.class.getPackage().getName().split("\\.");
+	   String[] split = PathToolsTest.class.getPackage().getName().split("\\.");
 	   List<String> packageParts = new ArrayList<>();
 	   packageParts.add("testResources");
 	   packageParts.addAll(Arrays.asList(split));
-	   packageParts.add(StringUtils.uncapitalize(PathTools.class.getSimpleName()));
-	   packageParts.add(PathTools.class.getSimpleName() + ".java.fake");
+	   packageParts.add(StringUtils.uncapitalize(PathToolsTest.class.getSimpleName()));
+	   packageParts.add(PathToolsTest.class.getSimpleName() + ".java.fake");
 	   Path path = Paths.get("");
 	   for (String part: packageParts)
 	   {
