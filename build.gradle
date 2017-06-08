@@ -1,9 +1,11 @@
 plugins {
    id "com.jfrog.bintray" version "1.7.3"
+   id "com.jfrog.artifactory" version "4.4.18"
 }
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
 
 sourceCompatibility = 1.8
 version = '0.11.0-alpha'
@@ -15,9 +17,7 @@ project.ext.licenseName = 'Apache License, Version 2.0'
 project.ext.bintrayLicenseName = 'Apache-2.0'
 project.ext.mainPublicationName = 'ihmc-commons'
 project.ext.testingPublicationName = 'ihmc-commons-testing'
-project.ext.publishCommonsMain = project.hasProperty('publish_commons_main') ? project.publish_commons_main : false
-project.ext.publishCommonsTesting = project.hasProperty('publish_commons_testing') ? project.publish_commons_testing : false
-if (project.ext.publishCommonsTesting)
+if (publishCommonsTesting)
 {
    project.ext.publicationName = project.ext.testingPublicationName
 }
@@ -44,7 +44,7 @@ jar {
 }
 
 project.sourceSets {
-   if (project.ext.publishCommonsTesting)
+   if (publishCommonsTesting)
    {
       main {
          java {
@@ -52,7 +52,7 @@ project.sourceSets {
          }
       }
    }
-   else if (project.ext.publishCommonsMain)
+   else if (publishCommonsMain)
    {
       main {
          java {
@@ -121,9 +121,27 @@ publishing {
    }
 }
 
+artifactory {
+   contextUrl = 'https://artifactory.ihmc.us/artifactory'
+   
+   publish {
+      repository {
+         repoKey = 'snapshots'
+         username = artifactoryUsername
+         password = artifactoryPassword
+      }  
+   }
+   
+   resolve {
+      repository {
+         repoKey = 'libs-releases'
+      }
+   }
+}
+
 bintray {
-   user = project.hasProperty('bintray_user') ? project.bintray_user : 'invalid'
-   key = project.hasProperty('bintray_key') ? project.bintray_key : 'invalid'
+   user = bintray_user
+   key = bintray_key
 
    dryRun = false
    publish = false
@@ -184,14 +202,14 @@ dependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
 
-   if (project.ext.publishCommonsTesting)
+   if (publishCommonsTesting)
    {
       compile group: 'junit', name: 'junit', version: '4.11'
       compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
       compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
       compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
    }
-   else if (!project.ext.publishCommonsMain)
+   else if (!publishCommonsMain)
    {
       compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
       testCompile group: 'junit', name: 'junit', version: '4.11'
