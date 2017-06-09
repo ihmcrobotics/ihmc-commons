@@ -11,6 +11,11 @@ sourceCompatibility = 1.8
 group = 'us.ihmc'
 version = '0.11.0-alpha'
 
+if (buildType == 'snapshot')
+{
+   version += '-' + bambooBuildNumber + '-SNAPSHOT'
+}
+
 project.ext.fullVersion = version
 project.ext.vcsUrl = 'https://github.com/ihmcrobotics/ihmc-commons'
 project.ext.licenseURL = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
