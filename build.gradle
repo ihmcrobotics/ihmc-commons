@@ -5,7 +5,6 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.artifactory'
 
 sourceCompatibility = 1.8
 group = 'us.ihmc'
@@ -56,6 +55,11 @@ project.sourceSets {
       main {
          java {
             srcDirs = ['testing']
+         }
+      }
+      primary {
+         java {
+            srcDirs = ['src']
          }
       }
    }
@@ -134,6 +138,13 @@ publishing {
 //project.ext.buildInfo.build.version = version
 //project.ext.buildInfo.build.url = 'https://bamboo.ihmc.us/browse/LIBS-IHMCCOMMONS-' + bambooBuildNumber
 //project.ext.buildInfo.build.vcsUrl = project.ext.vcsUrl
+
+//buildInfo {
+//   buildNumber = bambooBuildNumber
+//   url = 'https://bamboo.ihmc.us/browse/LIBS-IHMCCOMMONS-' + bambooBuildNumber
+//   vcsUrl = project.ext.vcsUrl
+//}
+
 artifactory {
    contextUrl = 'https://artifactory.ihmc.us/artifactory'
    
@@ -223,7 +234,9 @@ dependencies {
       compile group: 'junit', name: 'junit', version: '4.11'
       compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
       compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
-      compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
+      compile sourceSets.primary.output
+      primaryCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+      primaryCompile group: 'commons-io', name: 'commons-io', version: '2.4'
    }
    else if (publishTarget == 'all')
    {
