@@ -8,6 +8,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
 
 sourceCompatibility = 1.8
+group = 'us.ihmc'
 version = '0.11.0-alpha'
 
 project.ext.fullVersion = version
@@ -115,9 +116,10 @@ publishing {
             classifier 'sources'
          }
 
-         //artifact javaDocJar {
-         //   classifier 'javadoc'
-         //}
+         // Someday we'll get Javadoc working, but there's source
+         // artifact javaDocJar {
+         //    classifier 'javadoc'
+         // }
       }
    }
 }
