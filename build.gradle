@@ -3,6 +3,8 @@ plugins {
    id "com.jfrog.artifactory" version "4.4.18"
 }
 
+apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 
@@ -10,7 +12,7 @@ sourceCompatibility = 1.8
 group = 'us.ihmc'
 version = '0.11.0-alpha'
 
-if (buildType == 'snapshot')
+if (buildType == 'SNAPSHOT')
 {
    version += '-' + bambooBuildNumber + '-SNAPSHOT'
 }
@@ -26,8 +28,7 @@ println 'Publish target: ' + publishTarget
 if (publishTarget == 'testing')
 {
    project.ext.publicationName = project.ext.testingPublicationName
-}
-else
+} else
 {
    project.ext.publicationName = project.ext.mainPublicationName
 }
@@ -37,15 +38,15 @@ println project.ext.publicationName
 jar {
    manifest {
       attributes(
-              'Created-By': 'IHMC Gradle Build Script',
-              'Implementation-Title': project.name,
-              'Implementation-Version': project.version,
-              'Implementation-Vendor': 'IHMC',
+            'Created-By': 'IHMC Gradle Build Script',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor': 'IHMC',
 
-              'Bundle-Name': project.ext.publicationName,
-              'Bundle-Version': project.version,
-              'Bundle-License': project.ext.licenseURL,
-              'Bundle-Vendor': 'IHMC')
+            'Bundle-Name': project.ext.publicationName,
+            'Bundle-Version': project.version,
+            'Bundle-License': project.ext.licenseURL,
+            'Bundle-Vendor': 'IHMC')
    }
 }
 
@@ -62,16 +63,14 @@ project.sourceSets {
             srcDirs = ['src']
          }
       }
-   }
-   else if (publishTarget == 'main')
+   } else if (publishTarget == 'main')
    {
       main {
          java {
             srcDirs = ['src']
          }
       }
-   }
-   else if (publishTarget == 'all')
+   } else if (publishTarget == 'all')
    {
       main {
          java {
@@ -108,7 +107,7 @@ publishing {
 
          pom.withXml {
             asNode().children().last() + {
-               resolveStrategy = Closure.DELEGATE_FIRST
+               resolveStrategy = DELEGATE_FIRST
                name project.name
                url project.ext.vcsUrl
                licenses {
@@ -147,7 +146,7 @@ publishing {
 
 artifactory {
    contextUrl = 'https://artifactory.ihmc.us/artifactory'
-   
+
    publish {
       repository {
          repoKey = 'snapshots'
@@ -158,7 +157,7 @@ artifactory {
          publications('mavenJava')
       }
    }
-   
+
    resolve {
       repository {
          repoKey = 'libs-releases'
@@ -237,8 +236,7 @@ dependencies {
       compile sourceSets.primary.output
       primaryCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
       primaryCompile group: 'commons-io', name: 'commons-io', version: '2.4'
-   }
-   else if (publishTarget == 'all')
+   } else if (publishTarget == 'all')
    {
       compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
       testCompile group: 'junit', name: 'junit', version: '4.11'
