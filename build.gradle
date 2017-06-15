@@ -1,27 +1,38 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+//buildscript {
+//   repositories {
+//      mavenLocal()
+//   }
+//   dependencies {
+//      classpath 'us.ihmc.gradle:ihmc-build:0.0.20'
+//   }
+//}
+
 plugins {
-   id "com.jfrog.bintray" version "1.7.3"
-   id "com.jfrog.artifactory" version "4.4.18"
+   id 'java'
+   id 'eclipse'
+   id 'idea'
+   id 'maven-publish'
+   id 'com.jfrog.bintray' version '1.7.3'
+   id 'com.jfrog.artifactory' version '4.4.18'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.20'
 }
 
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'java'
-apply plugin: 'maven-publish'
+//apply plugin: 'us.ihmc.gradle.ihmc-build'
 
 sourceCompatibility = 1.8
 group = 'us.ihmc'
-version = '0.11.0-alpha'
+version = '0.11.0'
 
 if (buildType == 'SNAPSHOT')
 {
-   version += '-SNAPSHOT-' + bambooBuildNumber
+   version = ihmc.getSnapshotVersion(version, bambooBuildNumber)
 }
 else if (buildType == 'NIGHTLY')
 {
-   version += '-NIGHTLY-' + LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"))
+   version = ihmc.getNightlyVersion(version)
 }
 
 project.ext.fullVersion = version
