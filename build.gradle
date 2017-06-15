@@ -1,3 +1,6 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 plugins {
    id "com.jfrog.bintray" version "1.7.3"
    id "com.jfrog.artifactory" version "4.4.18"
@@ -14,7 +17,11 @@ version = '0.11.0-alpha'
 
 if (buildType == 'SNAPSHOT')
 {
-   version += '-' + bambooBuildNumber + '-SNAPSHOT'
+   version += '-SNAPSHOT-' + bambooBuildNumber
+}
+else if (buildType == 'NIGHTLY')
+{
+   version += '-NIGHTLY-' + LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"))
 }
 
 project.ext.fullVersion = version
