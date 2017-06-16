@@ -26,13 +26,9 @@ sourceCompatibility = 1.8
 group = 'us.ihmc'
 version = '0.11.0'
 
-if (buildType == 'SNAPSHOT')
+if (publishMode == 'SNAPSHOT')
 {
    version = ihmc.getSnapshotVersion(version, bambooBuildNumber)
-}
-else if (buildType == 'NIGHTLY')
-{
-   version = ihmc.getNightlyVersion(version)
 }
 
 project.ext.fullVersion = version
