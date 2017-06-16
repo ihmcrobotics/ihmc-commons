@@ -1,15 +1,6 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-//buildscript {
-//   repositories {
-//      mavenLocal()
-//   }
-//   dependencies {
-//      classpath 'us.ihmc.gradle:ihmc-build:0.0.20'
-//   }
-//}
-
 plugins {
    id 'java'
    id 'eclipse'
@@ -17,10 +8,8 @@ plugins {
    id 'maven-publish'
    id 'com.jfrog.bintray' version '1.7.3'
    id 'com.jfrog.artifactory' version '4.4.18'
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.20'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.21'
 }
-
-//apply plugin: 'us.ihmc.gradle.ihmc-build'
 
 sourceCompatibility = 1.8
 group = 'us.ihmc'
@@ -137,26 +126,9 @@ publishing {
          artifact sourceJar {
             classifier 'sources'
          }
-
-         // Someday we'll get Javadoc working, but there's source
-         // artifact javaDocJar {
-         //    classifier 'javadoc'
-         // }
       }
    }
 }
-
-//project.ext.buildInfo.build.name = project.ext.publicationName
-//project.ext.buildInfo.build.number = bambooBuildNumber
-//project.ext.buildInfo.build.version = version
-//project.ext.buildInfo.build.url = 'https://bamboo.ihmc.us/browse/LIBS-IHMCCOMMONS-' + bambooBuildNumber
-//project.ext.buildInfo.build.vcsUrl = project.ext.vcsUrl
-
-//buildInfo {
-//   buildNumber = bambooBuildNumber
-//   url = 'https://bamboo.ihmc.us/browse/LIBS-IHMCCOMMONS-' + bambooBuildNumber
-//   vcsUrl = project.ext.vcsUrl
-//}
 
 artifactory {
    contextUrl = 'https://artifactory.ihmc.us/artifactory'
@@ -211,31 +183,12 @@ bintray {
    }
 }
 
+repositories ihmc.setupCommonArtifactProxies()
+
 repositories {
    mavenCentral()
    jcenter()
    mavenLocal()
-   maven {
-      url 'http://dl.bintray.com/ihmcrobotics/maven-vendor'
-   }
-   maven {
-      url 'http://dl.bintray.com/ihmcrobotics/maven-release'
-   }
-   maven {
-      url 'http://clojars.org/repo/'
-   }
-   maven {
-      url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
-   }
-   maven {
-      url 'https://oss.sonatype.org/content/repositories/snapshots'
-   }
-   maven {
-      url 'https://artifactory.ihmc.us/artifactory/releases/'
-   }
-   maven {
-      url 'https://artifactory.ihmc.us/artifactory/thirdparty/'
-   }
 }
 
 dependencies {
