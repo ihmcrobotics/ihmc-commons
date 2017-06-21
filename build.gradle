@@ -1,14 +1,8 @@
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 plugins {
    id 'java'
-   //id 'java-library'
    id 'eclipse'
    id 'idea'
    id 'maven-publish'
-   id 'com.jfrog.bintray' version '1.7.3'
-   //id 'com.jfrog.artifactory' version '4.4.18'
    id 'us.ihmc.gradle.ihmc-build' version '0.0.21'
 }
 
@@ -126,7 +120,6 @@ publishing {
          groupId project.group
          artifactId project.name
          version project.version
-         //from components.java
 
          pom.withXml {
             def dependenciesNode = asNode().appendNode('dependencies')
@@ -246,76 +239,26 @@ publishing {
    }
 
    repositories {
-      maven {
-         name 'ArtifactorySnapshots'
-         url 'https://artifactory.ihmc.us/artifactory/snapshots'
-         credentials {
-            username = artifactoryUsername
-            password = artifactoryPassword
+      if (publishMode == 'SNAPSHOT')
+      {
+         maven {
+            name 'ArtifactorySnapshots'
+            url 'https://artifactory.ihmc.us/artifactory/snapshots'
+            credentials {
+               username = artifactoryUsername
+               password = artifactoryPassword
+            }
          }
-      }
-   }
-}
-
-//artifactory {
-//   contextUrl = 'https://artifactory.ihmc.us/artifactory'
-//
-//   publish {
-//      repository {
-//         repoKey = 'snapshots'
-//         username = artifactoryUsername
-//         password = artifactoryPassword
-//      }
-//   }
-//}
-
-//artifactoryPublish {
-//   publications('primary', 'testing')
-//}
-
-//task artifactoryPublishPrimary << {
-//   artifactoryPublish {
-//      publications('primary')
-//   }
-//}
-//artifactoryPublishPrimary.dependsOn artifactoryPublish
-//
-//task artifactoryPublishTesting << {
-//   artifactoryPublish {
-//      publications('testing')
-//   }
-//}
-//
-//artifactoryPublishTesting.dependsOn artifactoryPublish
-
-bintray {
-   user = bintray_user
-   key = bintray_key
-
-   dryRun = false
-   publish = false
-
-   publications = ['primary', 'testing']
-
-   pkg {
-      repo = 'maven-release'
-      name = project.name
-      userOrg = 'ihmcrobotics'
-      desc = project.name
-
-      websiteUrl = project.ext.vcsUrl
-      issueTrackerUrl = project.ext.vcsUrl + '/issues'
-      vcsUrl = project.ext.vcsUrl + '.git'
-
-      licenses = [project.ext.bintrayLicenseName]
-      labels = ['ihmc', 'java']
-      publicDownloadNumbers = true
-
-      version {
-         name = project.version
-         desc = project.name + ' v' + project.version
-         released = new Date()
-         vcsTag = 'v' + project.version
+      } else if (publishMode == 'STABLE')
+      {
+         maven {
+            name 'BintrayRelease'
+            url 'https://api.bintray.com/maven/ihmcrobotics/maven-release/ihmc-commons'
+            credentials {
+               username = bintray_user
+               password = bintray_key
+            }
+         }
       }
    }
 }
