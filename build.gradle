@@ -3,40 +3,29 @@ import java.time.format.DateTimeFormatter;
 
 plugins {
    id 'java'
+   //id 'java-library'
    id 'eclipse'
    id 'idea'
    id 'maven-publish'
    id 'com.jfrog.bintray' version '1.7.3'
-   id 'com.jfrog.artifactory' version '4.4.18'
+   //id 'com.jfrog.artifactory' version '4.4.18'
    id 'us.ihmc.gradle.ihmc-build' version '0.0.21'
 }
 
 sourceCompatibility = 1.8
 group = 'us.ihmc'
-version = '0.11.0'
+version = '0.11.1'
 
 if (publishMode == 'SNAPSHOT')
 {
    version = ihmc.getSnapshotVersion(version, bambooBuildNumber)
 }
 
-project.ext.fullVersion = version
 project.ext.vcsUrl = 'https://github.com/ihmcrobotics/ihmc-commons'
 project.ext.licenseURL = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
 project.ext.licenseName = 'Apache License, Version 2.0'
 project.ext.bintrayLicenseName = 'Apache-2.0'
-project.ext.mainPublicationName = 'ihmc-commons'
 project.ext.testingPublicationName = 'ihmc-commons-testing'
-println 'Publish target: ' + publishTarget
-if (publishTarget == 'testing')
-{
-   project.ext.publicationName = project.ext.testingPublicationName
-} else
-{
-   project.ext.publicationName = project.ext.mainPublicationName
-}
-
-println project.ext.publicationName
 
 jar {
    manifest {
@@ -46,7 +35,7 @@ jar {
             'Implementation-Version': project.version,
             'Implementation-Vendor': 'IHMC',
 
-            'Bundle-Name': project.ext.publicationName,
+            'Bundle-Name': project.name,
             'Bundle-Version': project.version,
             'Bundle-License': project.ext.licenseURL,
             'Bundle-Vendor': 'IHMC')
@@ -54,131 +43,23 @@ jar {
 }
 
 project.sourceSets {
-   if (publishTarget == 'testing')
-   {
-      main {
-         java {
-            srcDirs = ['testing']
-         }
-      }
-      primary {
-         java {
-            srcDirs = ['src']
-         }
-      }
-   } else if (publishTarget == 'main')
-   {
-      main {
-         java {
-            srcDirs = ['src']
-         }
-      }
-   } else if (publishTarget == 'all')
-   {
-      main {
-         java {
-            srcDirs = ['src', 'testing']
-         }
-      }
-      test {
-         java {
-            srcDirs = ['test']
-         }
-
-         resources {
-            srcDirs = ['testResources']
-         }
+   main {
+      java {
+         srcDirs = ['src']
       }
    }
-}
-
-task sourceJar(type: Jar) {
-   from sourceSets.main.allJava
-}
-
-task javaDocJar(type: Jar, dependsOn: javadoc) {
-   from javadoc.destinationDir
-}
-
-publishing {
-   publications {
-      mavenJava(MavenPublication) {
-         groupId 'us.ihmc'
-         artifactId project.ext.publicationName
-         version project.ext.fullVersion
-         from components.java
-
-         pom.withXml {
-            asNode().children().last() + {
-               resolveStrategy = DELEGATE_FIRST
-               name project.name
-               url project.ext.vcsUrl
-               licenses {
-                  license {
-                     name project.ext.licenseName
-                     url project.ext.licenseURL
-                     distribution 'repo'
-                  }
-               }
-            }
-         }
-
-         artifact sourceJar {
-            classifier 'sources'
-         }
+   testing {
+      java {
+         srcDirs = ['testing']
       }
    }
-}
-
-artifactory {
-   contextUrl = 'https://artifactory.ihmc.us/artifactory'
-
-   publish {
-      repository {
-         repoKey = 'snapshots'
-         username = artifactoryUsername
-         password = artifactoryPassword
+   test {
+      java {
+         srcDirs = ['test']
       }
-      defaults {
-         publications('mavenJava')
-      }
-   }
 
-   resolve {
-      repository {
-         repoKey = 'libs-releases'
-      }
-   }
-}
-
-bintray {
-   user = bintray_user
-   key = bintray_key
-
-   dryRun = false
-   publish = false
-
-   publications = ['mavenJava']
-
-   pkg {
-      repo = 'maven-release'
-      name = project.ext.publicationName
-      userOrg = 'ihmcrobotics'
-      desc = project.name
-
-      websiteUrl = project.ext.vcsUrl
-      issueTrackerUrl = project.ext.vcsUrl + '/issues'
-      vcsUrl = project.ext.vcsUrl + '.git'
-
-      licenses = [project.ext.bintrayLicenseName]
-      labels = ['ihmc', 'java']
-      publicDownloadNumbers = true
-
-      version {
-         name = project.ext.fullVersion
-         desc = project.name + ' v' + project.ext.fullVersion
-         released = new Date()
-         vcsTag = 'v' + project.version
+      resources {
+         srcDirs = ['testResources']
       }
    }
 }
@@ -195,19 +76,246 @@ dependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
 
-   if (publishTarget == 'testing')
-   {
-      compile group: 'junit', name: 'junit', version: '4.11'
-      compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-      compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
-      compile sourceSets.primary.output
-      primaryCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-      primaryCompile group: 'commons-io', name: 'commons-io', version: '2.4'
-   } else if (publishTarget == 'all')
-   {
-      compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
-      testCompile group: 'junit', name: 'junit', version: '4.11'
-      testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-      testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+   testingCompile group: 'junit', name: 'junit', version: '4.11'
+   testingCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   testingCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+   testingCompile sourceSets.main.output
+   testingCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+   testingCompile group: 'commons-io', name: 'commons-io', version: '2.4'
+
+   testCompile group: 'junit', name: 'junit', version: '4.11'
+   testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+   testCompile sourceSets.main.output
+   testCompile sourceSets.testing.output
+   testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+   testCompile group: 'commons-io', name: 'commons-io', version: '2.4'
+}
+
+
+task mainClassesJar(type: Jar) {
+   from sourceSets.main.output
+}
+
+task mainSourceJar(type: Jar) {
+   from sourceSets.main.allJava
+   classifier 'sources'
+}
+
+task testingClassesJar(type: Jar) {
+   from sourceSets.testing.output
+}
+
+task testingSourceJar(type: Jar) {
+   from sourceSets.testing.allJava
+   classifier 'sources'
+}
+
+task testClassesJar(type: Jar) {
+   from sourceSets.test.output
+}
+
+task testSourceJar(type: Jar) {
+   from sourceSets.test.allJava
+   classifier 'sources'
+}
+
+publishing {
+   publications {
+      primary(MavenPublication) {
+         groupId project.group
+         artifactId project.name
+         version project.version
+         //from components.java
+
+         pom.withXml {
+            def dependenciesNode = asNode().appendNode('dependencies')
+
+            configurations.compile.allDependencies.each {
+               if (it.name != "unspecified")
+               {
+                  def dependencyNode = dependenciesNode.appendNode('dependency')
+                  dependencyNode.appendNode('groupId', it.group)
+                  dependencyNode.appendNode('artifactId', it.name)
+                  dependencyNode.appendNode('version', it.version)
+               }
+            }
+
+            asNode().children().last() + {
+               resolveStrategy = DELEGATE_FIRST
+               name project.name
+               url project.ext.vcsUrl
+               licenses {
+                  license {
+                     name project.ext.licenseName
+                     url project.ext.licenseURL
+                     distribution 'repo'
+                  }
+               }
+            }
+         }
+
+         artifact mainClassesJar
+         artifact mainSourceJar
+      }
+      testing(MavenPublication) {
+         groupId project.group
+         artifactId project.ext.testingPublicationName
+         version project.version
+
+         pom.withXml {
+            def dependenciesNode = asNode().appendNode('dependencies')
+
+            def primaryNode = dependenciesNode.appendNode('dependency')
+            primaryNode.appendNode('groupId', project.group)
+            primaryNode.appendNode('artifactId', project.name)
+            primaryNode.appendNode('version', project.version)
+
+            configurations.testingCompile.allDependencies.each {
+               if (it.name != "unspecified")
+               {
+                  def dependencyNode = dependenciesNode.appendNode('dependency')
+                  dependencyNode.appendNode('groupId', it.group)
+                  dependencyNode.appendNode('artifactId', it.name)
+                  dependencyNode.appendNode('version', it.version)
+               }
+            }
+
+            asNode().children().last() + {
+               resolveStrategy = DELEGATE_FIRST
+               name project.name
+               url project.ext.vcsUrl
+               licenses {
+                  license {
+                     name project.ext.licenseName
+                     url project.ext.licenseURL
+                     distribution 'repo'
+                  }
+               }
+            }
+         }
+
+         artifact testingClassesJar
+         artifact testingSourceJar
+      }
+      test(MavenPublication) {
+         groupId project.group
+         artifactId project.name + "-test"
+         version project.version
+
+         pom.withXml {
+            def dependenciesNode = asNode().appendNode('dependencies')
+
+            def primaryNode = dependenciesNode.appendNode('dependency')
+            primaryNode.appendNode('groupId', project.group)
+            primaryNode.appendNode('artifactId', project.name)
+            primaryNode.appendNode('version', project.version)
+
+            def testingNode = dependenciesNode.appendNode('dependency')
+            testingNode.appendNode('groupId', project.group)
+            testingNode.appendNode('artifactId', project.ext.testingPublicationName)
+            testingNode.appendNode('version', project.version)
+
+            configurations.testCompile.allDependencies.each {
+               if (it.name != "unspecified")
+               {
+                  def dependencyNode = dependenciesNode.appendNode('dependency')
+                  dependencyNode.appendNode('groupId', it.group)
+                  dependencyNode.appendNode('artifactId', it.name)
+                  dependencyNode.appendNode('version', it.version)
+               }
+            }
+
+            asNode().children().last() + {
+               resolveStrategy = DELEGATE_FIRST
+               name project.name
+               url project.ext.vcsUrl
+               licenses {
+                  license {
+                     name project.ext.licenseName
+                     url project.ext.licenseURL
+                     distribution 'repo'
+                  }
+               }
+            }
+         }
+
+         artifact testClassesJar
+         artifact testSourceJar
+      }
+   }
+
+   repositories {
+      maven {
+         name 'ArtifactorySnapshots'
+         url 'https://artifactory.ihmc.us/artifactory/snapshots'
+         credentials {
+            username = artifactoryUsername
+            password = artifactoryPassword
+         }
+      }
+   }
+}
+
+//artifactory {
+//   contextUrl = 'https://artifactory.ihmc.us/artifactory'
+//
+//   publish {
+//      repository {
+//         repoKey = 'snapshots'
+//         username = artifactoryUsername
+//         password = artifactoryPassword
+//      }
+//   }
+//}
+
+//artifactoryPublish {
+//   publications('primary', 'testing')
+//}
+
+//task artifactoryPublishPrimary << {
+//   artifactoryPublish {
+//      publications('primary')
+//   }
+//}
+//artifactoryPublishPrimary.dependsOn artifactoryPublish
+//
+//task artifactoryPublishTesting << {
+//   artifactoryPublish {
+//      publications('testing')
+//   }
+//}
+//
+//artifactoryPublishTesting.dependsOn artifactoryPublish
+
+bintray {
+   user = bintray_user
+   key = bintray_key
+
+   dryRun = false
+   publish = false
+
+   publications = ['primary', 'testing']
+
+   pkg {
+      repo = 'maven-release'
+      name = project.name
+      userOrg = 'ihmcrobotics'
+      desc = project.name
+
+      websiteUrl = project.ext.vcsUrl
+      issueTrackerUrl = project.ext.vcsUrl + '/issues'
+      vcsUrl = project.ext.vcsUrl + '.git'
+
+      licenses = [project.ext.bintrayLicenseName]
+      labels = ['ihmc', 'java']
+      publicDownloadNumbers = true
+
+      version {
+         name = project.version
+         desc = project.name + ' v' + project.version
+         released = new Date()
+         vcsTag = 'v' + project.version
+      }
    }
 }
