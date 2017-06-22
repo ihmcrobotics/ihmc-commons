@@ -1,23 +1,10 @@
-//buildscript {
-//   repositories {
-//      mavenLocal()
-//      jcenter()
-//   }
-//
-//   dependencies {
-//      classpath "us.ihmc.gradle:ihmc-build:0.0.24"
-//   }
-//}
-
 plugins {
    id 'java'
    id 'eclipse'
    id 'idea'
    id 'maven-publish'
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.24'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.25'
 }
-
-//apply plugin: 'us.ihmc.gradle.ihmc-build'
 
 sourceCompatibility = 1.8
 group = 'us.ihmc'
@@ -32,22 +19,10 @@ project.ext.vcsUrl = 'https://github.com/ihmcrobotics/ihmc-commons'
 project.ext.licenseURL = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
 project.ext.licenseName = 'Apache License, Version 2.0'
 project.ext.bintrayLicenseName = 'Apache-2.0'
-project.ext.testingPublicationName = 'ihmc-commons-testing'
+project.ext.companyName = 'IHMC'
+project.ext.author = 'Duncan Calvert'
 
-jar {
-   manifest {
-      attributes(
-            'Created-By': 'IHMC Gradle Build Script',
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'Implementation-Vendor': 'IHMC',
-
-            'Bundle-Name': project.name,
-            'Bundle-Version': project.version,
-            'Bundle-License': project.ext.licenseURL,
-            'Bundle-Vendor': 'IHMC')
-   }
-}
+ihmc.setupCommonJARConfiguration(project)
 
 project.sourceSets {
    main {
@@ -101,6 +76,6 @@ dependencies {
 
 ihmc.declareArtifactoryOrBintray(project, publishMode)
 
-ihmc.declarePublication(project, "Main", project.name, configurations.compile, sourceSets.main)
-ihmc.declarePublication(project, "Testing", project.name + '-testing', configurations.testingCompile, sourceSets.testing, project.name)
-ihmc.declarePublication(project, "Test", project.name + '-test', configurations.testCompile, sourceSets.test, project.name, project.name + '-testing')
+ihmc.declarePublication(project, project.name, configurations.compile, sourceSets.main)
+ihmc.declarePublication(project, project.name + '-testing', configurations.testingCompile, sourceSets.testing, project.name)
+ihmc.declarePublication(project, project.name + '-test', configurations.testCompile, sourceSets.test, project.name, project.name + '-testing')
