@@ -18,7 +18,6 @@ if (publishMode == 'SNAPSHOT')
 project.ext.vcsUrl = 'https://github.com/ihmcrobotics/ihmc-commons'
 project.ext.licenseURL = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
 project.ext.licenseName = 'Apache License, Version 2.0'
-project.ext.bintrayLicenseName = 'Apache-2.0'
 project.ext.companyName = 'IHMC'
 project.ext.author = 'Duncan Calvert'
 
