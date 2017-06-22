@@ -1,14 +1,27 @@
+//buildscript {
+//   repositories {
+//      mavenLocal()
+//      jcenter()
+//   }
+//
+//   dependencies {
+//      classpath "us.ihmc.gradle:ihmc-build:0.0.24"
+//   }
+//}
+
 plugins {
    id 'java'
    id 'eclipse'
    id 'idea'
    id 'maven-publish'
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.21'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.24'
 }
+
+//apply plugin: 'us.ihmc.gradle.ihmc-build'
 
 sourceCompatibility = 1.8
 group = 'us.ihmc'
-version = '0.11.1'
+version = '0.11.2'
 
 if (publishMode == 'SNAPSHOT')
 {
@@ -86,179 +99,8 @@ dependencies {
    testCompile group: 'commons-io', name: 'commons-io', version: '2.4'
 }
 
+ihmc.declareArtifactoryOrBintray(project, publishMode)
 
-task mainClassesJar(type: Jar) {
-   from sourceSets.main.output
-}
-
-task mainSourceJar(type: Jar) {
-   from sourceSets.main.allJava
-   classifier 'sources'
-}
-
-task testingClassesJar(type: Jar) {
-   from sourceSets.testing.output
-}
-
-task testingSourceJar(type: Jar) {
-   from sourceSets.testing.allJava
-   classifier 'sources'
-}
-
-task testClassesJar(type: Jar) {
-   from sourceSets.test.output
-}
-
-task testSourceJar(type: Jar) {
-   from sourceSets.test.allJava
-   classifier 'sources'
-}
-
-publishing {
-   publications {
-      primary(MavenPublication) {
-         groupId project.group
-         artifactId project.name
-         version project.version
-
-         pom.withXml {
-            def dependenciesNode = asNode().appendNode('dependencies')
-
-            configurations.compile.allDependencies.each {
-               if (it.name != "unspecified")
-               {
-                  def dependencyNode = dependenciesNode.appendNode('dependency')
-                  dependencyNode.appendNode('groupId', it.group)
-                  dependencyNode.appendNode('artifactId', it.name)
-                  dependencyNode.appendNode('version', it.version)
-               }
-            }
-
-            asNode().children().last() + {
-               resolveStrategy = DELEGATE_FIRST
-               name project.name
-               url project.ext.vcsUrl
-               licenses {
-                  license {
-                     name project.ext.licenseName
-                     url project.ext.licenseURL
-                     distribution 'repo'
-                  }
-               }
-            }
-         }
-
-         artifact mainClassesJar
-         artifact mainSourceJar
-      }
-      testing(MavenPublication) {
-         groupId project.group
-         artifactId project.ext.testingPublicationName
-         version project.version
-
-         pom.withXml {
-            def dependenciesNode = asNode().appendNode('dependencies')
-
-            def primaryNode = dependenciesNode.appendNode('dependency')
-            primaryNode.appendNode('groupId', project.group)
-            primaryNode.appendNode('artifactId', project.name)
-            primaryNode.appendNode('version', project.version)
-
-            configurations.testingCompile.allDependencies.each {
-               if (it.name != "unspecified")
-               {
-                  def dependencyNode = dependenciesNode.appendNode('dependency')
-                  dependencyNode.appendNode('groupId', it.group)
-                  dependencyNode.appendNode('artifactId', it.name)
-                  dependencyNode.appendNode('version', it.version)
-               }
-            }
-
-            asNode().children().last() + {
-               resolveStrategy = DELEGATE_FIRST
-               name project.name
-               url project.ext.vcsUrl
-               licenses {
-                  license {
-                     name project.ext.licenseName
-                     url project.ext.licenseURL
-                     distribution 'repo'
-                  }
-               }
-            }
-         }
-
-         artifact testingClassesJar
-         artifact testingSourceJar
-      }
-      test(MavenPublication) {
-         groupId project.group
-         artifactId project.name + "-test"
-         version project.version
-
-         pom.withXml {
-            def dependenciesNode = asNode().appendNode('dependencies')
-
-            def primaryNode = dependenciesNode.appendNode('dependency')
-            primaryNode.appendNode('groupId', project.group)
-            primaryNode.appendNode('artifactId', project.name)
-            primaryNode.appendNode('version', project.version)
-
-            def testingNode = dependenciesNode.appendNode('dependency')
-            testingNode.appendNode('groupId', project.group)
-            testingNode.appendNode('artifactId', project.ext.testingPublicationName)
-            testingNode.appendNode('version', project.version)
-
-            configurations.testCompile.allDependencies.each {
-               if (it.name != "unspecified")
-               {
-                  def dependencyNode = dependenciesNode.appendNode('dependency')
-                  dependencyNode.appendNode('groupId', it.group)
-                  dependencyNode.appendNode('artifactId', it.name)
-                  dependencyNode.appendNode('version', it.version)
-               }
-            }
-
-            asNode().children().last() + {
-               resolveStrategy = DELEGATE_FIRST
-               name project.name
-               url project.ext.vcsUrl
-               licenses {
-                  license {
-                     name project.ext.licenseName
-                     url project.ext.licenseURL
-                     distribution 'repo'
-                  }
-               }
-            }
-         }
-
-         artifact testClassesJar
-         artifact testSourceJar
-      }
-   }
-
-   repositories {
-      if (publishMode == 'SNAPSHOT')
-      {
-         maven {
-            name 'ArtifactorySnapshots'
-            url 'https://artifactory.ihmc.us/artifactory/snapshots'
-            credentials {
-               username = artifactoryUsername
-               password = artifactoryPassword
-            }
-         }
-      } else if (publishMode == 'STABLE')
-      {
-         maven {
-            name 'BintrayRelease'
-            url 'https://api.bintray.com/maven/ihmcrobotics/maven-release/ihmc-commons'
-            credentials {
-               username = bintray_user
-               password = bintray_key
-            }
-         }
-      }
-   }
-}
+ihmc.declarePublication(project, "Main", project.name, configurations.compile, sourceSets.main)
+ihmc.declarePublication(project, "Testing", project.name + '-testing', configurations.testingCompile, sourceSets.testing, project.name)
+ihmc.declarePublication(project, "Test", project.name + '-test', configurations.testCompile, sourceSets.test, project.name, project.name + '-testing')
