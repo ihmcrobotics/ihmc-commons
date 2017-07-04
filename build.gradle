@@ -45,13 +45,7 @@ project.sourceSets {
    }
 }
 
-repositories ihmc.setupCommonArtifactProxies()
-
-repositories {
-   mavenCentral()
-   jcenter()
-   mavenLocal()
-}
+ihmc.setupCommonArtifactProxies(project)
 
 dependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
