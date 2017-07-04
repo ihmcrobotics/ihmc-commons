@@ -3,12 +3,12 @@ plugins {
    id 'eclipse'
    id 'idea'
    id 'maven-publish'
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.25'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.31'
 }
 
 sourceCompatibility = 1.8
 group = 'us.ihmc'
-version = '0.11.2'
+version = '0.11.3'
 
 if (publishMode == 'SNAPSHOT')
 {
@@ -73,7 +73,14 @@ dependencies {
    testCompile group: 'commons-io', name: 'commons-io', version: '2.4'
 }
 
-ihmc.declareArtifactoryOrBintray(project, publishMode)
+if (publishMode == "SNAPSHOT")
+{
+   ihmc.declareArtifactory(project, "snapshots")
+}
+else if (publishMode == "STABLE")
+{
+   ihmc.declareBintray(project)
+}
 
 ihmc.declarePublication(project, project.name, configurations.compile, sourceSets.main)
 ihmc.declarePublication(project, project.name + '-testing', configurations.testingCompile, sourceSets.testing, project.name)
