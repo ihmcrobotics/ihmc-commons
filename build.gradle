@@ -1,81 +1,39 @@
-plugins {
-   id 'java'
-   id 'eclipse'
-   id 'idea'
-   id 'maven-publish'
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.31'
-}
-
-sourceCompatibility = 1.8
-group = 'us.ihmc'
-version = '0.11.3'
-
-if (publishMode == 'SNAPSHOT')
-{
-   version = ihmc.getSnapshotVersion(version, bambooBuildNumber)
-}
-
-project.ext.vcsUrl = 'https://github.com/ihmcrobotics/ihmc-commons'
-project.ext.licenseURL = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-project.ext.licenseName = 'Apache License, Version 2.0'
-project.ext.companyName = 'IHMC'
-project.ext.maintainer = 'Duncan Calvert'
-
-ihmc.setupCommonJARConfiguration(project)
-
-project.sourceSets {
-   main {
-      java {
-         srcDirs = ['src']
-      }
+buildscript {
+   repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
    }
-   testing {
-      java {
-         srcDirs = ['testing']
-      }
-   }
-   test {
-      java {
-         srcDirs = ['test']
-      }
-
-      resources {
-         srcDirs = ['testResources']
-      }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.2"
    }
 }
+apply plugin: "us.ihmc.ihmc-build"
 
-ihmc.setupCommonArtifactProxies(project)
+ihmc {
+   group = "us.ihmc"
+   version = "0.12.0"
+   vcsUrl = "https://github.com/ihmcrobotics/ihmc-commons"
+   openSource = true
+   maintainer = "Duncan Calvert"
 
-dependencies {
+   configureDependencyResolution()
+   configurePublications()
+}
+
+mainDependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
 
-   testingCompile group: 'junit', name: 'junit', version: '4.11'
-   testingCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-   testingCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
-   testingCompile sourceSets.main.output
-   testingCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-   testingCompile group: 'commons-io', name: 'commons-io', version: '2.4'
-
-   testCompile group: 'junit', name: 'junit', version: '4.11'
-   testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-   testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
-   testCompile sourceSets.main.output
-   testCompile sourceSets.testing.output
-   testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-   testCompile group: 'commons-io', name: 'commons-io', version: '2.4'
 }
 
-if (publishMode == "SNAPSHOT")
-{
-   ihmc.declareArtifactory(project, "snapshots")
-}
-else if (publishMode == "STABLE")
-{
-   ihmc.declareBintray(project)
+testingDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
 }
 
-ihmc.declarePublication(project, project.name, configurations.compile, sourceSets.main)
-ihmc.declarePublication(project, project.name + '-testing', configurations.testingCompile, sourceSets.testing, project.name)
-ihmc.declarePublication(project, project.name + '-test', configurations.testCompile, sourceSets.test, project.name, project.name + '-testing')
+testDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile ihmc.sourceSetProject("testing")
+}
