@@ -15,8 +15,8 @@ https://bintray.com/ihmcrobotics/maven-release/ihmc-commons-test
 
 In your `build.gradle`:
 ```groovy
-compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.0"
-testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.0"
+compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
+testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
 ```
 
 ### Warning
