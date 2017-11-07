@@ -5,13 +5,23 @@ Useful tools and utilities that extend Java, Apache Commons Lang, and Apache Com
 
 ### Getting Started
 
-Artifacts are hosted on Bintray at https://bintray.com/ihmcrobotics/maven-release/ihmc-commons
+Artifacts are hosted on Bintray at the following URLs.
+
+https://bintray.com/ihmcrobotics/maven-release/ihmc-commons
+
+https://bintray.com/ihmcrobotics/maven-release/ihmc-commons-testing
+
+https://bintray.com/ihmcrobotics/maven-release/ihmc-commons-test
 
 In your `build.gradle`:
 ```groovy
 compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.0"
 testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.0"
 ```
+
+### Warning
+
+As of 0.12.0, this project will be unstable and a sandbox for refactoring. It will aim become stable again on the 0.13.x release.
 
 ### What's Included
 
