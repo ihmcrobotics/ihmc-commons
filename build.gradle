@@ -4,14 +4,14 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.5"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.7"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    group = "us.ihmc"
-   version = "0.12.1"
+   version = "0.12.2"
    vcsUrl = "https://github.com/ihmcrobotics/ihmc-commons"
    openSource = true
    maintainer = "Duncan Calvert"
@@ -21,8 +21,8 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-   compile group: 'commons-io', name: 'commons-io', version: '2.4'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+   compile group: "commons-io", name: "commons-io", version: "2.6"
 
 }
 
