@@ -49,7 +49,7 @@ public class PathToolsTest
    @Test(timeout = 30000)
    public void testFindAllPathsRecursivelyThatMatchRegex()
    {
-      List<Path> matchingPaths = PathTools.findAllPathsRecursivelyThatMatchRegex(Paths.get("testResources"), ".*[\\\\/]PathTools\\.java\\.fake$");
+      List<Path> matchingPaths = PathTools.findAllPathsRecursivelyThatMatchRegex(Paths.get("resources"), ".*[\\\\/]PathTools\\.java\\.fake$");
       
       PrintTools.info(this, "Matched " + matchingPaths.size() + " file(s).");
       
