@@ -33,6 +33,7 @@ public enum DefaultExceptionHandler
          // do nothing
          break;
       case KILL_PROCESS:
+         PrintTools.error(this, throwable.getMessage());
          System.exit(1);
          break;
       case PRINT_STACKTRACE:
