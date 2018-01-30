@@ -32,6 +32,27 @@ public class PrintToolsTest
       
       assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:25): Test log tools!"));
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPrintToolsReflection() throws Exception
+   {
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+      PrintStream systemOut = System.out;
+
+      System.setOut(new PrintStream(byteArrayOutputStream));
+
+      PrintTools.info("Test log tools!");
+
+      System.out.flush();
+
+      System.setOut(systemOut);
+
+      System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
+
+      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:46): Test log tools!"));
+   }
 	
 	public static void main(String[] args)
    {
