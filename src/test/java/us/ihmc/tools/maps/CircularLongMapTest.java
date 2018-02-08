@@ -9,7 +9,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 
 public class CircularLongMapTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFillingMap()
    {
@@ -41,7 +40,6 @@ public class CircularLongMapTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMatchNearest()
    {
@@ -70,7 +68,6 @@ public class CircularLongMapTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEdgeCases()
    {

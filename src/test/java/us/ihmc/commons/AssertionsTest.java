@@ -6,7 +6,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 
 public class AssertionsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertExceptionThrown()
    {
@@ -20,7 +19,6 @@ public class AssertionsTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertExceptionNotThrown()
    {

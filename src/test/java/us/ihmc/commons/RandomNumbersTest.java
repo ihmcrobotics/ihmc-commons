@@ -10,7 +10,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 
 public class RandomNumbersTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomFloatArray()
    {
@@ -31,7 +30,6 @@ public class RandomNumbersTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomIntArray()
    {
@@ -52,7 +50,6 @@ public class RandomNumbersTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomDoubleInRange()
    {
@@ -67,7 +64,6 @@ public class RandomNumbersTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomFloatInRange()
    {

@@ -86,8 +86,7 @@ public class FileToolsTest
       return Paths.get("testResources", pathNames.toArray(new String[0]));
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+	@Test(timeout = 30000)
    public void testReadAllLines()
    {
       List<String> lines = FileTools.readAllLines(READ_ALL_LINES_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -97,8 +96,7 @@ public class FileToolsTest
       assertTrue(lines.get(2).equals("line3"));
    }
 	
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+	@Test(timeout = 30000)
    public void testReadAllBytesAndReadLinesFromBytesAndReplaceLine()
    {
       byte[] bytes = FileTools.readAllBytes(READ_ALL_LINES_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -116,8 +114,7 @@ public class FileToolsTest
       assertTrue(lines.get(2).equals("line3"));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+	@Test(timeout = 30000)
    public void testConcatenateFilesTogether()
    {      
       Path concatFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH;

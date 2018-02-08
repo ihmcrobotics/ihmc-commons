@@ -11,7 +11,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 
 public class ConversionsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void kibibytesToBytes()
    {
@@ -23,7 +22,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void kilobytesToBytes()
    {
@@ -35,7 +33,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void megabytesToBytes()
    {
@@ -47,7 +44,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void mebibytesToBytes()
    {
@@ -59,7 +55,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testToSeconds()
    {
@@ -70,7 +65,6 @@ public class ConversionsTest
       assertEquals(-1.5, Conversions.nanosecondsToSeconds(-timestamp), 1e-22);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testToNanoSeconds()
    {
@@ -80,7 +74,6 @@ public class ConversionsTest
       assertEquals(-1500000000, Conversions.secondsToNanoseconds(-time));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMicroSecondsToNanoseconds()
    {
@@ -96,7 +89,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSecondsToMilliseconds()
    {
@@ -112,7 +104,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMillisecondsToSeconds()
    {
@@ -128,7 +119,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMillisecondsToMinutes()
    {
@@ -144,7 +134,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMillisecondsToNanoSeconds()
    {
@@ -160,7 +149,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMicroSecondsToSeconds()
    {
@@ -176,7 +164,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMinutesToSeconds()
    {
@@ -192,7 +179,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSecondsToMinutes()
    {
@@ -208,7 +194,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNanoSecondsToMilliSeconds()
    {
@@ -224,7 +209,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNanoSecondsToMicroSeconds()
    {
@@ -240,7 +224,6 @@ public class ConversionsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMagnitudeToDecibels()
    {
@@ -262,7 +245,6 @@ public class ConversionsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNaN()
    {
@@ -271,7 +253,6 @@ public class ConversionsTest
       assertTrue(Double.isNaN(decibels));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNegativeInfinity()
    {
@@ -303,7 +284,6 @@ public class ConversionsTest
       assertEquals("Not equal", 1, Conversions.nanosecondsToMicroseconds(1000), 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRadiansPerSecondToHz()
    {

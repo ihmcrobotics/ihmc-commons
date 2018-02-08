@@ -17,7 +17,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 
 public class RecyclingArrayListTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
    {
@@ -38,7 +37,6 @@ public class RecyclingArrayListTest
       assertTrue(list.getLast() == null);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAddAndGet()
    {
@@ -112,7 +110,6 @@ public class RecyclingArrayListTest
       assertTrue(list.getLast() == expectedList.get(finalSize - 1));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAndGrowIfNeeded()
    {
@@ -168,7 +165,6 @@ public class RecyclingArrayListTest
       assertTrue(list.getLast() == lastObject);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void growByOne()
    {
@@ -193,7 +189,6 @@ public class RecyclingArrayListTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void growByN()
    {
@@ -228,7 +223,6 @@ public class RecyclingArrayListTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFastRemove()
    {
@@ -264,7 +258,6 @@ public class RecyclingArrayListTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRemove()
    {
@@ -311,7 +304,6 @@ public class RecyclingArrayListTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSwap()
    {
@@ -361,7 +353,6 @@ public class RecyclingArrayListTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInsertAtIndex()
    {
@@ -403,7 +394,6 @@ public class RecyclingArrayListTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShuffle()
    {

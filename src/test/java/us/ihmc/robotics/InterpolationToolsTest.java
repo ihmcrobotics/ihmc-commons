@@ -26,7 +26,6 @@ public class InterpolationToolsTest
    {
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPiecewiseInterpolation()
    {
@@ -76,7 +75,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPiecewiseInterpolationRoundDown()
    {
@@ -126,7 +124,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLinearInterpolateBounds()
    {
@@ -143,7 +140,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLinearInterpolate()
    {
@@ -159,7 +155,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHermite01InterpolateBounds()
    {
@@ -176,7 +171,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHermite01Interpolate()
    {
@@ -192,7 +186,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHermiteInterpolateBounds()
    {
@@ -217,7 +210,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHermiteInterpolate()
    {
@@ -233,7 +225,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLogisticInterpolateBounds()
    {
@@ -262,7 +253,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLogisticInterpolate()
    {
@@ -279,7 +269,6 @@ public class InterpolationToolsTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLogisticInterpolateSlopedBounds()
    {
@@ -310,7 +299,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLogisticInterpolateSloped()
    {
@@ -328,7 +316,6 @@ public class InterpolationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHermiteCoefficients()
    {

@@ -105,7 +105,6 @@ public class FormattingToolsTest
       assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", expectedString + System.lineSeparator(), byteArrayOutputStream.toString());
    }
 	
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetDateString()
    {
@@ -134,7 +133,6 @@ public class FormattingToolsTest
       PrintTools.debug(this, FormattingTools.getDateString());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetTimeString()
    {

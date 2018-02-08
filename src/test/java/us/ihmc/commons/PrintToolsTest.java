@@ -12,8 +12,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 
 public class PrintToolsTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+	@Test(timeout = 30000)
    public void testPrintTools() throws Exception
    {
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -33,7 +32,6 @@ public class PrintToolsTest
       assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:25): Test log tools!"));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPrintToolsReflection() throws Exception
    {

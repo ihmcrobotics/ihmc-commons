@@ -45,8 +45,7 @@ public class PathToolsTest
       FileTools.deleteQuietly(FAKE_JAVA_FILE_PATH);
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+	@Test(timeout = 30000)
    public void testFindAllPathsRecursivelyThatMatchRegex()
    {
       List<Path> matchingPaths = PathTools.findAllPathsRecursivelyThatMatchRegex(Paths.get("resources"), ".*[\\\\/]PathTools\\.java\\.fake$");
@@ -56,8 +55,7 @@ public class PathToolsTest
       assertTrue("Didn't match exactly one file.", matchingPaths.size() == 1);
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+	@Test(timeout = 30000)
    public void testGetBaseName()
    {
       Path pathToThisTest = FileSystems.getDefault().getPath("test/us/ihmc/utilities/io/files/PathToolsTest.java");
@@ -69,8 +67,7 @@ public class PathToolsTest
       assertTrue("Base name not correct.", baseName.equals(PathToolsTest.class.getSimpleName()));
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+	@Test(timeout = 30000)
    public void testGetExtension()
    {
       Path pathToThisTest = FileSystems.getDefault().getPath("test/us/ihmc/utilities/io/files/PathToolsTest.java");
@@ -82,8 +79,7 @@ public class PathToolsTest
       assertTrue("Extension name not correct.", extensionName.equals("java"));
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+	@Test(timeout = 30000)
    public void testFirstPathMatchingGlob()
    {
       String camelCasedClassSimpleName = StringUtils.uncapitalize(PathToolsTest.class.getSimpleName());
@@ -103,7 +99,6 @@ public class PathToolsTest
       assertTrue("First path not correct.", firstPath.getFileName().toString().equals(camelCasedClassSimpleName));
    }
 	
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTemporaryDirectoryPath()
    {
@@ -112,8 +107,7 @@ public class PathToolsTest
       assertNotNull("Java temp directory is null.", tempPath);
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+	@Test(timeout = 30000)
    public void testWalkTreeFlat()
    {
       PathTools.walkFlat(PARENT_DIRECTORY, new BasicPathVisitor()
