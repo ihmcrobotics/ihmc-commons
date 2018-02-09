@@ -1,16 +1,16 @@
 package us.ihmc.commons.time;
 
-import java.util.function.DoubleSupplier;
-
 import us.ihmc.commons.Conversions;
+
+import java.util.function.DoubleSupplier;
 
 /**
  * <p>Minimal stopwatch with a friendly API. Measures durations of time.
  * Features the ability to suspend and resume measurement of the current lap.</p>
- * 
+ *
  * <p>Alternative to {@link org.apache.commons.lang3.time.StopWatch StopWatch} in
  * Apache Commons Lang with the following functional differences:</p>
- * 
+ *
  * <li>Uses double precision instead of long.</p>
  * <li>Uses seconds as the default unit instead of milliseconds.</li>
  * <li>Provides a more fluent interface with the concept of laps.</li>
@@ -31,7 +31,7 @@ public class Stopwatch
 
    /**
     * <p>Construct a new Stopwatch.</p>
-    * 
+    *
     * <p>All methods will return NaN until {@link #start()} or {@link #reset()} is called.</p>
     */
    public Stopwatch()
@@ -44,10 +44,10 @@ public class Stopwatch
 
    /**
     * Start the clock. Functionally the same as {@link #reset()}.
-    * 
+    *
     * <p>NOTE: Will reset any suspensions of measurement from previous calls
     * to {@link #suspend()} and {@link #resume()}.</p>
-    * 
+    *
     * @return <code>this</code> for convenience.
     */
    public Stopwatch start()
@@ -59,7 +59,7 @@ public class Stopwatch
 
    /**
     * Reset the current lap. Does not get averaged.
-    * 
+    *
     * <p>NOTE: Will reset any suspensions of measurement from previous calls
     * to {@link #suspend()} and {@link #resume()}.</p>
     */
@@ -72,7 +72,7 @@ public class Stopwatch
 
    /**
     * Reset the stopwatch. Clears average, resets lap, starts the clock.
-    * 
+    *
     * <p>NOTE: Will reset any suspensions of measurement from previous calls
     * to {@link #suspend()} and {@link #resume()}.</p>
     */
@@ -88,10 +88,10 @@ public class Stopwatch
 
    /**
     * Record a lap. Shortest time since last lap, start, or reset is returned and averaged.
-    * 
+    *
     * <p>NOTE: Will omit the sum of all suspend durations and
     * automatically resume measurement for the next lap.</p>
-    * 
+    *
     * @return Lap time.
     */
    public double lap()
@@ -111,7 +111,7 @@ public class Stopwatch
 
    /**
     * Get the average lap duration.
-    * 
+    *
     * @return Average lap duration.
     */
    public double averageLap()
@@ -121,7 +121,7 @@ public class Stopwatch
 
    /**
     * Get the total elapsed time. Since the last reset or start.
-    * 
+    *
     * @return Total elapsed time.
     */
    public double totalElapsed()
@@ -131,7 +131,7 @@ public class Stopwatch
 
    /**
     * Get the elapsed time in the current lap. Shortest time since last lap, reset, or start.
-    * 
+    *
     * @return Lap elapsed time.
     */
    public double lapElapsed()
@@ -141,9 +141,9 @@ public class Stopwatch
 
    /**
     * <p>Suspend the measurement of a lap.</p>
-    * 
+    *
     * <p>Use with {@link #resume()} to omit durations of time from the measurement of a lap.</p>
-    * 
+    *
     * <p>WARNING: {@link #lap()}, {@link #reset()}, {@link #lapReset()}, and {@link #start()}
     * will reset any suspensions of measurement from previous calls to {@link #suspend()} and
     * {@link #resume()}.</p>
@@ -159,9 +159,9 @@ public class Stopwatch
 
    /**
     * <p>Resume the measurement of a lap.</p>
-    * 
+    *
     * <p>Use with {@link #suspend()} to omit durations of time from the measurement of a lap.</p>
-    * 
+    *
     * <p>WARNING: {@link #lap()}, {@link #reset()}, {@link #lapReset()}, and {@link #start()}
     * will reset any suspensions of measurement from previous calls to {@link #suspend()} and
     * {@link #resume()}.</p>
@@ -200,7 +200,8 @@ public class Stopwatch
    /**
     * WARNING: Exclusively for unit testing. Do not use.
     */
-   /** package-private */ Stopwatch(DoubleSupplier nowSupplier)
+   /** package-private */
+   Stopwatch(DoubleSupplier nowSupplier)
    {
       this.nowSupplier = nowSupplier;
       lapStart = Double.NaN;

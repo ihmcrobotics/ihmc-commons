@@ -1,30 +1,21 @@
 package us.ihmc.commons.nio;
 
+import org.apache.commons.io.FilenameUtils;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.BasicPathVisitor.PathType;
+
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitOption;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.apache.commons.io.FilenameUtils;
-
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.BasicPathVisitor.PathType;
-
 /**
  * <p>A collection of tools to extend Java's NIO.2 API and
  * Apache Commons Lang. Tools here should fit one of
  * the following categories:</p>
- * 
+ *
  * <ol>Provide a commonly needed method not provided by Apache Commons Lang or Java's NIO.2. API.</ol>
  * <ol>Provide a wrapper around a commonly used method that uses a {@link DefaultExceptionHandler}.</ol>
  * <ol>Provide a bridge between Java's NIO.2 API and Apache Commons Lang.</ol>
@@ -33,10 +24,10 @@ public class PathTools
 {
    private static final String GLOB_SYNTAX_PREFIX = "glob:";
    private static final String REGEX_SYNTAX_PREFIX = "regex:";
-   
+
    /**
     * Get the base name of a file. A bridge from Java's NIO.2 to Apache Commons IO.
-    * 
+    *
     * @param path path
     * @return baseName the base name, minus the full path and extension, from a full filename
     */
@@ -44,10 +35,10 @@ public class PathTools
    {
       return FilenameUtils.getBaseName(path.toString());
    }
-   
+
    /**
     * Get the extension of a file. A bridge from Java's NIO.2 to Apache Commons IO.
-    * 
+    *
     * @param path path
     * @return extension the extension of a file name
     */
@@ -63,18 +54,17 @@ public class PathTools
 
    /**
     * Find a list of all Paths that match regex.
-    * 
-    * @see {@link java.util.regex.Pattern}
-    * 
+    *
     * @param directory directory to search
     * @param regex regular expression as defined by {@link java.util.regex.Pattern}
     * @return List of matching Paths.
+    * @see {@link java.util.regex.Pattern}
     */
    public static List<Path> findAllPathsRecursivelyThatMatchRegex(Path directory, String regex)
    {
       final PathMatcher matcher = FileSystems.getDefault().getPathMatcher(REGEX_SYNTAX_PREFIX + regex);
       final List<Path> matchingPaths = new ArrayList<Path>();
-      
+
       walkRecursively(directory, new BasicPathVisitor()
       {
          @Override
@@ -84,40 +74,39 @@ public class PathTools
             {
                matchingPaths.add(path);
             }
-            
+
             return FileVisitResult.CONTINUE;
          }
       });
-      
+
       return matchingPaths;
    }
 
    /**
     * Find the first Path that matches the glob.
-    * 
-    * @see {@link PathMatcher}
-    * 
+    *
     * @param directory directory to search
     * @param glob glob as defined by {@link PathMatcher}
     * @return List of matching Paths.
+    * @see {@link PathMatcher}
     */
    public static Path findFirstPathMatchingGlob(Path directory, final String glob)
-   {      
+   {
       final PathMatcher matcher = FileSystems.getDefault().getPathMatcher(GLOB_SYNTAX_PREFIX + glob);
       final Path[] pathHolder = {null};
-      
+
       walkRecursively(directory, new BasicPathVisitor()
-      {         
+      {
          @Override
          public FileVisitResult visitPath(Path path, PathType pathType)
          {
             if (matcher.matches(path))
             {
                pathHolder[0] = path;
-               
+
                return FileVisitResult.TERMINATE;
             }
-            
+
             return FileVisitResult.CONTINUE;
          }
       });
@@ -127,12 +116,11 @@ public class PathTools
 
    /**
     * Determines if there is a file or directory that matches <code>glob</code>.
-    * 
-    * @see {@link PathMatcher}
-    * 
+    *
     * @param directory directory to search
     * @param glob glob as defined by {@link PathMatcher}
     * @return Has glob boolean.
+    * @see {@link PathMatcher}
     */
    public static boolean directoryHasGlob(Path directory, final String glob)
    {
@@ -141,10 +129,10 @@ public class PathTools
 
    /**
     * Recursively walk through a directory. A simple case of Files.walkFileTree provided by Java's NIO.2.
-    * 
+    *
     * <p>WARNING: This method is best try only. All exceptions will be swallowed silently. For more specific behavior
     * you must use {@link Files#walkFileTree(Path, FileVisitor)} directly.</p>
-    * 
+    *
     * @param directory directory to walk
     * @param basicFileVisitor callback to take action on visits
     */
@@ -159,7 +147,7 @@ public class PathTools
             {
                return basicFileVisitor.visitPath(preVisitDirectory, PathType.DIRECTORY);
             }
-            
+
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException
             {
@@ -171,13 +159,13 @@ public class PathTools
       {
       }
    }
-   
+
    /**
     * <p>Walk through a directory to a max depth. A simple case of Files.walkFileTree provided by Java's NIO.2.</p>
-    * 
+    *
     * <p>WARNING: This method is best try only. All exceptions will be swallowed silently. For more specific behavior
     * you must use {@link Files#walkFileTree(Path, FileVisitor)} directly.</p>
-    * 
+    *
     * @param directory directory to walk
     * @param basicFileVisitor callback to take action on visits
     */
@@ -194,10 +182,10 @@ public class PathTools
                {
                   return FileVisitResult.CONTINUE;
                }
-               
+
                return basicFileVisitor.visitPath(preVisitDirectory, PathType.DIRECTORY);
             }
-            
+
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException
             {
@@ -220,10 +208,10 @@ public class PathTools
    /**
     * Walk through a directory's immediate contents without diving deeper.
     * A simple case of Files.walkFileTree provided by Java's NIO.2.
-    * 
+    *
     * <p>WARNING: This method is best try only. All exceptions will be swallowed silently. For more specific behavior
     * you must use {@link Files#walkFileTree(Path, FileVisitor)} directly.</p>
-    * 
+    *
     * @param directory directory to walk
     * @param basicFileVisitor callback to take action on visits
     */

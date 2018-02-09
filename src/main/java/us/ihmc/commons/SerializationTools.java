@@ -9,7 +9,7 @@ public class SerializationTools
    /**
     * Checks if an object is serializable by trying to write it
     * to an ObjectOutputStream and calling flush.
-    * 
+    *
     * @param objectToTest object to check
     * @return If the object is serializable.
     */

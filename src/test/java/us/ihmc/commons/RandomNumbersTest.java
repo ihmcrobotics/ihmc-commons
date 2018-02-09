@@ -1,12 +1,10 @@
 package us.ihmc.commons;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.util.Random;
 
-import org.junit.Test;
-
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertTrue;
 
 public class RandomNumbersTest
 {
@@ -49,7 +47,7 @@ public class RandomNumbersTest
          assertTrue((randomFloat >= -5) && (randomFloat <= 5));
       }
    }
-   
+
    @Test(timeout = 30000)
    public void testGenerateRandomDoubleInRange()
    {

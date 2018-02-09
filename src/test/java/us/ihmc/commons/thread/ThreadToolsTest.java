@@ -1,18 +1,14 @@
 package us.ihmc.commons.thread;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
-
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import static org.junit.Assert.*;
 
 public class ThreadToolsTest
 {
@@ -42,8 +38,8 @@ public class ThreadToolsTest
       for (int i = 0; i < ITERATIONS; i++)
       {
          long startTime = System.currentTimeMillis();
-         ScheduledFuture<?> future = ThreadTools.scheduleWithFixeDelayAndTimeLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit,
-                                                                                   timeLimit);
+         ScheduledFuture<?> future = ThreadTools
+               .scheduleWithFixeDelayAndTimeLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, timeLimit);
          while (!future.isDone())
          {
             // do nothing
@@ -73,8 +69,8 @@ public class ThreadToolsTest
          }
       };
 
-      ScheduledFuture<?> future = ThreadTools.scheduleWithFixedDelayAndIterationLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit,
-                                                                                      iterations);
+      ScheduledFuture<?> future = ThreadTools
+            .scheduleWithFixedDelayAndIterationLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, iterations);
 
       while (!future.isDone())
       {
@@ -164,7 +160,7 @@ public class ThreadToolsTest
 
       // Check to make sure slept at least the amount specified.
       assertTrue("timeSlept = " + timeSleptInNanoseconds + ", totalNanosecondsToSleep = " + totalNanosecondsToSleep, timeOverSleptInNanoseconds >= 0);
-      
+
       // Check to make sure didn't over sleep by more than 5 milliseconds, which seems reasonable on most operating systems.
       assertTrue("timeSlept = " + timeSleptInNanoseconds + ", millisecondsToSleep = " + millisecondsToSleep, timeOverSleptInNanoseconds < 100 * oneMillion);
 

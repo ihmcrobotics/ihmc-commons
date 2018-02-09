@@ -11,7 +11,7 @@ public class InterpolationTools
     * @param a the first value used in the interpolation.
     * @param b the second value used in the interpolation.
     * @param alpha the percentage to use for the interpolation. A value of 0 will return {@code a},
-    *           while a value of 1 will return {@code b}.
+    * while a value of 1 will return {@code b}.
     * @return the interpolated value.
     */
    public static double piecewiseInterpolate(double a, double b, double alpha)
@@ -29,7 +29,7 @@ public class InterpolationTools
     * @param a the first value used in the interpolation.
     * @param b the second value used in the interpolation.
     * @param alpha the percentage to use for the interpolation. A value of 0 will return {@code a},
-    *           while a value of 1 will return {@code b}.
+    * while a value of 1 will return {@code b}.
     * @return the interpolated value.
     */
    public static double piecewiseInterpolateRoundDown(double a, double b, double alpha)
@@ -50,7 +50,7 @@ public class InterpolationTools
     * @param a the first value used in the interpolation.
     * @param b the second value used in the interpolation.
     * @param alpha the percentage to use for the interpolation. A value of 0 will return {@code a},
-    *           while a value of 1 will return {@code b}.
+    * while a value of 1 will return {@code b}.
     * @return the interpolated value.
     */
    public static double linearInterpolate(double a, double b, double alpha)
@@ -72,7 +72,7 @@ public class InterpolationTools
     * @param a the first value used in the interpolation.
     * @param b the second value used in the interpolation.
     * @param alpha the percentage to use for the interpolation. A value of 0 will return {@code a},
-    *           while a value of 1 will return {@code b}.
+    * while a value of 1 will return {@code b}.
     * @return the interpolated value.
     */
    public static double hermite01Interpolate(double a, double b, double alpha)
@@ -89,7 +89,7 @@ public class InterpolationTools
     * @param a the first value used in the interpolation.
     * @param b the second value used in the interpolation.
     * @param alpha the percentage to use for the interpolation. A value of 0 will return {@code a},
-    *           while a value of 1 will return {@code b}.
+    * while a value of 1 will return {@code b}.
     * @return the interpolated value.
     * @throws IllegalArgumentException If the interpolation value would produce a result outside
     * the set [{@code a} and {@code b}]
@@ -112,7 +112,7 @@ public class InterpolationTools
     * @param b the second value used in the interpolation.
     * @param bTangent the tangent at the second value in the interpolation.
     * @param alpha the percentage to use for the interpolation. A value of 0 will return {@code a},
-    *           while a value of 1 will return {@code b}.
+    * while a value of 1 will return {@code b}.
     * @return the interpolated value.
     * @throws IllegalArgumentException If the interpolation value would produce a result outside
     * the set [{@code a} and {@code b}]
@@ -132,8 +132,9 @@ public class InterpolationTools
     * Calculates the coefficient for the initial value (value when {@code alpha} = 0.0)
     * of the Hermite Cubic spline for interpolation.
     * <p>
-    *    result = 2.0 * alpha^3.0 - 3.0 * alpha^2 + 1.0
+    * result = 2.0 * alpha^3.0 - 3.0 * alpha^2 + 1.0
     * </p>
+    *
     * @param alpha the percentage to use for the interpolation.
     * @return coefficient
     */
@@ -146,8 +147,9 @@ public class InterpolationTools
     * Calculates the coefficient for the initial tangent value
     * (tangent value when {@code alpha} = 0.0) of the Hermite Cubic spline for interpolation.
     * <p>
-    *    result = alpha^3.0 - 2.0 * alpha^2 + alpha
+    * result = alpha^3.0 - 2.0 * alpha^2 + alpha
     * </p>
+    *
     * @param alpha the percentage to use for the interpolation.
     * @return coefficient
     */
@@ -160,8 +162,9 @@ public class InterpolationTools
     * Calculates the coefficient for the final value (value when {@code alpha} = 1.0)
     * of the Hermite Cubic spline for interpolation.
     * <p>
-    *    result = -2.0 * alpha^3.0 + 3.0 * alpha^2
+    * result = -2.0 * alpha^3.0 + 3.0 * alpha^2
     * </p>
+    *
     * @param alpha the percentage to use for the interpolation.
     * @return coefficient
     */
@@ -174,8 +177,9 @@ public class InterpolationTools
     * Calculates the coefficient for the final tangent value
     * (tangent value when {@code alpha} = 1.0) of the Hermite Cubic spline for interpolation.
     * <p>
-    *    result = alpha^3.0 - alpha^2
+    * result = alpha^3.0 - alpha^2
     * </p>
+    *
     * @param alpha the percentage to use for the interpolation.
     * @return coefficient
     */
@@ -188,11 +192,10 @@ public class InterpolationTools
     * Performs a logistic interpolation from {@code a} to {@code b} given the percentage
     * {@code alpha}. Assumes a function steepness of 1.0.
     *
-    *
     * @param a the first value used in the interpolation.
     * @param b the second value used in the interpolation.
     * @param alpha the percentage to use for the interpolation. A value of 0 will return {@code a},
-    *           while a value of 1 will return {@code b}.
+    * while a value of 1 will return {@code b}.
     * @return the interpolated value.
     */
    public static double logisticInterpolate(double a, double b, double alpha)
@@ -209,7 +212,7 @@ public class InterpolationTools
     * @param a the first value used in the interpolation.
     * @param b the second value used in the interpolation.
     * @param alpha the percentage to use for the interpolation. A value of 0 will return {@code a},
-    *           while a value of 1 will return {@code b}.
+    * while a value of 1 will return {@code b}.
     * @param steepness the steepness of the exponential function.
     * @return the interpolated value.
     */

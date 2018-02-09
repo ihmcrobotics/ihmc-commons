@@ -19,14 +19,14 @@ public abstract class GenericTypeBuilder<V>
       {
          throw new RuntimeException("Could not find a visible empty constructor in the class: " + clazz.getSimpleName());
       }
-   
+
       GenericTypeBuilder<U> builder = new GenericTypeBuilder<U>()
       {
          @Override
          public U newInstance()
          {
             U newInstance = null;
-   
+
             try
             {
                newInstance = emptyConstructor.newInstance();
@@ -34,9 +34,10 @@ public abstract class GenericTypeBuilder<V>
             catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
             {
                e.printStackTrace();
-               throw new RuntimeException("Something went wrong the empty constructor implemented in the class: " + emptyConstructor.getDeclaringClass().getSimpleName());
+               throw new RuntimeException(
+                     "Something went wrong the empty constructor implemented in the class: " + emptyConstructor.getDeclaringClass().getSimpleName());
             }
-   
+
             return newInstance;
          }
       };

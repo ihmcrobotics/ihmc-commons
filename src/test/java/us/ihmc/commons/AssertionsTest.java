@@ -2,8 +2,6 @@ package us.ihmc.commons;
 
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
 public class AssertionsTest
 {
    @Test(timeout = 30000)

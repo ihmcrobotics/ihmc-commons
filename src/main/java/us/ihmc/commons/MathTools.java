@@ -17,7 +17,7 @@ public class MathTools
    {
       return sum(array) / array.length;
    }
-   
+
    /**
     * Average value in a list of doubles.
     *
@@ -31,9 +31,9 @@ public class MathTools
 
    /**
     * <p>Ceils {@code value} to the given precision.</p>
-    * 
-    * <p>Example: ceilToPrecision(19.2, 1.0) = 20.0;</p> 
-    * 
+    *
+    * <p>Example: ceilToPrecision(19.2, 1.0) = 20.0;</p>
+    *
     * @param value value to ceil to precision
     * @param precision precision to ceil to
     * @return {@code value} ceiled to {@code precision}
@@ -45,7 +45,7 @@ public class MathTools
 
    /**
     * Throw exception if {@code value1} not epsilon equal to {@code value2}.
-    * 
+    *
     * @param value1 value to check
     * @param value2 value to check
     * @param epsilon epsilon
@@ -61,7 +61,7 @@ public class MathTools
 
    /**
     * Throw exception if {@code value1} not equal to {@code value2}.
-    * 
+    *
     * @param value1 value to check
     * @param value2 value to check
     * @throws RuntimeException if {@code value1} not equal to {@code value2}.
@@ -77,7 +77,7 @@ public class MathTools
    /**
     * Throw exception if {@code greater} not greater than or equal to {@code lesser}.
     * No exception thrown if {@code greater == lesser}.
-    * 
+    *
     * @param greater greater value
     * @param lesser lesser value
     * @throws RuntimeException if {@code greater} not greater than or equal to {@code lesser}.
@@ -95,7 +95,7 @@ public class MathTools
     * {@code lowerEndpoint} and {@code upperEndpoint}. Interval is closed,
     * meaning that if {@code value == upperEndpoint} or {@code value == lowerEndpoint},
     * no exception is thrown.
-    * 
+    *
     * @param value the values to check contains
     * @param lowerEndpoint lower endpoint of the interval
     * @param upperEndpoint upper endpoint of the interval
@@ -114,7 +114,7 @@ public class MathTools
     * {@code lowerEndpoint} and {@code upperEndpoint}. Interval is closed,
     * meaning that if {@code value == upperEndpoint} or {@code value == lowerEndpoint},
     * no exception is thrown.
-    * 
+    *
     * @param value the values to check contains
     * @param lowerEndpoint lower endpoint of the interval
     * @param upperEndpoint upper endpoint of the interval
@@ -131,7 +131,7 @@ public class MathTools
    /**
     * Throw exception if {@code lesser} not less than or equal to {@code greater}.
     * No exception thrown if {@code lesser == greater}.
-    * 
+    *
     * @param lesser lesser value
     * @param greater greater value
     * @throws RuntimeException if {@code lesser} not less than or equal to {@code greater}.
@@ -143,11 +143,11 @@ public class MathTools
          throw new RuntimeException("Not less than or equal. " + lesser + " > " + greater);
       }
    }
-   
+
    /**
     * Throw exception if value is greater than zero.
     * No exception thrown if {@code value == 0.0}.
-    * 
+    *
     * @param value value to check
     * @throws RuntimeException if value is positive.
     */
@@ -162,7 +162,7 @@ public class MathTools
    /**
     * Throw exception if value is less than zero.
     * No exception thrown if {@code value == 0.0}.
-    * 
+    *
     * @param value value to check
     * @throws RuntimeException if value is negative.
     */
@@ -180,14 +180,14 @@ public class MathTools
     * @param value value
     * @param minMax inclusive absolute boundary
     * @return <li>{@code -minMax} if {@code value} is less than {@code -minMax}</li>
-    *         <li>{@code minMax} if {@code value} is greater than {@code minMax}</li>
-    *         <li>{@code value} if {@code value} is between or equal to {@code -minMax} and {@code minMax}</li>
+    * <li>{@code minMax} if {@code value} is greater than {@code minMax}</li>
+    * <li>{@code value} if {@code value} is between or equal to {@code -minMax} and {@code minMax}</li>
     */
    public static double clamp(double value, double minMax)
    {
       return clamp(value, -minMax, minMax);
    }
-   
+
    /**
     * Clamps value to the given range, inclusive.
     *
@@ -195,8 +195,8 @@ public class MathTools
     * @param min inclusive boundary start
     * @param max inclusive boundary end
     * @return <li>{@code min} if {@code value} is less than {@code min}</li>
-    *         <li>{@code max} if {@code value} is greater than {@code max}</li>
-    *         <li>{@code value} if {@code value} is between or equal to {@code min} and {@code max}</li>
+    * <li>{@code max} if {@code value} is greater than {@code max}</li>
+    * <li>{@code value} if {@code value} is between or equal to {@code min} and {@code max}</li>
     */
    public static double clamp(double value, double min, double max)
    {
@@ -207,15 +207,15 @@ public class MathTools
 
       return (Math.min(max, Math.max(value, min)));
    }
-   
+
    /**
     * Clamps value to the given range, defined by {@code -minMax} and {@code minMax}, inclusive.
     *
     * @param value value
     * @param minMax inclusive absolute boundary
     * @return <li>{@code -minMax} if {@code value} is less than {@code -minMax}</li>
-    *         <li>{@code minMax} if {@code value} is greater than {@code minMax}</li>
-    *         <li>{@code value} if {@code value} is between or equal to {@code -minMax} and {@code minMax}</li>
+    * <li>{@code minMax} if {@code value} is greater than {@code minMax}</li>
+    * <li>{@code value} if {@code value} is between or equal to {@code -minMax} and {@code minMax}</li>
     */
    public static int clamp(int value, int minMax)
    {
@@ -229,8 +229,8 @@ public class MathTools
     * @param min inclusive boundary start
     * @param max inclusive boundary end
     * @return <li>{@code min} if {@code value} is less than {@code min}</li>
-    *         <li>{@code max} if {@code value} is greater than {@code max}</li>
-    *         <li>{@code value} if {@code value} is between or equal to {@code min} and {@code max}</li>
+    * <li>{@code max} if {@code value} is greater than {@code max}</li>
+    * <li>{@code value} if {@code value} is between or equal to {@code min} and {@code max}</li>
     */
    public static int clamp(int value, int min, int max)
    {
@@ -238,13 +238,13 @@ public class MathTools
       {
          throw new RuntimeException(MathTools.class.getSimpleName() + ".clamp(int, int, int): min > max (" + min + " > " + max + ")");
       }
-      
+
       return (Math.min(max, Math.max(value, min)));
    }
-   
+
    /**
     * Cubes value.
-    * 
+    *
     * @param value value to be cubed
     * @return {@code value * value * value}
     */
@@ -255,10 +255,10 @@ public class MathTools
 
    /**
     * <p>Computes the cumulative sum array for a given array of doubles.</p>
-    * 
+    *
     * <p>Example: The cumulative sum sequence of the input sequence {a, b, c, ...}
     * is {a, a + b, a + b + c, ...}</p>
-    * 
+    *
     * @param array input sequence
     * @return Cumulative sum sequence.
     */
@@ -333,11 +333,11 @@ public class MathTools
 
    /**
     * <p>Compare {@code a} and {@code b} with epsilon. NaNs compare to {@code true}.</p>
-    * 
+    *
     * <li>If Double.compare(a, b) == 0, return {@code true}.</li>
     * <li>If value |({@code a} - {@code b})| <= epsilon, return {@code true}.</li>
     * <li>If {@code a} and {@code b} are NaN, returns {@code true}.</li>
-    * 
+    *
     * <p>See {@link MathTools#epsilonEquals(double, double, double) epsilonEquals
     * for NaNs to return {@code false}.</p>
     *
@@ -353,7 +353,7 @@ public class MathTools
       {
          throw new RuntimeException("epilson is less than 0.0");
       }
-      
+
       if (Double.compare(a, b) == 0)
       {
          return true;
@@ -362,18 +362,18 @@ public class MathTools
       {
          return true;
       }
-   
+
       return false;
    }
 
    /**
     * <p>Compare {@code a} and {@code b} with epsilon. If either {@code a} or
     * {@code b} is NaN, returns {@code false}.</p>
-    * 
+    *
     * <li>If Double.compare(a, b) == 0, return {@code true}.</li>
     * <li>If value |({@code a} - {@code b})| <= epsilon, return {@code true}.</li>
     * <li>If either {@code a} or {@code b} is NaN, returns {@code false}.</li>
-    * 
+    *
     * <p>See {@link MathTools#epsilonCompare(double, double, double) epsilonCompare
     * for NaNs to return {@code true}.</p>
     *
@@ -389,7 +389,7 @@ public class MathTools
       {
          throw new RuntimeException("epilson is less than 0.0");
       }
-      
+
       if (Double.isNaN(a) || Double.isNaN(b))
       {
          return false;
@@ -408,9 +408,9 @@ public class MathTools
 
    /**
     * <p>Floors {@code value} to the given precision.</p>
-    * 
-    * <p>Example: floorToPrecision(19.9, 1.0) = 19.0;</p> 
-    * 
+    *
+    * <p>Example: floorToPrecision(19.9, 1.0) = 19.0;</p>
+    *
     * @param value value to floor to precision
     * @param precision precision to floor to
     * @return {@code value} floored to {@code precision}
@@ -422,20 +422,20 @@ public class MathTools
 
    /**
     * Greatest common divisor of {@code a} and {@code b}.
-    * 
+    *
     * @param a
     * @param b
     * @return The greatest common divisor.
     */
    public static long gcd(long a, long b)
    {
-      while(b > 0)
+      while (b > 0)
       {
          long c = a % b;
          a = b;
          b = c;
       }
-      
+
       return a;
    }
 
@@ -444,7 +444,7 @@ public class MathTools
     * {@code -endpointMinMax} and {@code endpointMinMax}. Interval is closed,
     * meaning that if {@code value == -endpointMinMax} or {@code value == endpointMinMax},
     * true is returned.
-    * 
+    *
     * @param value the values to check contains
     * @param endpointMinMax min-max style parameter defining the interval endpoints as
     * {@code -endpointMinMax} and {@code endpointMinMax}
@@ -460,7 +460,7 @@ public class MathTools
     * {@code lowerEndpoint} and {@code upperEndpoint}. Interval is closed,
     * meaning that if {@code value == upperEndpoint} or {@code value == lowerEndpoint},
     * true is returned.
-    * 
+    *
     * @param value the values to check contains
     * @param lowerEndpoint lower endpoint of the interval
     * @param upperEndpoint upper endpoint of the interval
@@ -476,7 +476,7 @@ public class MathTools
     * {@code lowerEndpoint} and {@code upperEndpoint}. Interval can be
     * open or closed using {@code includeLowerEndpoint} and
     * {@code includeUpperEndpoint}.
-    * 
+    *
     * @param value the values to check contains
     * @param lowerEndpoint lower endpoint of the interval
     * @param upperEndpoint upper endpoint of the interval
@@ -488,12 +488,14 @@ public class MathTools
    {
       if (lowerEndpoint > upperEndpoint + Epsilons.ONE_TEN_BILLIONTH)
       {
-         throw new RuntimeException(MathTools.class.getSimpleName()
-               + ".intervalContains(double, double, double, boolean, boolean): lowerEndpoint > upperEndpoint (" + lowerEndpoint + " > " + upperEndpoint + ")");
+         throw new RuntimeException(
+               MathTools.class.getSimpleName() + ".intervalContains(double, double, double, boolean, boolean): lowerEndpoint > upperEndpoint (" + lowerEndpoint
+                     + " > " + upperEndpoint + ")");
       }
 
-      return (includeLowerEndpoint ? value >= lowerEndpoint : value > (lowerEndpoint + Epsilons.ONE_TEN_BILLIONTH))
-            && (includeUpperEndpoint ? value <= upperEndpoint : value < (upperEndpoint - Epsilons.ONE_TEN_BILLIONTH));
+      return (includeLowerEndpoint ? value >= lowerEndpoint : value > (lowerEndpoint + Epsilons.ONE_TEN_BILLIONTH)) && (includeUpperEndpoint ?
+            value <= upperEndpoint :
+            value < (upperEndpoint - Epsilons.ONE_TEN_BILLIONTH));
    }
 
    /**
@@ -502,7 +504,7 @@ public class MathTools
     * meaning that if {@code value == upperEndpoint} or {@code value == lowerEndpoint},
     * true is returned. This method rounds {@code value}, {@code lowerEndpoint}, and {@code upperEndpoint}
     * to the given precision before performing comparisons.
-    * 
+    *
     * @param value the values to check contains
     * @param lowerEndpoint lower endpoint of the interval
     * @param upperEndpoint upper endpoint of the interval
@@ -521,7 +523,7 @@ public class MathTools
     * {@code includeUpperEndpoint}. This method rounds {@code value},
     * {@code lowerEndpoint}, and {@code upperEndpoint}
     * to the given precision before performing comparisons.
-    * 
+    *
     * @param value the values to check contains
     * @param lowerEndpoint lower endpoint of the interval
     * @param upperEndpoint upper endpoint of the interval
@@ -530,14 +532,16 @@ public class MathTools
     * @param includeUpperEndpoint whether to return true if {@code value == upperEndpoint}
     * @return {@code lowerEndpoint <(=) value <(=) upperEndpoint}
     */
-   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint, double precision, boolean includeLowerEndpoint, boolean includeUpperEndpoint)
+   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint, double precision, boolean includeLowerEndpoint,
+                                          boolean includeUpperEndpoint)
    {
-      return intervalContains(roundToPrecision(value, precision), roundToPrecision(lowerEndpoint, precision), roundToPrecision(upperEndpoint, precision), includeLowerEndpoint, includeUpperEndpoint);
+      return intervalContains(roundToPrecision(value, precision), roundToPrecision(lowerEndpoint, precision), roundToPrecision(upperEndpoint, precision),
+                              includeLowerEndpoint, includeUpperEndpoint);
    }
 
    /**
     * Compares {@code a} >= {@code b} after rounding to precision.
-    * 
+    *
     * @param a
     * @param b
     * @param precision
@@ -550,7 +554,7 @@ public class MathTools
 
    /**
     * Compares {@code a} >= {@code b} after rounding to significant figures.
-    * 
+    *
     * @param a
     * @param b
     * @param significantFigures
@@ -563,7 +567,7 @@ public class MathTools
 
    /**
     * Compares {@code a} > {@code b} after rounding to precision.
-    * 
+    *
     * @param a
     * @param b
     * @param precision
@@ -576,7 +580,7 @@ public class MathTools
 
    /**
     * Compares {@code a} > {@code b} after rounding to significant figures.
-    * 
+    *
     * @param a
     * @param b
     * @param significantFigures
@@ -589,7 +593,7 @@ public class MathTools
 
    /**
     * Compares {@code a} <= {@code b} after rounding to precision.
-    * 
+    *
     * @param a
     * @param b
     * @param precision
@@ -602,7 +606,7 @@ public class MathTools
 
    /**
     * Compares {@code a} <= {@code b} after rounding to significant figures.
-    * 
+    *
     * @param a
     * @param b
     * @param significantFigures
@@ -615,7 +619,7 @@ public class MathTools
 
    /**
     * Compares {@code a} < {@code b} after rounding to precision.
-    * 
+    *
     * @param a
     * @param b
     * @param precision
@@ -628,7 +632,7 @@ public class MathTools
 
    /**
     * Compares {@code a} < {@code b} after rounding to significant figures.
-    * 
+    *
     * @param a
     * @param b
     * @param significantFigures
@@ -641,7 +645,7 @@ public class MathTools
 
    /**
     * Least common multiple of {@code a, b, c...}
-    * 
+    *
     * @param a
     * @return The least common multiple.
     */
@@ -697,11 +701,11 @@ public class MathTools
 
    /**
     * <p>Order of magnitude of {@code number}.</p>
-    * 
+    *
     * <p>For example:</br>
     * Order of magnitude of 100.0 is 2.</br>
     * Order of magnitude of 0.005 is -3.</p>
-    * 
+    *
     * @param number
     * @return Order of magnitude.
     */
@@ -709,26 +713,25 @@ public class MathTools
    {
       return (int) Math.floor(Math.log10(Math.abs(number)));
    }
-   
+
    /**
     * If b is within given percent of a, return {@code true}.
     * Uses {@link MathTools#epsilonEquals(double, double, double) MathTools.epsilonEquals}.
-    * 
-    * @see {@link MathTools#epsilonEquals(double, double, double)}
     *
     * @param a double
     * @param b double
     * @param percent double
     * @return boolean
+    * @see {@link MathTools#epsilonEquals(double, double, double)}
     */
    public static boolean percentEquals(double a, double b, double percent)
    {
       return epsilonEquals(a, b, Math.abs(percent * a));
    }
-   
+
    /**
     * Calculates value to the power of exponent. Uses integer for efficiency.
-    * 
+    *
     * @param value
     * @param exponent
     * @return Value to the power of exponent.
@@ -752,12 +755,12 @@ public class MathTools
       }
       return pow;
    }
-   
+
    /**
     * <p>Rounds {@code value} to the given precision.</p>
-    * 
-    * <p>Example: roundToPrecision(19.5, 1.0) = 20.0;</p> 
-    * 
+    *
+    * <p>Example: roundToPrecision(19.5, 1.0) = 20.0;</p>
+    *
     * @param value value to round to precision
     * @param precision precision to round to
     * @return {@code value} rounded to {@code precision}
@@ -769,9 +772,9 @@ public class MathTools
 
    /**
     * <p>Rounds to number of significant figures.</p>
-    * 
+    *
     * <p>NOTE: For now, this method creates garbage. A garbage free solution needs to be found.</p>
-    * 
+    *
     * @param value
     * @param significantFigures
     * @return Rounded to significant figures.
@@ -782,10 +785,10 @@ public class MathTools
       {
          return 0.0;
       }
-   
+
       return new BigDecimal(value, new MathContext(significantFigures, RoundingMode.HALF_UP)).doubleValue();
    }
-   
+
    /**
     * Returns the sign of the argument. 1.0 if positive or 0.0, -1.0 if negative.
     * (Unlike Math.signum that returns 0.0 if the argument is 0.0)
@@ -800,10 +803,10 @@ public class MathTools
 
       return -1.0;
    }
-   
+
    /**
     * Squares value.
-    * 
+    *
     * @param value value to be squared
     * @return {@code value * value}
     */
@@ -811,7 +814,7 @@ public class MathTools
    {
       return value * value;
    }
-   
+
    /**
     * Sums the doubles in an array.
     *
@@ -827,7 +830,7 @@ public class MathTools
       }
       return sum;
    }
-   
+
    /**
     * Sums the integers in an array.
     *
@@ -843,7 +846,7 @@ public class MathTools
       }
       return sum;
    }
-   
+
    /**
     * Sums the doubles in a list.
     *

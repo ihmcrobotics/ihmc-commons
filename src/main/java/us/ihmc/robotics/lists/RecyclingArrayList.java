@@ -1,11 +1,6 @@
 package us.ihmc.robotics.lists;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Random;
+import java.util.*;
 
 public class RecyclingArrayList<T> implements List<T>
 {
@@ -35,9 +30,9 @@ public class RecyclingArrayList<T> implements List<T>
 
    public void shuffle(Random random)
    {
-      for (int i=size; i>1; i--)
+      for (int i = size; i > 1; i--)
       {
-         unsafeSwap(i-1, random.nextInt(i));
+         unsafeSwap(i - 1, random.nextInt(i));
       }
    }
 
@@ -85,6 +80,7 @@ public class RecyclingArrayList<T> implements List<T>
 
    /**
     * Add a new element at the end of this list.
+    *
     * @return the new element.
     */
    public T add()
@@ -100,7 +96,7 @@ public class RecyclingArrayList<T> implements List<T>
     * @param index index at which the new element is to be inserted
     * @return the new inserted element
     * @throws IndexOutOfBoundsException if the index is out of range
-    *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
+    * (<tt>index &lt; 0 || index &gt;= size()</tt>)
     */
    public T insertAtIndex(int index)
    {
@@ -119,10 +115,10 @@ public class RecyclingArrayList<T> implements List<T>
    /**
     * Returns the element at the specified position in this list.
     *
-    * @param  index index of the element to return
+    * @param index index of the element to return
     * @return the element at the specified position in this list
     * @throws IndexOutOfBoundsException if the index is out of range
-     *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
+    * (<tt>index &lt; 0 || index &gt;= size()</tt>)
     */
    @Override
    public T get(int i)
@@ -134,6 +130,7 @@ public class RecyclingArrayList<T> implements List<T>
    /**
     * Returns the first element of this list.
     * If the list is empty, it returns {@code null}.
+    *
     * @return the first element of this list
     */
    public T getFirst()
@@ -147,6 +144,7 @@ public class RecyclingArrayList<T> implements List<T>
    /**
     * Returns the last element of this list.
     * If the list is empty, it returns {@code null}.
+    *
     * @return the last element of this list
     */
    public T getLast()
@@ -167,7 +165,7 @@ public class RecyclingArrayList<T> implements List<T>
     * The list will grow if the given index is greater or equal to
     * the size this list.
     *
-    * @param  index index of the element to return
+    * @param index index of the element to return
     * @return the element at the specified position in this list
     * @throws IndexOutOfBoundsException if the index is negative (<tt>index &lt; 0</tt>)
     */
@@ -223,10 +221,11 @@ public class RecyclingArrayList<T> implements List<T>
 
    /**
     * Swap two objects of this list.
+    *
     * @param i index of the first object to swap
     * @param j index of the second object to swap
     * @throws IndexOutOfBoundsException if either of the indices is out of range
-    *         (<tt>i &lt; 0 || i &gt;= size() || j &lt; 0 || j &gt;= size()</tt>)
+    * (<tt>i &lt; 0 || i &gt;= size() || j &lt; 0 || j &gt;= size()</tt>)
     */
    public void swap(int i, int j)
    {
@@ -366,8 +365,6 @@ public class RecyclingArrayList<T> implements List<T>
       if (index < 0)
          throw new IndexOutOfBoundsException("Index cannot be negative: " + index);
    }
-
-
 
    /**
     * Returns <tt>true</tt> if this list contains the specified element.

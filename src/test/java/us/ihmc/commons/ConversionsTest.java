@@ -1,13 +1,12 @@
 package us.ihmc.commons;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 
-import org.junit.Test;
-
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ConversionsTest
 {
@@ -242,7 +241,6 @@ public class ConversionsTest
       assertEquals(20.0, decibels[0], epsilon);
       assertEquals(40.0, decibels[1], epsilon);
       assertEquals(28.691378080683975, decibels[2], epsilon);
-
    }
 
    @Test(timeout = 30000)
@@ -260,7 +258,7 @@ public class ConversionsTest
       double decibels = Conversions.amplitudeToDecibels(magnitude);
       assertTrue(Double.isInfinite(decibels));
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testMinutesSecondsConversions()

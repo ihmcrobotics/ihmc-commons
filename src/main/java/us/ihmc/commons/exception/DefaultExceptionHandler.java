@@ -21,7 +21,7 @@ public enum DefaultExceptionHandler
 
    /**
     * Handles the throwable in one of the default ways.
-    * 
+    *
     * @param throwable to be handled
     * @return Null casted to Object for convenience.
     */

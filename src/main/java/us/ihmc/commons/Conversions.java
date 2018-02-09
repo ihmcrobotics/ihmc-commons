@@ -29,7 +29,7 @@ public class Conversions
 
    /**
     * Convert kibibytes (KiB) to bytes (B).
-    * 
+    *
     * @param kibibytes number of kibibytes
     * @return bytes number of bytes
     */
@@ -40,7 +40,7 @@ public class Conversions
 
    /**
     * Convert kilobytes (KB) to bytes (B).
-    * 
+    *
     * @param kilobytes number of kilobytes
     * @return bytes number of bytes
     */
@@ -51,7 +51,7 @@ public class Conversions
 
    /**
     * Convert mebibytes (MiB) to bytes (B).
-    * 
+    *
     * @param mebibytes number of mebibytes
     * @return bytes number of bytes
     */
@@ -62,7 +62,7 @@ public class Conversions
 
    /**
     * Convert megabytes (MB) to bytes (B).
-    * 
+    *
     * @param megabytes number of megabytes
     * @return bytes number of bytes
     */
@@ -73,9 +73,9 @@ public class Conversions
 
    /**
     * <p>Convert minutes to seconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param minutes time in minutes
     * @return Time in seconds.
     */
@@ -86,9 +86,9 @@ public class Conversions
 
    /**
     * <p>Convert seconds to minutes.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param seconds time in seconds
     * @return Time in minutes.
     */
@@ -99,9 +99,9 @@ public class Conversions
 
    /**
     * <p>Convert seconds to milliseconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param seconds time in seconds
     * @return Time in milliseconds.
     */
@@ -111,13 +111,13 @@ public class Conversions
    }
 
    /**
-     * <p>Convert seconds to nanoseconds.</p>
-     * 
+    * <p>Convert seconds to nanoseconds.</p>
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-     * 
-     * @param seconds time in seconds
-     * @return Time in nanoseconds.
-     */
+    *
+    * @param seconds time in seconds
+    * @return Time in nanoseconds.
+    */
    public static long secondsToNanoseconds(double seconds)
    {
       return (long) (seconds * 1e9);
@@ -125,9 +125,9 @@ public class Conversions
 
    /**
     * <p>Convert milliseconds to minutes.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param milliseconds time in milliseconds
     * @return Time in minutes.
     */
@@ -138,9 +138,9 @@ public class Conversions
 
    /**
     * <p>Convert milliseconds to seconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param milliseconds time in milliseconds
     * @return Time in seconds.
     */
@@ -151,9 +151,9 @@ public class Conversions
 
    /**
     * <p>Convert milliseconds to nanoseconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param timeInMilliSeconds time in milliseconds
     * @return Time in nanoseconds.
     */
@@ -164,9 +164,9 @@ public class Conversions
 
    /**
     * <p>Convert milliseconds to nanoseconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param timeInMilliSeconds time in milliseconds
     * @return Time in nanoseconds.
     */
@@ -177,9 +177,9 @@ public class Conversions
 
    /**
     * <p>Convert microseconds to seconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param microseconds time in microseconds
     * @return Time in seconds.
     */
@@ -190,9 +190,9 @@ public class Conversions
 
    /**
     * <p>Convert microseconds to nanoseconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param microseconds time in microseconds
     * @return Time in nanoseconds.
     */
@@ -203,9 +203,9 @@ public class Conversions
 
    /**
     * <p>Convert microseconds to nanoseconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param microseconds time in microseconds
     * @return Time in nanoseconds.
     */
@@ -216,9 +216,9 @@ public class Conversions
 
    /**
     * <p>Convert nanoseconds to seconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param nanoseconds time in nanoseconds
     * @return Time in seconds.
     */
@@ -228,26 +228,26 @@ public class Conversions
    }
 
    /**
-   * <p>Convert nanoseconds to milliseconds.</p>
-   * 
-   * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-   * 
-   * @param nanoseconds time in nanoseconds
-   * @return Time in milliseconds.
-   */
+    * <p>Convert nanoseconds to milliseconds.</p>
+    *
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
+    *
+    * @param nanoseconds time in nanoseconds
+    * @return Time in milliseconds.
+    */
    public static long nanosecondsToMilliseconds(long nanoseconds)
    {
       return nanoseconds / 1000000L;
    }
 
    /**
-   * <p>Convert nanoseconds to milliseconds.</p>
-   * 
-   * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-   * 
-   * @param nanoseconds time in nanoseconds
-   * @return Time in milliseconds.
-   */
+    * <p>Convert nanoseconds to milliseconds.</p>
+    *
+    * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
+    *
+    * @param nanoseconds time in nanoseconds
+    * @return Time in milliseconds.
+    */
    public static double nanosecondsToMilliseconds(double nanoseconds)
    {
       return nanoseconds / 1e6;
@@ -255,9 +255,9 @@ public class Conversions
 
    /**
     * <p>Convert nanoseconds to microseconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param nanoseconds time in nanoseconds
     * @return Time in microseconds.
     */
@@ -268,9 +268,9 @@ public class Conversions
 
    /**
     * <p>Convert nanoseconds to microseconds.</p>
-    * 
+    *
     * <p>NOTE: These methods exist as a floating point alternative to {@link TimeUnit}.</p>
-    * 
+    *
     * @param nanoseconds time in nanoseconds
     * @return Time in microseconds.
     */
@@ -281,7 +281,7 @@ public class Conversions
 
    /**
     * <p>Convert angular velocity in radians per second (rad/s) to angular frequency in Hertz (Hz).</p>
-    * 
+    *
     * @param angular velocity in rad/s
     * @return Angular frequency in Hz.
     */
@@ -292,12 +292,12 @@ public class Conversions
 
    /**
     * <p>Convert the amplitude of a signal to decibels (dB) for use in Bode magnitude plots.</p>
-    * 
+    *
     * <p>Implmented as 20 * log10(amplitude).</p>
-    * 
-    * @see https://en.wikipedia.org/wiki/Bode_plot
+    *
     * @param amplitude of signal
     * @return Magnitude of signal in dB.
+    * @see https://en.wikipedia.org/wiki/Bode_plot
     */
    public static double amplitudeToDecibels(double amplitude)
    {

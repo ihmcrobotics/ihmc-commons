@@ -4,9 +4,8 @@ import java.util.Arrays;
 
 /**
  * Circular map filled with key->value pairs of the type long. Uses binary search to find values based on key. Ability to use non-exact matches.
- * 
- * @author jesper
  *
+ * @author jesper
  */
 public class CircularLongMap
 {
@@ -26,10 +25,9 @@ public class CircularLongMap
 
    /**
     * Insert a new key-value pair into the buffer. Keys have to be monotonically increasing (!)
-    * 
+    *
     * @param key
     * @param value
-    * 
     * @throws IndexOutOfBoundsException if key is smaller than or equal to the previously inserted key
     */
    public void insert(long key, long value)
@@ -57,18 +55,17 @@ public class CircularLongMap
 
    /**
     * Get the size of the map
-    * 
+    *
     * @return the current number of key/value pairs in this map
-    * 
     */
    public int size()
    {
       return size;
    }
-   
+
    /**
     * Get the latest key inserted in the map
-    * 
+    *
     * @return The last key inserted in the map
     */
    public long getLatestKey()
@@ -84,7 +81,6 @@ public class CircularLongMap
    }
 
    /**
-    * 
     * @return The last value inserted in the map
     */
    public long getLatestValue()
@@ -101,7 +97,7 @@ public class CircularLongMap
 
    /**
     * Get the value for key
-    * 
+    *
     * @param matchNearest Match the nearest key if true.
     * @param key
     * @return
@@ -149,9 +145,8 @@ public class CircularLongMap
       {
          return values[index];
       }
-
    }
-   
+
    public String toString()
    {
       return "index: " + insertionIndex + " keys: " + Arrays.toString(keys);

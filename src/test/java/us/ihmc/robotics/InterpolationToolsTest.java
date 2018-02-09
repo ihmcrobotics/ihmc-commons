@@ -1,13 +1,12 @@
 package us.ihmc.robotics;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
 
 public class InterpolationToolsTest
 {
@@ -267,7 +266,6 @@ public class InterpolationToolsTest
          assertEquals(value, average, epsilon);
       }
    }
-
 
    @Test(timeout = 30000)
    public void testLogisticInterpolateSlopedBounds()

@@ -13,15 +13,14 @@ public abstract class BasicPathVisitor
     */
    public enum PathType
    {
-      FILE,
-      DIRECTORY,
+      FILE, DIRECTORY,
    }
-   
+
    /**
     * This method is called when a Path is visited.
-    * 
+    *
     * @param path the Path being visited
-    * @param pathType the type of Path being visited (file or directory) 
+    * @param pathType the type of Path being visited (file or directory)
     * @return fileVisitResult CONTINUE, SKIP_SIBLINGS, SKIP_SUBTREE, or TERMINATE
     */
    public FileVisitResult visitPath(Path path, PathType pathType)

@@ -7,6 +7,7 @@ public class ListWrappingIndexTools
 {
    /**
     * Wrap the given index such that 0 <= wrappedIndex < list.size().
+    *
     * @param index the index to wrap
     * @param list the list for which the index is to be used.
     * @return the wrapped index.
@@ -21,6 +22,7 @@ public class ListWrappingIndexTools
 
    /**
     * Safe increment that will always the next index that is inside [0, list.size() - 1].
+    *
     * @returns {@code (index + 1) % list.size()}.
     */
    public static int next(int index, List<?> list)
@@ -30,6 +32,7 @@ public class ListWrappingIndexTools
 
    /**
     * Safe increment that will always the previous index that is inside [0, list.size() - 1].
+    *
     * @returns {@code (index - 1 + list.size()) % list.size()}.
     */
    public static int previous(int index, List<?> list)
@@ -118,13 +121,13 @@ public class ListWrappingIndexTools
    public static <T> List<T> subListInclusive(int startIndex, int endIndex, List<T> input)
    {
       List<T> output = new ArrayList<>();
-   
+
       int outputLenth = subLengthInclusive(startIndex, endIndex, input);
-   
+
       int i = startIndex;
       while (output.size() != outputLenth)
          output.add(getWrap(i++, input));
-   
+
       return output;
    }
 
@@ -137,13 +140,13 @@ public class ListWrappingIndexTools
 
       if (startIndex == endIndex)
          return output;
-   
+
       int outputLenth = subLengthExclusive(startIndex, endIndex, input);
-   
+
       int i = startIndex + 1;
       while (output.size() != outputLenth)
          output.add(getWrap(i++, input));
-   
+
       return output;
    }
 
@@ -153,7 +156,7 @@ public class ListWrappingIndexTools
    public static int removeAllInclusive(int startIndex, int endIndex, List<?> list)
    {
       int numberOfElementsToRemove = subLengthInclusive(startIndex, endIndex, list);
-   
+
       for (int count = 0; count < numberOfElementsToRemove; count++)
       {
          startIndex = wrap(startIndex, list);
@@ -169,7 +172,7 @@ public class ListWrappingIndexTools
    public static int removeAllExclusive(int startIndex, int endIndex, List<?> list)
    {
       int numberOfElementsToRemove = subLengthExclusive(startIndex, endIndex, list);
-   
+
       startIndex = next(startIndex, list);
 
       for (int count = 0; count < numberOfElementsToRemove; count++)

@@ -1,6 +1,13 @@
 package us.ihmc.commons;
 
-import java.awt.Desktop;
+import org.pitest.mutationtest.commandline.MutationCoverageReport;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.commons.nio.WriteOption;
+
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -11,34 +18,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-
-import org.pitest.mutationtest.commandline.MutationCoverageReport;
-
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.BasicPathVisitor;
-import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
-import us.ihmc.commons.nio.WriteOption;
 
 /**
  * <p>Easily run mutation tests and display the results in your web browser. This class is designed to wrap an otherwise command-line only tool.</p>
- * 
+ *
  * <p>Example usage:</p>
- * 
+ *
  * <pre>
  * {@code
  * MutationTestFacilitator.facilitateMutationTestForClass(Application.class, ApplicationTest.class);
  * }
  * </pre>
- * 
+ *
  * <p>Uses the Pitest library from <a href="http://pitest.org/">http://pitest.org/</a>.</p>
  */
 public class MutationTestFacilitator
@@ -52,7 +46,7 @@ public class MutationTestFacilitator
 
    /**
     * <p>A mutator as defined in Pitest.</p>
-    * 
+    *
     * @see <a href="http://pitest.org/quickstart/mutators/">http://pitest.org/quickstart/mutators/</a>.
     */
    public enum Mutator
@@ -80,7 +74,7 @@ public class MutationTestFacilitator
 
    /**
     * Adds mutators to be applied. If this is never called, defaults to ALL.
-    * 
+    *
     * @param mutators mutators to add
     */
    public void addMutators(Mutator... mutators)
@@ -90,7 +84,7 @@ public class MutationTestFacilitator
 
    /**
     * Add to the list of tests the Pitest will run.
-    * 
+    *
     * @param testClassesToRun
     */
    public void addTestClassesToRun(Class<?>... testClassesToRun)
@@ -100,7 +94,7 @@ public class MutationTestFacilitator
 
    /**
     * Add package path strings such as {@code your.package.here.*} where all src classes in the package will be mutated.
-    * 
+    *
     * @param packagePathsToMutate package path strings to mutate
     */
    public void addPackagePathsToMutate(String... packagePathsToMutate)
@@ -110,7 +104,7 @@ public class MutationTestFacilitator
 
    /**
     * Add group of classes to mutate by passing in one of it's neighbors. Each class passed in will include all classes in it's package.
-    * 
+    *
     * @param neighborToMutate class to mutate along with it's neighbors
     */
    public void addNeighborClassesToMutate(Class<?> neighborToMutate)
@@ -120,7 +114,7 @@ public class MutationTestFacilitator
 
    /**
     * Add a specific class to be mutated. Will not include any others.
-    * 
+    *
     * @param classesToMutate class to be mutated
     */
    public void addClassesToMutate(Class<?>... classesToMutate)
@@ -133,7 +127,7 @@ public class MutationTestFacilitator
 
    /**
     * <p>Perform mutation testing with current settings. Does not open a browser.</p>
-    * 
+    *
     * <p>NOTE: In order to save disk space, all reports older than 3 hours will be deleted from your reports directory.</p>
     */
    public void doMutationTest()
@@ -202,8 +196,9 @@ public class MutationTestFacilitator
          mutatorsList = mutatorsList.substring(0, mutatorsList.lastIndexOf(','));
       }
 
-      MutationCoverageReport.main(new String[] {"--reportDir", REPORT_DIRECTORY_NAME, "--targetClasses", targetClasses, "--targetTests", targetTests,
-            "--sourceDirs", "src,test", "--mutators", mutatorsList});
+      MutationCoverageReport
+            .main(new String[] {"--reportDir", REPORT_DIRECTORY_NAME, "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs",
+                  "src,test", "--mutators", mutatorsList});
    }
 
    /**
@@ -278,7 +273,7 @@ public class MutationTestFacilitator
    /**
     * Most common settings for mutation unit testing. Runs a test class and mutates it's application class.
     * Convenient for a one-liner solution in the main method of your test classes.
-    * 
+    *
     * @param applicationClass application class to mutate
     * @param testClass test class to run
     */
@@ -294,7 +289,7 @@ public class MutationTestFacilitator
    /**
     * Common settings for mutation testing. Runs a test class and mutates the package it resides in.
     * Convenient for a one-liner solution for integration tests where you want to mutate a wider range of classes.
-    * 
+    *
     * @param applicationClass application class to mutate
     * @param testClass test class to run
     */

@@ -2,12 +2,7 @@ package us.ihmc.commons.thread;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadTools
@@ -15,7 +10,7 @@ public class ThreadTools
    public static final int REASONABLE_WAITING_SLEEP_DURATION_MS = 10;
 
    /**
-    * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of seconds, 
+    * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of seconds,
     * subject to the precision and accuracy of system timers and schedulers. If the sleep is interrupted with a InterruptedException,
     * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
     * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
@@ -28,11 +23,11 @@ public class ThreadTools
    }
 
    /**
-    * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of milliseconds, 
+    * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of milliseconds,
     * subject to the precision and accuracy of system timers and schedulers. If the sleep is interrupted with a InterruptedException,
     * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
     * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
-    * 
+    *
     * @param millisecondsToSleep The time to sleep in milliseconds. The Thread should sleep this long, even if interrupted.
     */
    public static void sleep(long millisecondsToSleep)
@@ -41,12 +36,12 @@ public class ThreadTools
    }
 
    /**
-    * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of milliseconds 
-    * plus the specified number of nanoseconds, subject to the precision and accuracy of system timers and schedulers. 
+    * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of milliseconds
+    * plus the specified number of nanoseconds, subject to the precision and accuracy of system timers and schedulers.
     * If the sleep is interrupted with a InterruptedException,
     * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
     * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
-    * 
+    *
     * @param millisecondsToSleep The time to sleep in milliseconds. The Thread should sleep this long, even if interrupted.
     * @param additionalNanosecondsToSleep 0-999999 additional nanoseconds to sleep
     */
@@ -275,5 +270,4 @@ public class ThreadTools
 
       return handleKiller;
    }
-
 }

@@ -1,25 +1,22 @@
 package us.ihmc.commons;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-
-import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class FormattingToolsTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetFormattedDecimal3D()
    {
       String resultingFormattedString = FormattingTools.getFormattedDecimal3D(1.2345678);
@@ -42,11 +39,10 @@ public class FormattingToolsTest
 
       resultingFormattedString = FormattingTools.getFormattedDecimal3D(-22.0234);
       assertTrue(resultingFormattedString.equals("-22.023"));
-
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCapitalizeFirstLetter()
    {
       String resultingString = StringUtils.capitalize("capital");
@@ -65,11 +61,10 @@ public class FormattingToolsTest
       assertTrue(resultingString.equals("robot"));
       resultingString = StringUtils.uncapitalize(resultingString);
       assertTrue(resultingString.equals("robot"));
-
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testUnderScoredToCamelCase()
    {
       String resultingFormattedString;
@@ -82,8 +77,8 @@ public class FormattingToolsTest
       resultingFormattedString = FormattingTools.underscoredToCamelCase("1234_@$%_BCDF", true);
       assertTrue(resultingFormattedString.equals("1234@$%Bcdf"));
    }
-	
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 3000000)
    public void testFormatToSignificantFigures()
    {
@@ -104,7 +99,7 @@ public class FormattingToolsTest
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
       assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", expectedString + System.lineSeparator(), byteArrayOutputStream.toString());
    }
-	
+
    @Test(timeout = 30000)
    public void testGetDateString()
    {
@@ -128,8 +123,7 @@ public class FormattingToolsTest
          dateBuilder.append(day);
 
       assertEquals(dateBuilder.toString(), dateToolsDateString);
-      
-      
+
       PrintTools.debug(this, FormattingTools.getDateString());
    }
 
@@ -137,12 +131,12 @@ public class FormattingToolsTest
    public void testGetTimeString()
    {
       StringBuilder timeBuilder = new StringBuilder();
-      
+
       LocalTime now = LocalTime.now();
       int hours = now.getHour();
       int minutes = now.getMinute();
       int seconds = now.getSecond();
-      
+
       String timeString = FormattingTools.getTimeString();
       String timeSecondsString = FormattingTools.getTimeStringWithSeconds();
 
@@ -158,14 +152,14 @@ public class FormattingToolsTest
 
       assertEquals(timeBuilder.toString(), timeString);
       PrintTools.debug(this, FormattingTools.getTimeString());
-      
+
       if (seconds / 10 < 1)
          timeBuilder.append("0" + seconds);
       else
          timeBuilder.append(seconds);
-      
+
       assertEquals(timeBuilder.toString(), timeSecondsString);
-      
+
       PrintTools.debug(this, FormattingTools.getTimeStringWithSeconds());
    }
 }

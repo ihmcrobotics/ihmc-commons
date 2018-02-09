@@ -8,24 +8,24 @@ public class PrintTools
 {
    /** Debug message prefix */
    public static final String DEBUG = "[DEBUG] ";
-   
+
    /** Info message prefix */
    public static final String INFO = "[INFO] ";
-   
+
    /** Warn message prefix */
    public static final String WARN = "[WARN] ";
-   
+
    /** Error message prefix */
    public static final String ERROR = "[ERROR] ";
 
    /** For keeping track of the class that actually calls the PrintTools method. */
    private static final int STACK_TRACE_INDEX = 2;
-   
+
    /**
     * <p>Print a debug level message to the console.</p>
-    * 
+    *
     * <p>Example: [DEBUG] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param debug if false, do nothing
     * @param message message to print
     */
@@ -36,12 +36,12 @@ public class PrintTools
          print(DEBUG, null, message, false);
       }
    }
-   
+
    /**
     * <p>Print a debug level message to the console.</p>
-    * 
+    *
     * <p>Example: [DEBUG] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param debug if false, do nothing
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
@@ -53,24 +53,24 @@ public class PrintTools
          print(DEBUG, null, message, useSystemError);
       }
    }
-   
+
    /**
     * <p>Print a debug level message to the console.</p>
-    * 
+    *
     * <p>Example: [DEBUG] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param message message to print
     */
    public static void debug(String message)
    {
       print(DEBUG, null, message, false);
    }
-   
+
    /**
     * <p>Print a debug level message to the console.</p>
-    * 
+    *
     * <p>Example: [DEBUG] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
     */
@@ -78,12 +78,12 @@ public class PrintTools
    {
       print(DEBUG, null, message, useSystemError);
    }
-   
+
    /**
     * <p>Print a debug level message to the console.</p>
-    * 
+    *
     * <p>Example: [DEBUG] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param debug if false, do nothing
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
@@ -95,12 +95,12 @@ public class PrintTools
          print(DEBUG, containingObjectOrClass, message, false);
       }
    }
-   
+
    /**
     * <p>Print a debug level message to the console.</p>
-    * 
+    *
     * <p>Example: [DEBUG] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param debug if false, do nothing
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
@@ -113,12 +113,12 @@ public class PrintTools
          print(DEBUG, containingObjectOrClass, message, useSystemError);
       }
    }
-   
+
    /**
     * <p>Print a debug level message to the console.</p>
-    * 
+    *
     * <p>Example: [DEBUG] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     */
@@ -126,12 +126,12 @@ public class PrintTools
    {
       print(DEBUG, containingObjectOrClass, message, false);
    }
-   
+
    /**
     * <p>Print a debug level message to the console.</p>
-    * 
+    *
     * <p>Example: [DEBUG] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
@@ -143,9 +143,9 @@ public class PrintTools
 
    /**
     * <p>Print a info level message to the console.</p>
-    * 
+    *
     * <p>Example: [INFO] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     */
@@ -153,24 +153,24 @@ public class PrintTools
    {
       print(INFO, containingObjectOrClass, message, false);
    }
-   
+
    /**
     * <p>Print a info level message to the console.</p>
-    * 
+    *
     * <p>Example: [INFO] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param message message to print
     */
    public static void info(String message)
    {
       print(INFO, null, message, false);
    }
-   
+
    /**
     * <p>Print a info level message to the console.</p>
-    * 
+    *
     * <p>Example: [INFO] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
@@ -179,12 +179,12 @@ public class PrintTools
    {
       print(INFO, containingObjectOrClass, message, useSystemError);
    }
-   
+
    /**
     * <p>Print a info level message to the console.</p>
-    * 
+    *
     * <p>Example: [INFO] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
     */
@@ -195,9 +195,9 @@ public class PrintTools
 
    /**
     * <p>Print a warning level message to the console.</p>
-    * 
+    *
     * <p>Example: [WARN] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     */
@@ -205,24 +205,24 @@ public class PrintTools
    {
       print(WARN, containingObjectOrClass, message, false);
    }
-   
+
    /**
     * <p>Print a warning level message to the console.</p>
-    * 
+    *
     * <p>Example: [WARN] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param message message to print
     */
    public static void warn(String message)
    {
       print(WARN, null, message, false);
    }
-   
+
    /**
     * <p>Print a warning level message to the console.</p>
-    * 
+    *
     * <p>Example: [WARN] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
@@ -231,12 +231,12 @@ public class PrintTools
    {
       print(WARN, containingObjectOrClass, message, useSystemError);
    }
-   
+
    /**
     * <p>Print a warning level message to the console.</p>
-    * 
+    *
     * <p>Example: [WARN] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
     */
@@ -247,9 +247,9 @@ public class PrintTools
 
    /**
     * <p>Print a error level message to the console.</p>
-    * 
+    *
     * <p>Example: [ERROR] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     */
@@ -257,23 +257,23 @@ public class PrintTools
    {
       print(ERROR, containingObjectOrClass, message, true);
    }
-   
+
    /**
     * <p>Print a error level message to the console.</p>
-    * 
+    *
     * <p>Example: [ERROR] (YourClass:19): Your message here</p>
-    * 
+    *
     * @param message message to print
     */
    public static void error(String message)
    {
       print(ERROR, null, message, true);
    }
-   
+
    private static void print(String level, Object containingObjectOrClass, String message, boolean useSystemError)
    {
       Throwable throwable = new Throwable();
-      
+
       int lineNumber = -1;
       String className;
       if (containingObjectOrClass == null)
@@ -297,11 +297,11 @@ public class PrintTools
 
          if (lineNumber == -1)
             lineNumber = throwable.getStackTrace()[STACK_TRACE_INDEX].getLineNumber();
-         
+
          if (containingObjectOrClass instanceof Class<?>)
             className = ((Class<?>) containingObjectOrClass).getSimpleName();
       }
-      
+
       String clickableLocation = "(" + className + ".java:" + lineNumber + ")";
 
       String finalOutput = level + clickableLocation + ": " + message;

@@ -1,15 +1,13 @@
 package us.ihmc.commons;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-
-import org.apache.commons.lang3.StringUtils;
-
-import us.ihmc.commons.MathTools;
 
 public class FormattingTools
 {
@@ -19,6 +17,7 @@ public class FormattingTools
 
    private static final DateTimeFormatter timeHHMMFormatter;
    private static final DateTimeFormatter timeHHMMSSFormatter;
+
    static
    {
       DateTimeFormatterBuilder dateTimeFormatterBuilder = new DateTimeFormatterBuilder();
@@ -146,9 +145,9 @@ public class FormattingTools
 
    /**
     * The date as YYYYMMDD in the system's default timezone.
-    * 
-    * @see Use {@link java.time.LocalDate}
+    *
     * @return The date as YYYYMMDD in the system's default timezone.
+    * @see Use {@link java.time.LocalDate}
     */
    public static String getDateString()
    {
@@ -157,9 +156,9 @@ public class FormattingTools
 
    /**
     * The date as HHMM in the system's default timezone.
-    * 
-    * @see Use {@link java.time.LocalTime}
+    *
     * @return The date as HHMM in the system's default timezone.
+    * @see Use {@link java.time.LocalTime}
     */
    public static String getTimeString()
    {
@@ -168,9 +167,9 @@ public class FormattingTools
 
    /**
     * The date as HHMMSS in the system's default timezone.
-    * 
-    * @see Use {@link java.time.LocalTime}
+    *
     * @return The date as HHMMSS in the system's default timezone.
+    * @see Use {@link java.time.LocalTime}
     */
    public static String getTimeStringWithSeconds()
    {

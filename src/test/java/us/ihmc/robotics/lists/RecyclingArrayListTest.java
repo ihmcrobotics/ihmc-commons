@@ -1,19 +1,14 @@
 package us.ihmc.robotics.lists;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.junit.Test;
+import us.ihmc.commons.RandomNumbers;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.Test;
-
-import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.*;
 
 public class RecyclingArrayListTest
 {
@@ -427,6 +422,5 @@ public class RecyclingArrayListTest
       }
 
       assertEquals(sumBefore, sumAfter);
-
    }
 }

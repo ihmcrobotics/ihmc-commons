@@ -1,17 +1,16 @@
 package us.ihmc.commons.time;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Random;
-import java.util.function.DoubleSupplier;
-
 import org.junit.Test;
-
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+
+import java.util.Random;
+import java.util.function.DoubleSupplier;
+
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings(value = "unused")
 public class StopwatchTest
@@ -26,7 +25,7 @@ public class StopwatchTest
       assertEquals("didnt NaN", Double.NaN, stopwatch.lapElapsed(), 0.0);
       assertEquals("didnt NaN", Double.NaN, stopwatch.totalElapsed(), 0.0);
       assertEquals("didnt NaN", Double.NaN, stopwatch.lap(), 0.0);
-      
+
       stopwatch = new Stopwatch(new FakeTimeProvider());
 
       assertEquals("didnt NaN", Double.NaN, stopwatch.averageLap(), 0.0);
@@ -56,53 +55,53 @@ public class StopwatchTest
    public void testStopwatchWithRealTime() throws InterruptedException
    {
       Stopwatch stopwatch = new Stopwatch();
-      
+
       double averageLap = stopwatch.averageLap();
       PrintTools.debug(this, "Lap: " + stopwatch.lap());
       assertEquals("averageLap incorrect", Double.NaN, averageLap, Epsilons.ONE_HUNDREDTH);
-      
+
       assertEquals("return ref not equal", stopwatch, stopwatch.start());
-      
+
       double lapElapsed = stopwatch.lapElapsed();
       double totalElapsed = stopwatch.totalElapsed();
       averageLap = stopwatch.averageLap();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_HUNDREDTH);
       assertEquals("totalElapsed incorrect", 0.0, totalElapsed, Epsilons.ONE_HUNDREDTH);
       assertEquals("averageLap incorrect", Double.NaN, averageLap, Epsilons.ONE_HUNDREDTH);
-      
+
       double sleepTime1 = 0.5;
       Thread.sleep((long) Conversions.secondsToMilliseconds(sleepTime1));
-      
+
       double lap = stopwatch.lap();
       averageLap = stopwatch.averageLap();
       assertEquals("lap incorrect", sleepTime1, lap, Epsilons.ONE_HUNDREDTH);
       assertEquals("averageLap incorrect", sleepTime1, averageLap, Epsilons.ONE_HUNDREDTH);
-      
+
       double sleepTime2 = 1.0;
       Thread.sleep((long) Conversions.secondsToMilliseconds(sleepTime2));
-      
+
       lap = stopwatch.lap();
       averageLap = stopwatch.averageLap();
       assertEquals("lap incorrect", sleepTime2, lap, Epsilons.ONE_HUNDREDTH);
       assertEquals("averageLap incorrect", (sleepTime1 + sleepTime2) / 2.0, averageLap, Epsilons.ONE_HUNDREDTH);
-      
+
       stopwatch.resetLap();
       lapElapsed = stopwatch.lapElapsed();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_HUNDREDTH);
-      
+
       lap = stopwatch.lap();
       averageLap = stopwatch.averageLap();
       assertEquals("lap incorrect", 0.0, lap, Epsilons.ONE_HUNDREDTH);
       assertEquals("averageLap incorrect", (sleepTime1 + sleepTime2) / 3.0, averageLap, Epsilons.ONE_HUNDREDTH);
-      
+
       double sleepTime3 = 0.3;
       Thread.sleep((long) Conversions.secondsToMilliseconds(sleepTime3));
-      
+
       lapElapsed = stopwatch.lapElapsed();
       totalElapsed = stopwatch.totalElapsed();
       assertEquals("lapElapsed incorrect", sleepTime3, lapElapsed, Epsilons.ONE_HUNDREDTH);
       assertEquals("totalElapsed incorrect", sleepTime1 + sleepTime2 + sleepTime3, totalElapsed, Epsilons.ONE_HUNDREDTH);
-      
+
       stopwatch.reset();
       lapElapsed = stopwatch.lapElapsed();
       totalElapsed = stopwatch.totalElapsed();
@@ -110,10 +109,10 @@ public class StopwatchTest
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_HUNDREDTH);
       assertEquals("totalElapsed incorrect", 0.0, totalElapsed, Epsilons.ONE_HUNDREDTH);
       assertEquals("averageLap incorrect", Double.NaN, averageLap, Epsilons.ONE_HUNDREDTH);
-      
+
       double sleepTime4 = 0.3;
       Thread.sleep((long) Conversions.secondsToMilliseconds(sleepTime4));
-      
+
       stopwatch.resetLap();
       lapElapsed = stopwatch.lapElapsed();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_HUNDREDTH);
@@ -125,53 +124,53 @@ public class StopwatchTest
    {
       FakeTimeProvider fakeTimeProvider = new FakeTimeProvider();
       Stopwatch stopwatch = new Stopwatch(fakeTimeProvider);
-      
+
       double averageLap = stopwatch.averageLap();
       PrintTools.debug(this, "Lap: " + stopwatch.lap());
       assertEquals("averageLap incorrect", Double.NaN, averageLap, Epsilons.ONE_TEN_BILLIONTH);
-      
+
       assertEquals("return ref not equal", stopwatch, stopwatch.start());
-      
+
       double lapElapsed = stopwatch.lapElapsed();
       double totalElapsed = stopwatch.totalElapsed();
       averageLap = stopwatch.averageLap();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_TEN_BILLIONTH);
       assertEquals("totalElapsed incorrect", 0.0, totalElapsed, Epsilons.ONE_TEN_BILLIONTH);
       assertEquals("averageLap incorrect", Double.NaN, averageLap, Epsilons.ONE_TEN_BILLIONTH);
-      
+
       double sleepTime1 = 0.5;
       fakeTimeProvider.incrementClock(sleepTime1);
-      
+
       double lap = stopwatch.lap();
       averageLap = stopwatch.averageLap();
       assertEquals("lap incorrect", sleepTime1, lap, Epsilons.ONE_TEN_BILLIONTH);
       assertEquals("averageLap incorrect", sleepTime1, averageLap, Epsilons.ONE_TEN_BILLIONTH);
-      
+
       double sleepTime2 = 1.0;
       fakeTimeProvider.incrementClock(sleepTime2);
-      
+
       lap = stopwatch.lap();
       averageLap = stopwatch.averageLap();
       assertEquals("lap incorrect", sleepTime2, lap, Epsilons.ONE_TEN_BILLIONTH);
       assertEquals("averageLap incorrect", (sleepTime1 + sleepTime2) / 2.0, averageLap, Epsilons.ONE_TEN_BILLIONTH);
-      
+
       stopwatch.resetLap();
       lapElapsed = stopwatch.lapElapsed();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_TEN_BILLIONTH);
-      
+
       lap = stopwatch.lap();
       averageLap = stopwatch.averageLap();
       assertEquals("lap incorrect", 0.0, lap, Epsilons.ONE_TEN_BILLIONTH);
       assertEquals("averageLap incorrect", (sleepTime1 + sleepTime2) / 3.0, averageLap, Epsilons.ONE_TEN_BILLIONTH);
-      
+
       double sleepTime3 = 0.3;
       fakeTimeProvider.incrementClock(sleepTime3);
-      
+
       lapElapsed = stopwatch.lapElapsed();
       totalElapsed = stopwatch.totalElapsed();
       assertEquals("lapElapsed incorrect", sleepTime3, lapElapsed, Epsilons.ONE_TEN_BILLIONTH);
       assertEquals("totalElapsed incorrect", sleepTime1 + sleepTime2 + sleepTime3, totalElapsed, Epsilons.ONE_TEN_BILLIONTH);
-      
+
       stopwatch.reset();
       lapElapsed = stopwatch.lapElapsed();
       totalElapsed = stopwatch.totalElapsed();
@@ -179,15 +178,15 @@ public class StopwatchTest
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_TEN_BILLIONTH);
       assertEquals("totalElapsed incorrect", 0.0, totalElapsed, Epsilons.ONE_TEN_BILLIONTH);
       assertEquals("averageLap incorrect", Double.NaN, averageLap, Epsilons.ONE_TEN_BILLIONTH);
-      
+
       double sleepTime4 = 0.3;
       fakeTimeProvider.incrementClock(sleepTime4);
-      
+
       stopwatch.resetLap();
       lapElapsed = stopwatch.lapElapsed();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_TEN_BILLIONTH);
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSuspendAndResume()

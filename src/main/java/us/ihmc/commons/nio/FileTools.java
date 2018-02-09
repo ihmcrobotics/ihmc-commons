@@ -1,18 +1,10 @@
 package us.ihmc.commons.nio;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import org.apache.commons.io.FileUtils;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -21,16 +13,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-
-import us.ihmc.commons.Conversions;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-
 /**
  * <p>A collection of tools to extend Java's NIO.2 API and
  * Apache Commons Lang. Tools here should fit one of
  * the following categories:</p>
- * 
+ *
  * <ol>Provide a commonly needed method not provided by Apache Commons Lang or Java's NIO.2. API.</ol>
  * <ol>Provide a wrapper around a commonly used method that uses a {@link DefaultExceptionHandler}.</ol>
  * <ol>Provide a bridge between Java's NIO.2 API and Apache Commons Lang.</ol>
@@ -45,10 +32,9 @@ public class FileTools
 
    /**
     * Delete a file or directory quietly. A bridge from Java's NIO.2 to Apache Commons IO.
-    * 
-    * @see {@link FileUtils#deleteQuietly(File)}
-    * 
+    *
     * @param path file or directory to be deleted
+    * @see {@link FileUtils#deleteQuietly(File)}
     */
    public static void deleteQuietly(Path path)
    {
@@ -57,14 +43,13 @@ public class FileTools
 
    /**
     * Reads all lines from a file. Uses Java's NIO.2 API.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link java.nio.file.Files#readAllLines(Path)}
-    * 
+    *
     * @param path file to read lines from
     * @param exceptionHandler default exception handler
     * @return list of strings
+    * @see {@link java.nio.file.Files#readAllLines(Path)}
     */
    @SuppressWarnings("unchecked")
    public static List<String> readAllLines(Path path, DefaultExceptionHandler exceptionHandler)
@@ -81,15 +66,14 @@ public class FileTools
 
    /**
     * Reads all lines from a file. Uses Java's NIO.2 API.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link java.nio.file.Files#readAllLines(Path, Charset)}
-    * 
+    *
     * @param path file to read lines from
     * @param charset character set to use
     * @param exceptionHandler default exception handler
     * @return list of strings
+    * @see {@link java.nio.file.Files#readAllLines(Path, Charset)}
     */
    @SuppressWarnings("unchecked")
    public static List<String> readAllLines(Path path, Charset charset, DefaultExceptionHandler exceptionHandler)
@@ -106,14 +90,13 @@ public class FileTools
 
    /**
     * Reads all the bytes from a file. Uses Java's NIO.2 API.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link java.nio.file.Files#readAllBytes(Path)}
-    * 
+    *
     * @param path file to read lines from
     * @param exceptionHandler default exception handler
     * @return File as a byte array.
+    * @see {@link java.nio.file.Files#readAllBytes(Path)}
     */
    public static byte[] readAllBytes(Path path, DefaultExceptionHandler defaultExceptionHandler)
    {
@@ -129,15 +112,14 @@ public class FileTools
 
    /**
     * Writes bytes to a file. Uses Java's NIO.2 API.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link java.nio.file.Files#write(Path, byte[], OpenOption...)}
-    * 
+    *
     * @param path file to write to
     * @param bytes bytes to write
     * @param writeOption append or truncate
     * @param exceptionHandler default exception handler
+    * @see {@link java.nio.file.Files#write(Path, byte[], OpenOption...)}
     */
    public static void write(Path path, byte[] bytes, WriteOption writeOption, DefaultExceptionHandler defaultExceptionHandler)
    {
@@ -153,15 +135,14 @@ public class FileTools
 
    /**
     * Write lines of text to a file. Uses Java's NIO.2 API.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link java.nio.file.Files#write(Path, Iterable, OpenOption...)}
-    * 
+    *
     * @param path file to write to
     * @param lines lines to write
     * @param writeOption append or truncate
     * @param exceptionHandler default exception handler
+    * @see {@link java.nio.file.Files#write(Path, Iterable, OpenOption...)}
     */
    public static void write(Path path, Iterable<? extends CharSequence> lines, WriteOption writeOption, DefaultExceptionHandler defaultExceptionHandler)
    {
@@ -177,16 +158,15 @@ public class FileTools
 
    /**
     * Write lines of text to a file. Uses Java's NIO.2 API.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link java.nio.file.Files#write(Path, Iterable, Charset, OpenOption...)}
-    * 
+    *
     * @param path file to write to
     * @param lines lines to write
     * @param charset charset to use
     * @param writeOption append or truncate
     * @param exceptionHandler default exception handler
+    * @see {@link java.nio.file.Files#write(Path, Iterable, Charset, OpenOption...)}
     */
    public static void write(Path path, Iterable<? extends CharSequence> lines, Charset charset, WriteOption writeOption,
                             DefaultExceptionHandler defaultExceptionHandler)
@@ -203,9 +183,9 @@ public class FileTools
 
    /**
     * Write a list of Strings to lines in a file. Uses Java's NIO.2 API.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
+    *
     * @param lines lines to be written
     * @param path file
     * @param writeOption append or truncate
@@ -220,9 +200,9 @@ public class FileTools
 
    /**
     * Creates a new PrintWriter. Uses Java's NIO.2 API.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
+    *
     * @param path file to open
     * @param writeOption truncate or append
     * @param defaultExceptionHandler default exception handler
@@ -242,13 +222,12 @@ public class FileTools
 
    /**
     * Creates a new PrintWriter. Uses Java's NIO.2 API.
-    * 
-    * @see {@link Files#newBufferedWriter(Path)}
-    * 
+    *
     * @param path file to open
     * @param writeOption append or truncate
     * @return new print writer
-    * @throws IOException 
+    * @throws IOException
+    * @see {@link Files#newBufferedWriter(Path)}
     */
    public static PrintWriter newPrintWriter(Path path, WriteOption writeOption) throws IOException
    {
@@ -257,9 +236,9 @@ public class FileTools
 
    /**
     * Read bytes into a list of strings using {@link BufferedReader#readLine()}.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
+    *
     * @param bytes bytes to read
     * @param defaultExceptionHandler default exception handler
     * @return list of strings
@@ -292,7 +271,7 @@ public class FileTools
    /**
     * Replace a line in a file by index with a replacement line. For efficiency, it is required
     * to pass in the file as an array of bytes and also as a list of strings by line.
-    * 
+    *
     * @param lineIndex line number starting at 0 of line to replace
     * @param newLine replacement line
     * @param fileBytes file as an array of bytes
@@ -342,13 +321,13 @@ public class FileTools
 
    /**
     * <p>Ensure directory exists. Performs the following:</p>
-    * 
+    *
     * <li>Recursively perform this on parents.</li>
     * <li>If <code>path</code> is a file, delete and make new directory.</li>
     * <li>If <code>path</code> does not exist, create directory.</li>
-    * 
+    *
     * @param path path of directory to ensure existence of
-    * @throws IOException 
+    * @throws IOException
     */
    public static void ensureDirectoryExists(Path path) throws IOException
    {
@@ -371,13 +350,13 @@ public class FileTools
 
    /**
     * <p>Ensure directory exists. Performs the following:</p>
-    * 
+    *
     * <li>Recursively perform this on parents.</li>
     * <li>If <code>path</code> is a file, delete and make new directory.</li>
     * <li>If <code>path</code> does not exist, create directory.</li>
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
+    *
     * @param path path of directory to ensure existence of
     * @param defaultExceptionHandler default exception handler
     */
@@ -395,13 +374,13 @@ public class FileTools
 
    /**
     * <p>Ensure file exists. Performs the following:</p>
-    * 
+    *
     * <li>Recursively perform this on parents.</li>
     * <li>If <code>path</code> is a directory, delete and create new file.</li>
     * <li>If <code>path</code> does not exist, create file.</li>
-    * 
+    *
     * @param path path of file to ensure existence of
-    * @throws IOException 
+    * @throws IOException
     */
    public static void ensureFileExists(Path path) throws IOException
    {
@@ -424,13 +403,13 @@ public class FileTools
 
    /**
     * <p>Ensure file exists. Performs the following:</p>
-    * 
+    *
     * <li>Recursively perform this on parents.</li>
     * <li>If <code>path</code> is a directory, delete and create new file.</li>
     * <li>If <code>path</code> does not exist, create file.</li>
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
+    *
     * @param path path of file to ensure existence of
     */
    public static void ensureFileExists(Path path, DefaultExceptionHandler defaultExceptionHandler)
@@ -447,11 +426,11 @@ public class FileTools
 
    /**
     * Concatenate N files together into one file.
-    * 
+    *
     * @param filesToConcatenate files to concatenate
     * @param concatenatedFile concatenated file
     * @param defaultExceptionHandler default exception handler
-    * @throws IOException 
+    * @throws IOException
     */
    public static void concatenateFiles(List<Path> filesToConcatenate, Path concatenatedFile) throws IOException
    {
@@ -472,13 +451,13 @@ public class FileTools
 
    /**
     * Concatenate N files together into one file.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
+    *
     * @param filesToConcatenate files to concatenate
     * @param concatenatedFile concatenated file
     * @param defaultExceptionHandler default exception handler
-    * @throws IOException 
+    * @throws IOException
     */
    public static void concatenateFiles(List<Path> filesToConcatenate, Path concatenatedFile, DefaultExceptionHandler defaultExceptionHandler)
    {
@@ -494,12 +473,11 @@ public class FileTools
 
    /**
     * Creates a new data output stream to a file for writing.
-    * 
-    * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
-    * 
+    *
     * @param file file to create stream from
     * @return dataOutputStream file data output stream
     * @throws FileNotFoundException
+    * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
     */
    public static DataOutputStream newFileDataOutputStream(Path file) throws FileNotFoundException
    {
@@ -508,13 +486,12 @@ public class FileTools
 
    /**
     * Creates a new data output stream to a file for writing.
-    * 
-    * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
-    * 
+    *
     * @param file file to create stream from
     * @param bufferSizeInBytes buffer size in bytes
     * @return dataOutputStream file data output stream
     * @throws FileNotFoundException
+    * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
     */
    public static DataOutputStream newFileDataOutputStream(Path file, int bufferSizeInBytes) throws FileNotFoundException
    {
@@ -523,15 +500,14 @@ public class FileTools
 
    /**
     * Creates a new data output stream to a file for writing.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
-    * 
+    *
     * @param file file to create stream from
     * @param defaultExceptionHandler default exception handler
     * @return dataOutputStream file data output stream
     * @throws FileNotFoundException
+    * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
     */
    public static DataOutputStream newFileDataOutputStream(Path file, DefaultExceptionHandler defaultExceptionHandler)
    {
@@ -540,16 +516,15 @@ public class FileTools
 
    /**
     * Creates a new data output stream to a file for writing.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
-    * 
+    *
     * @param file file to create stream from
     * @param bufferSizeInBytes buffer size in bytes
     * @param defaultExceptionHandler default exception handler
     * @return dataOutputStream file data output stream
     * @throws FileNotFoundException
+    * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
     */
    public static DataOutputStream newFileDataOutputStream(Path file, int bufferSizeInBytes, DefaultExceptionHandler defaultExceptionHandler)
    {
@@ -565,12 +540,11 @@ public class FileTools
 
    /**
     * Creates a new data input stream to read from a file.
-    * 
-    * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
-    * 
+    *
     * @param file file to create stream from
     * @return dataInputStream file data input stream
     * @throws FileNotFoundException
+    * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
     */
    public static DataInputStream newFileDataInputStream(Path file) throws FileNotFoundException
    {
@@ -579,13 +553,12 @@ public class FileTools
 
    /**
     * Creates a new data input stream to read from a file.
-    * 
-    * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
-    * 
+    *
     * @param file file to create stream from
     * @param bufferSizeInBytes buffer size in bytes
     * @return dataInputStream file data input stream
     * @throws FileNotFoundException
+    * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
     */
    public static DataInputStream newFileDataInputStream(Path file, int bufferSizeInBytes) throws FileNotFoundException
    {
@@ -594,15 +567,14 @@ public class FileTools
 
    /**
     * Creates a new data input stream to read from a file.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
-    * 
+    *
     * @param file file to create stream from
     * @param defaultExceptionHandler default exception handler
     * @return dataInputStream file data input stream
     * @throws FileNotFoundException
+    * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
     */
    public static DataInputStream newFileDataInputStream(Path file, DefaultExceptionHandler defaultExceptionHandler)
    {
@@ -611,16 +583,15 @@ public class FileTools
 
    /**
     * Creates a new data input stream to read from a file.
-    * 
+    *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
-    * 
-    * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
-    * 
+    *
     * @param file file to create stream from
     * @param bufferSizeInBytes buffer size in bytes
     * @param defaultExceptionHandler default exception handler
     * @return dataInputStream file data input stream
     * @throws FileNotFoundException
+    * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
     */
    public static DataInputStream newFileDataInputStream(Path file, int bufferSizeInBytes, DefaultExceptionHandler defaultExceptionHandler)
    {

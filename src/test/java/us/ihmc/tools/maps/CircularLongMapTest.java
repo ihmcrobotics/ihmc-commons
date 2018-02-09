@@ -1,11 +1,9 @@
 package us.ihmc.tools.maps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class CircularLongMapTest
 {
@@ -20,12 +18,10 @@ public class CircularLongMapTest
          assertEquals(i * 10, map.getLatestValue());
       }
 
-
       for (int i = 0; i < 100; i++)
       {
          long value = map.getValue(false, i);
          assertEquals(i * 10, value);
-
       }
 
       for (int i = 100; i < 150; i++)
@@ -86,32 +82,28 @@ public class CircularLongMapTest
       {
 
       }
-      
-      
+
       assertEquals(40, map.getValue(true, 3));
-      
-      for(int i = 54; i < 104; i++)
+
+      for (int i = 54; i < 104; i++)
       {
          map.insert(i, i * 10);
       }
-      
+
       assertEquals(40, map.getValue(true, 3));
       assertEquals(40, map.getValue(true, 4));
 
-      
-      for(int i = 105; i < 125; i+=2)
+      for (int i = 105; i < 125; i += 2)
       {
-         map.insert(i, i*10);
+         map.insert(i, i * 10);
       }
-      
+
       assertEquals(140, map.getValue(true, 13));
       assertEquals(140, map.getValue(true, 14));
       assertEquals(150, map.getValue(true, 15));
-      
+
       assertEquals(1030, map.getValue(true, 103));
       assertEquals(1030, map.getValue(true, 104));
       assertEquals(1050, map.getValue(true, 105));
-      
-      
    }
 }

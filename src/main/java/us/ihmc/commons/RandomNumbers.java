@@ -51,7 +51,7 @@ public class RandomNumbers
          double parameter = random.nextDouble();
          ret[i] = parameter * lowerBound + (1.0 - parameter) * upperBound;
       }
-   
+
       return ret;
    }
 
@@ -68,7 +68,7 @@ public class RandomNumbers
          float parameter = random.nextFloat();
          ret[i] = parameter * lowerBound + (1.0f - parameter) * upperBound;
       }
-   
+
       return ret;
    }
 
@@ -79,7 +79,7 @@ public class RandomNumbers
       {
          ret[i] = (int) Math.round((random.nextDouble() - 0.5) * 2.0 * amplitude);
       }
-   
+
       return ret;
    }
 
@@ -90,14 +90,14 @@ public class RandomNumbers
       {
          ret[i] = (int) Math.round(random.nextDouble() * (upperBound - lowerBound) + lowerBound);
       }
-   
+
       return ret;
    }
 
    public static int nextIntWithEdgeCases(Random random, double probabilityForEdgeCase)
    {
       int totalNumberOfInts = (int) (4 / probabilityForEdgeCase);
-   
+
       int randInt = random.nextInt(totalNumberOfInts);
       switch (randInt)
       {
@@ -117,7 +117,7 @@ public class RandomNumbers
    public static double nextDoubleWithEdgeCases(Random random, double probabilityForEdgeCase, double maxValue)
    {
       int totalNumberOfInts = (int) (7 / probabilityForEdgeCase);
-   
+
       int randInt = random.nextInt(totalNumberOfInts);
       switch (randInt)
       {
@@ -147,7 +147,7 @@ public class RandomNumbers
       {
          ret[i] = nextDoubleWithEdgeCases(random, probabilityForEdgeCase);
       }
-   
+
       return ret;
    }
 

@@ -1,20 +1,15 @@
 package us.ihmc.commons;
 
+import java.io.*;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 
 public class Assertions
 {
    /**
     * Assert that an exception is thrown given a runnable that throws.
-    * 
+    *
     * @param exceptionType
     * @param methodToRun
     */
@@ -39,9 +34,9 @@ public class Assertions
 
    /**
     * <p>Assert an object is serializable by actually serializing.</p>
-    * 
+    *
     * <p>Does not assert equal.</p>
-    * 
+    *
     * @param serializable
     */
    public static void assertSerializable(Serializable serializable)
@@ -52,7 +47,7 @@ public class Assertions
    /**
     * Assert an object is serializable by actually serializing and optionally
     * asserting equals.
-    * 
+    *
     * @param serializable
     * @param assertEqual
     */

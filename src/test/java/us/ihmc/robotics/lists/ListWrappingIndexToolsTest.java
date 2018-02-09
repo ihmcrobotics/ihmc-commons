@@ -1,16 +1,8 @@
 package us.ihmc.robotics.lists;
 
-import static org.junit.Assert.assertEquals;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.getNext;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.getPrevious;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.getWrap;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.next;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.previous;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.subLengthExclusive;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.subLengthInclusive;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.subListExclusive;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.subListInclusive;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.wrap;
+import org.junit.Test;
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -18,14 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
-
-import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.*;
 
 public class ListWrappingIndexToolsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testWrap()
    {
@@ -47,7 +37,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testNext()
    {
@@ -69,7 +59,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testDecrement()
    {
@@ -91,7 +81,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testGetWrap()
    {
@@ -113,7 +103,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testGetNextWrap()
    {
@@ -135,7 +125,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testGetPreviousWrap()
    {
@@ -157,7 +147,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testSubLengthInclusive()
    {
@@ -185,7 +175,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testSubLengthExclusive()
    {
@@ -202,7 +192,7 @@ public class ListWrappingIndexToolsTest
          int endIndex = index + listSize + 1;
          assertEquals(listSize, subLengthExclusive(startIndex, endIndex, list));
          // Once wrapped, we lose the information about endIndex - startIndex = listSize, which is necessary to understand that the user wants the entire list.
-//         assertEquals(listSize, subLengthExclusive(startIndex, wrap(endIndex, list), list));
+         //         assertEquals(listSize, subLengthExclusive(startIndex, wrap(endIndex, list), list));
       }
 
       for (int index = 0; index < listSize; index++)
@@ -214,7 +204,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testSubListInclusive()
    {
@@ -253,7 +243,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testSubListExclusive()
    {
@@ -291,7 +281,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testRemoveAllInclusive()
    {
@@ -332,7 +322,7 @@ public class ListWrappingIndexToolsTest
          assertEquals(listBackup.get(i), list.get(index++));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testRemoveAllExclusive()
    {

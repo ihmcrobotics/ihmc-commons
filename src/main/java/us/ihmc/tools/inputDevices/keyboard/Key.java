@@ -57,7 +57,6 @@ public enum Key
    public static final Key[] values = values();
 
    /**
-    *
     * @param keyCode
     * @return Corresponding key if found, else UNDEFINED. Add more if neccesary.
     * ALSO have to modify the class JMEModifierKey when adding a new element
