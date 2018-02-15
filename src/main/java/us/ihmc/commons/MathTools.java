@@ -338,7 +338,7 @@ public class MathTools
     * <li>If value |({@code a} - {@code b})| <= epsilon, return {@code true}.</li>
     * <li>If {@code a} and {@code b} are NaN, returns {@code true}.</li>
     *
-    * <p>See {@link MathTools#epsilonEquals(double, double, double) epsilonEquals
+    * <p>See {@link MathTools#epsilonEquals(double, double, double) epsilonEquals}
     * for NaNs to return {@code false}.</p>
     *
     * @param a double
@@ -374,7 +374,7 @@ public class MathTools
     * <li>If value |({@code a} - {@code b})| <= epsilon, return {@code true}.</li>
     * <li>If either {@code a} or {@code b} is NaN, returns {@code false}.</li>
     *
-    * <p>See {@link MathTools#epsilonCompare(double, double, double) epsilonCompare
+    * <p>See {@link MathTools#epsilonCompare(double, double, double) epsilonCompare}
     * for NaNs to return {@code true}.</p>
     *
     * @param a double
