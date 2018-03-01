@@ -26,7 +26,7 @@ public class PrintToolsTest
 
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
 
-      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:25): Test log tools!"));
+      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:21): Test log tools!"));
    }
 
    @Test(timeout = 30000)
@@ -46,7 +46,7 @@ public class PrintToolsTest
 
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
 
-      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:46): Test log tools!"));
+      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:41): Test log tools!"));
    }
 
    public static void main(String[] args)
