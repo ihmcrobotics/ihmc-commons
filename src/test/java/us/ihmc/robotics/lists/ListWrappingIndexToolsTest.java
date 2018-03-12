@@ -2,7 +2,6 @@ package us.ihmc.robotics.lists;
 
 import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -15,7 +14,6 @@ import static us.ihmc.robotics.lists.ListWrappingIndexTools.*;
 
 public class ListWrappingIndexToolsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testWrap()
    {
@@ -37,7 +35,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testNext()
    {
@@ -59,7 +56,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testDecrement()
    {
@@ -81,7 +77,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testGetWrap()
    {
@@ -103,7 +98,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testGetNextWrap()
    {
@@ -125,7 +119,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testGetPreviousWrap()
    {
@@ -147,7 +140,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testSubLengthInclusive()
    {
@@ -175,7 +167,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testSubLengthExclusive()
    {
@@ -204,7 +195,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testSubListInclusive()
    {
@@ -243,7 +233,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testSubListExclusive()
    {
@@ -281,7 +270,6 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testRemoveAllInclusive()
    {
@@ -322,7 +310,6 @@ public class ListWrappingIndexToolsTest
          assertEquals(listBackup.get(i), list.get(index++));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 10000)
    public void testRemoveAllExclusive()
    {
