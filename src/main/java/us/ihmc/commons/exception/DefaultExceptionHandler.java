@@ -17,8 +17,8 @@ public class DefaultExceptionHandler
    };
 
    /** Prints the stack trace. */
-   public static ExceptionHandler PRINT_STACKTRACE = e -> { e.printStackTrace(); };
+   public static ExceptionHandler PRINT_STACKTRACE = Throwable::printStackTrace;
 
    /** Prints the throwable's message in a friendly way using {@link PrintTools} */
-   public static ExceptionHandler PRINT_MESSAGE = e -> { PrintTools.error(DefaultExceptionHandler.class, e.getMessage()); };
+   public static ExceptionHandler PRINT_MESSAGE = e -> PrintTools.error(DefaultExceptionHandler.class, e.getMessage());
 }
