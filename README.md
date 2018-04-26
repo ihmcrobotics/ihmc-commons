@@ -15,8 +15,8 @@ https://bintray.com/ihmcrobotics/maven-release/ihmc-commons-test
 
 In your `build.gradle`:
 ```groovy
-compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
-testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
+compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.0"
+testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.19.0"
 ```
 
 ### Warning
@@ -32,6 +32,7 @@ As of 0.12.0, this project will be unstable and a sandbox for refactoring. It wi
 - Commonly needed conversions. (Data information units, etc.)
 - Tool for printing log-level style messages that show class name and line number.
 - Epsilons for explicitness and convenience.
+- Functional exception handler with defaults.
 
 ###### Testing Distribution
 

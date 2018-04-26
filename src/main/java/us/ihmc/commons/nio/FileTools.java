@@ -2,7 +2,7 @@ package us.ihmc.commons.nio;
 
 import org.apache.commons.io.FileUtils;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionHandler;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -19,7 +19,7 @@ import java.util.List;
  * the following categories:</p>
  *
  * <ol>Provide a commonly needed method not provided by Apache Commons Lang or Java's NIO.2. API.</ol>
- * <ol>Provide a wrapper around a commonly used method that uses a {@link DefaultExceptionHandler}.</ol>
+ * <ol>Provide a wrapper around a commonly used method that uses a {@link ExceptionHandler}.</ol>
  * <ol>Provide a bridge between Java's NIO.2 API and Apache Commons Lang.</ol>
  */
 public class FileTools
@@ -47,12 +47,12 @@ public class FileTools
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
     *
     * @param path file to read lines from
-    * @param exceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @return list of strings
     * @see {@link java.nio.file.Files#readAllLines(Path)}
     */
    @SuppressWarnings("unchecked")
-   public static List<String> readAllLines(Path path, DefaultExceptionHandler exceptionHandler)
+   public static List<String> readAllLines(Path path, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -60,7 +60,8 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         return (List<String>) exceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
+         return null;
       }
    }
 
@@ -71,12 +72,12 @@ public class FileTools
     *
     * @param path file to read lines from
     * @param charset character set to use
-    * @param exceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @return list of strings
     * @see {@link java.nio.file.Files#readAllLines(Path, Charset)}
     */
    @SuppressWarnings("unchecked")
-   public static List<String> readAllLines(Path path, Charset charset, DefaultExceptionHandler exceptionHandler)
+   public static List<String> readAllLines(Path path, Charset charset, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -84,7 +85,8 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         return (List<String>) exceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
+         return null;
       }
    }
 
@@ -94,11 +96,11 @@ public class FileTools
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
     *
     * @param path file to read lines from
-    * @param exceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @return File as a byte array.
     * @see {@link java.nio.file.Files#readAllBytes(Path)}
     */
-   public static byte[] readAllBytes(Path path, DefaultExceptionHandler defaultExceptionHandler)
+   public static byte[] readAllBytes(Path path, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -106,7 +108,8 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         return (byte[]) defaultExceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
+         return null;
       }
    }
 
@@ -118,10 +121,10 @@ public class FileTools
     * @param path file to write to
     * @param bytes bytes to write
     * @param writeOption append or truncate
-    * @param exceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @see {@link java.nio.file.Files#write(Path, byte[], OpenOption...)}
     */
-   public static void write(Path path, byte[] bytes, WriteOption writeOption, DefaultExceptionHandler defaultExceptionHandler)
+   public static void write(Path path, byte[] bytes, WriteOption writeOption, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -129,7 +132,7 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         defaultExceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
       }
    }
 
@@ -141,10 +144,10 @@ public class FileTools
     * @param path file to write to
     * @param lines lines to write
     * @param writeOption append or truncate
-    * @param exceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @see {@link java.nio.file.Files#write(Path, Iterable, OpenOption...)}
     */
-   public static void write(Path path, Iterable<? extends CharSequence> lines, WriteOption writeOption, DefaultExceptionHandler defaultExceptionHandler)
+   public static void write(Path path, Iterable<? extends CharSequence> lines, WriteOption writeOption, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -152,7 +155,7 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         defaultExceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
       }
    }
 
@@ -165,11 +168,11 @@ public class FileTools
     * @param lines lines to write
     * @param charset charset to use
     * @param writeOption append or truncate
-    * @param exceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @see {@link java.nio.file.Files#write(Path, Iterable, Charset, OpenOption...)}
     */
    public static void write(Path path, Iterable<? extends CharSequence> lines, Charset charset, WriteOption writeOption,
-                            DefaultExceptionHandler defaultExceptionHandler)
+                            ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -177,7 +180,7 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         defaultExceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
       }
    }
 
@@ -189,11 +192,11 @@ public class FileTools
     * @param lines lines to be written
     * @param path file
     * @param writeOption append or truncate
-    * @param defaultExceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     */
-   public static void writeAllLines(List<String> lines, Path path, WriteOption writeOption, DefaultExceptionHandler defaultExceptionHandler)
+   public static void writeAllLines(List<String> lines, Path path, WriteOption writeOption, ExceptionHandler exceptionHandler)
    {
-      PrintWriter printer = newPrintWriter(path, writeOption, defaultExceptionHandler);
+      PrintWriter printer = newPrintWriter(path, writeOption, exceptionHandler);
       lines.forEach(line -> printer.println(line));
       printer.close();
    }
@@ -205,10 +208,10 @@ public class FileTools
     *
     * @param path file to open
     * @param writeOption truncate or append
-    * @param defaultExceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @return new print writer
     */
-   public static PrintWriter newPrintWriter(Path path, WriteOption writeOption, DefaultExceptionHandler defaultExceptionHandler)
+   public static PrintWriter newPrintWriter(Path path, WriteOption writeOption, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -216,7 +219,8 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         return (PrintWriter) defaultExceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
+         return null;
       }
    }
 
@@ -227,7 +231,7 @@ public class FileTools
     * @param writeOption append or truncate
     * @return new print writer
     * @throws IOException
-    * @see {@link Files#newBufferedWriter(Path)}
+    * @see {@link Files#newBufferedWriter(Path, OpenOption...)}
     */
    public static PrintWriter newPrintWriter(Path path, WriteOption writeOption) throws IOException
    {
@@ -240,10 +244,10 @@ public class FileTools
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
     *
     * @param bytes bytes to read
-    * @param defaultExceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @return list of strings
     */
-   public static List<String> readLinesFromBytes(byte[] bytes, DefaultExceptionHandler defaultExceptionHandler)
+   public static List<String> readLinesFromBytes(byte[] bytes, ExceptionHandler exceptionHandler)
    {
       List<String> lines = new ArrayList<>();
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8.newDecoder())))
@@ -263,7 +267,7 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         defaultExceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
       }
       return lines;
    }
@@ -358,9 +362,9 @@ public class FileTools
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
     *
     * @param path path of directory to ensure existence of
-    * @param defaultExceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     */
-   public static void ensureDirectoryExists(Path path, DefaultExceptionHandler defaultExceptionHandler)
+   public static void ensureDirectoryExists(Path path, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -368,7 +372,7 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         defaultExceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
       }
    }
 
@@ -412,7 +416,7 @@ public class FileTools
     *
     * @param path path of file to ensure existence of
     */
-   public static void ensureFileExists(Path path, DefaultExceptionHandler defaultExceptionHandler)
+   public static void ensureFileExists(Path path, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -420,7 +424,7 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         defaultExceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
       }
    }
 
@@ -429,7 +433,6 @@ public class FileTools
     *
     * @param filesToConcatenate files to concatenate
     * @param concatenatedFile concatenated file
-    * @param defaultExceptionHandler default exception handler
     * @throws IOException
     */
    public static void concatenateFiles(List<Path> filesToConcatenate, Path concatenatedFile) throws IOException
@@ -456,10 +459,10 @@ public class FileTools
     *
     * @param filesToConcatenate files to concatenate
     * @param concatenatedFile concatenated file
-    * @param defaultExceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @throws IOException
     */
-   public static void concatenateFiles(List<Path> filesToConcatenate, Path concatenatedFile, DefaultExceptionHandler defaultExceptionHandler)
+   public static void concatenateFiles(List<Path> filesToConcatenate, Path concatenatedFile, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -467,7 +470,7 @@ public class FileTools
       }
       catch (IOException ioException)
       {
-         defaultExceptionHandler.handleException(ioException);
+         exceptionHandler.handleException(ioException);
       }
    }
 
@@ -504,14 +507,14 @@ public class FileTools
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
     *
     * @param file file to create stream from
-    * @param defaultExceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @return dataOutputStream file data output stream
     * @throws FileNotFoundException
     * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
     */
-   public static DataOutputStream newFileDataOutputStream(Path file, DefaultExceptionHandler defaultExceptionHandler)
+   public static DataOutputStream newFileDataOutputStream(Path file, ExceptionHandler exceptionHandler)
    {
-      return newFileDataOutputStream(file, Conversions.kibibytesToBytes(8), defaultExceptionHandler);
+      return newFileDataOutputStream(file, Conversions.kibibytesToBytes(8), exceptionHandler);
    }
 
    /**
@@ -521,12 +524,12 @@ public class FileTools
     *
     * @param file file to create stream from
     * @param bufferSizeInBytes buffer size in bytes
-    * @param defaultExceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @return dataOutputStream file data output stream
     * @throws FileNotFoundException
     * @see {@link DataOutputStream}, {@link BufferedOutputStream}, {@link FileOutputStream}.
     */
-   public static DataOutputStream newFileDataOutputStream(Path file, int bufferSizeInBytes, DefaultExceptionHandler defaultExceptionHandler)
+   public static DataOutputStream newFileDataOutputStream(Path file, int bufferSizeInBytes, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -534,7 +537,8 @@ public class FileTools
       }
       catch (FileNotFoundException fileNotFoundException)
       {
-         return (DataOutputStream) defaultExceptionHandler.handleException(fileNotFoundException);
+         exceptionHandler.handleException(fileNotFoundException);
+         return null;
       }
    }
 
@@ -571,14 +575,14 @@ public class FileTools
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
     *
     * @param file file to create stream from
-    * @param defaultExceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @return dataInputStream file data input stream
     * @throws FileNotFoundException
     * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
     */
-   public static DataInputStream newFileDataInputStream(Path file, DefaultExceptionHandler defaultExceptionHandler)
+   public static DataInputStream newFileDataInputStream(Path file, ExceptionHandler exceptionHandler)
    {
-      return newFileDataInputStream(file, Conversions.kibibytesToBytes(8), defaultExceptionHandler);
+      return newFileDataInputStream(file, Conversions.kibibytesToBytes(8), exceptionHandler);
    }
 
    /**
@@ -588,12 +592,12 @@ public class FileTools
     *
     * @param file file to create stream from
     * @param bufferSizeInBytes buffer size in bytes
-    * @param defaultExceptionHandler default exception handler
+    * @param exceptionHandler functional exception handler
     * @return dataInputStream file data input stream
     * @throws FileNotFoundException
     * @see {@link DataInputStream}, {@link BufferedInputStream}, {@link FileInputStream}.
     */
-   public static DataInputStream newFileDataInputStream(Path file, int bufferSizeInBytes, DefaultExceptionHandler defaultExceptionHandler)
+   public static DataInputStream newFileDataInputStream(Path file, int bufferSizeInBytes, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -601,7 +605,8 @@ public class FileTools
       }
       catch (FileNotFoundException fileNotFoundException)
       {
-         return (DataInputStream) defaultExceptionHandler.handleException(fileNotFoundException);
+         exceptionHandler.handleException(fileNotFoundException);
+         return null;
       }
    }
 }

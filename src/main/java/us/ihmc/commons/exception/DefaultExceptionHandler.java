@@ -5,45 +5,20 @@ import us.ihmc.commons.PrintTools;
 /**
  * Create awareness, explicitness, and ease of handling exceptions in default or common ways.
  */
-public enum DefaultExceptionHandler
+public class DefaultExceptionHandler
 {
    /** Does nothing. */
-   PROCEED_SILENTLY,
+   public static ExceptionHandler PROCEED_SILENTLY = e -> { };
 
    /** Runs System.exit(1), killing the process and indicating failure. */
-   KILL_PROCESS,
+   public static ExceptionHandler KILL_PROCESS = e -> {
+      PrintTools.error(DefaultExceptionHandler.class, e.getMessage());
+      System.exit(1);
+   };
 
    /** Prints the stack trace. */
-   PRINT_STACKTRACE,
+   public static ExceptionHandler PRINT_STACKTRACE = e -> { e.printStackTrace(); };
 
    /** Prints the throwable's message in a friendly way using {@link PrintTools} */
-   PRINT_MESSAGE;
-
-   /**
-    * Handles the throwable in one of the default ways.
-    *
-    * @param throwable to be handled
-    * @return Null casted to Object for convenience.
-    */
-   public Object handleException(Throwable throwable)
-   {
-      switch (this)
-      {
-      case PROCEED_SILENTLY:
-         // do nothing
-         break;
-      case KILL_PROCESS:
-         PrintTools.error(this, throwable.getMessage());
-         System.exit(1);
-         break;
-      case PRINT_STACKTRACE:
-         throwable.printStackTrace();
-         break;
-      case PRINT_MESSAGE:
-         PrintTools.error(this, throwable.getMessage());
-         break;
-      }
-
-      return null;
-   }
+   public static ExceptionHandler PRINT_MESSAGE = e -> { PrintTools.error(DefaultExceptionHandler.class, e.getMessage()); };
 }
