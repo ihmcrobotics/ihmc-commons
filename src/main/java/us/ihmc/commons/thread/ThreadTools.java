@@ -9,6 +9,8 @@ public class ThreadTools
 {
    public static final int REASONABLE_WAITING_SLEEP_DURATION_MS = 10;
 
+   private static final long ONE_MILLION = 1000000;
+
    /**
     * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of seconds,
     * subject to the precision and accuracy of system timers and schedulers. If the sleep is interrupted with a InterruptedException,
@@ -16,10 +18,11 @@ public class ThreadTools
     * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
     *
     * @param secondsToSleep The time to sleep in seconds. The Thread should sleep this long, even if interrupted.
+    * @return actual nanoseconds slept
     */
-   public static void sleepSeconds(double secondsToSleep)
+   public static long sleepSeconds(double secondsToSleep)
    {
-      sleep((long) (secondsToSleep * 1000));
+      return sleep((long) (secondsToSleep * 1000));
    }
 
    /**
@@ -29,10 +32,11 @@ public class ThreadTools
     * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
     *
     * @param millisecondsToSleep The time to sleep in milliseconds. The Thread should sleep this long, even if interrupted.
+    * @return actual nanoseconds slept
     */
-   public static void sleep(long millisecondsToSleep)
+   public static long sleep(long millisecondsToSleep)
    {
-      sleep(millisecondsToSleep, 0);
+      return sleep(millisecondsToSleep, 0);
    }
 
    /**
@@ -40,52 +44,44 @@ public class ThreadTools
     * plus the specified number of nanoseconds, subject to the precision and accuracy of system timers and schedulers.
     * If the sleep is interrupted with a InterruptedException,
     * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
-    * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
+    * It is guaranteed to sleep for at least the requested amount of time. May sleep a little more.
     *
     * @param millisecondsToSleep The time to sleep in milliseconds. The Thread should sleep this long, even if interrupted.
     * @param additionalNanosecondsToSleep 0-999999 additional nanoseconds to sleep
+    * @return actual nanoseconds slept
     */
-   public static void sleep(long millisecondsToSleep, int additionalNanosecondsToSleep)
+   public static long sleep(long millisecondsToSleep, int additionalNanosecondsToSleep)
    {
-      int oneMillion = 1000000;
-      long totalNanosecondsToSleep = millisecondsToSleep * oneMillion + additionalNanosecondsToSleep;
-
       long startTimeNanos = System.nanoTime();
-
+      long desiredSleepNanos = millisecondsToSleep * ONE_MILLION + additionalNanosecondsToSleep;
       boolean doneSleeping = false;
-      boolean wasInterrupted = false;
+      long nanosSleptSoFar = 0L;
 
       while (!doneSleeping)
       {
          try
          {
             Thread.sleep(millisecondsToSleep, additionalNanosecondsToSleep);
-            doneSleeping = true;
          }
          catch (InterruptedException ex)
          {
-            wasInterrupted = true;
+         }
 
-            long nanosecondsSleptSoFar = System.nanoTime() - startTimeNanos;
-            long nanoSecondsRemaining = totalNanosecondsToSleep - nanosecondsSleptSoFar;
+         nanosSleptSoFar = System.nanoTime() - startTimeNanos;
 
-            if (nanoSecondsRemaining <= 0)
-            {
-               doneSleeping = true;
-            }
-            else
-            {
-               millisecondsToSleep = nanoSecondsRemaining / oneMillion;
-               additionalNanosecondsToSleep = (int) (nanoSecondsRemaining - (millisecondsToSleep * oneMillion));
-            }
+         if (nanosSleptSoFar >= desiredSleepNanos)
+         {
+            doneSleeping = true;
+         }
+         else
+         {
+            long nanosRemaining = desiredSleepNanos - nanosSleptSoFar;
+            millisecondsToSleep = nanosRemaining / ONE_MILLION;
+            additionalNanosecondsToSleep = (int) (nanosRemaining - (millisecondsToSleep * ONE_MILLION));
          }
       }
 
-      // If the thread was interrupted while sleeping, make sure to interrupt it again.
-      if (wasInterrupted)
-      {
-         Thread.currentThread().interrupt();
-      }
+      return nanosSleptSoFar;
    }
 
    /**

@@ -12,17 +12,16 @@ import static org.junit.Assert.*;
 
 public class ThreadToolsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 3.1, categoriesOverride = IntegrationCategory.FLAKY)
    @Test(timeout = 30000)
    public void testTimeLimitScheduler()
    {
-      final int ITERATIONS = 100;
-      final double EPSILON = 5;
+      final int ITERATIONS = 10;
+      final double EPSILON = 40;
 
       TimeUnit timeUnit = TimeUnit.MILLISECONDS;
       long initialDelay = 0;
       long delay = 3;
-      long timeLimit = 30;
+      long timeLimit = 300;
 
       final Runnable runnable = new Runnable()
 
@@ -49,7 +48,6 @@ public class ThreadToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testIterationLimitScheduler()
    {
@@ -80,7 +78,6 @@ public class ThreadToolsTest
       assertEquals(iterations, counter.get());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FLAKY)
    @Test(timeout = 30000)
    public void testExecuteWithTimeout()
    {
@@ -121,69 +118,64 @@ public class ThreadToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testThreadSleepEvenWhenInterrupted()
    {
-      long oneMillion = 1000000;
+      final long ONE_MILLION = 1000000;
       long millisecondsToSleep = 1100;
       int additionalNanosecondsToSleep = 500000;
 
-      long totalNanosecondsToSleep = millisecondsToSleep * oneMillion + additionalNanosecondsToSleep;
+      long totalNanosecondsToSleep = millisecondsToSleep * ONE_MILLION + additionalNanosecondsToSleep;
 
       SleepAndVerifyDespiteWakingUpRunnable runnable = new SleepAndVerifyDespiteWakingUpRunnable(millisecondsToSleep, additionalNanosecondsToSleep);
 
-      Thread thread = new Thread(runnable);
-      thread.start();
-
-      while (!runnable.isDoneSleeping())
+      int numberOfTimesToTest = 5;
+      for (int i = 0; i < numberOfTimesToTest; i++)
       {
-         try
+         Thread thread = new Thread(runnable);
+         thread.start();
+
+         while (!runnable.isDoneSleeping())
          {
-            Thread.sleep(millisecondsToSleep / 10);
-         }
-         catch (InterruptedException e)
-         {
+            // Here we interrupt the thread to make sure that it sleeps for the total amount of time requested.
+            thread.interrupt();
+
+            try
+            {
+               Thread.sleep(millisecondsToSleep / 10);
+            }
+            catch (InterruptedException e)
+            {
+            }
          }
 
-         // Here we interrupt the thread to make sure that it sleeps for the total amount of time and so that it also re-interrupts the 
-         // thread after it is done sleeping.
-         thread.interrupt();
+         long timeSleptInNanoseconds = runnable.getTimeSleptNanonseconds();
+         long timeOverSleptInNanoseconds = timeSleptInNanoseconds - totalNanosecondsToSleep;
+
+         // Check to make sure slept at least the amount specified. Method guarantees it sleeps at least or more than requested.
+         assertTrue("timeSlept = " + timeSleptInNanoseconds + ", totalNanosecondsToSleep = " + totalNanosecondsToSleep + " timeOverSleptInNanoseconds = "
+                          + timeOverSleptInNanoseconds, timeOverSleptInNanoseconds > 0);
+
+         // Check to make sure didn't over sleep by more than 100 milliseconds, which seems reasonable on most operating systems.
+         assertTrue("timeSlept = " + timeSleptInNanoseconds + ", millisecondsToSleep = " + millisecondsToSleep, timeOverSleptInNanoseconds < 100 * ONE_MILLION);
+
+         // Now make sure it doesn't get interrupted if we don't interrupt it...
+         runnable = new SleepAndVerifyDespiteWakingUpRunnable(millisecondsToSleep, additionalNanosecondsToSleep);
+
+         thread = new Thread(runnable);
+         thread.start();
+
+         while (!runnable.isDoneSleeping())
+         {
+            try
+            {
+               Thread.sleep(millisecondsToSleep / 10);
+            }
+            catch (InterruptedException e)
+            {
+            }
+         }
       }
-
-      // Yield this thread to make sure the other one has an opportunity to wake up during its second sleep.
-      Thread.yield();
-      assertTrue(runnable.wasInterruptedDuringSecondSleep());
-
-      long timeSleptInNanoseconds = runnable.getTimeSleptNanonseconds();
-      long timeOverSleptInNanoseconds = timeSleptInNanoseconds - totalNanosecondsToSleep;
-
-      // Check to make sure slept at least the amount specified.
-      assertTrue("timeSlept = " + timeSleptInNanoseconds + ", totalNanosecondsToSleep = " + totalNanosecondsToSleep, timeOverSleptInNanoseconds >= 0);
-
-      // Check to make sure didn't over sleep by more than 5 milliseconds, which seems reasonable on most operating systems.
-      assertTrue("timeSlept = " + timeSleptInNanoseconds + ", millisecondsToSleep = " + millisecondsToSleep, timeOverSleptInNanoseconds < 100 * oneMillion);
-
-      // Now make sure it doesn't get interrupted if we don't interrupt it...
-      runnable = new SleepAndVerifyDespiteWakingUpRunnable(millisecondsToSleep, additionalNanosecondsToSleep);
-
-      thread = new Thread(runnable);
-      thread.start();
-
-      while (!runnable.isDoneSleeping())
-      {
-         try
-         {
-            Thread.sleep(millisecondsToSleep / 10);
-         }
-         catch (InterruptedException e)
-         {
-         }
-      }
-
-      // Yield this thread to make sure the other one has an opportunity to wake up during its second sleep, if it is interrupted (which it shouldn't be).
-      Thread.yield();
-      assertFalse(runnable.wasInterruptedDuringSecondSleep());
    }
 
    private class SleepAndVerifyDespiteWakingUpRunnable implements Runnable
@@ -191,8 +183,7 @@ public class ThreadToolsTest
       private long millisecondsToSleep;
       private int additonalNanosecondsToSleep;
       private boolean isDoneSleeping;
-      private boolean wasInterruptedDuringSecondSleep;
-      private long timeSleptNanoseconds;
+      private long timeSleptNanosecondsMeasuredExternally;
 
       public SleepAndVerifyDespiteWakingUpRunnable(long millisecondsToSleep, int additonalNanosecondsToSleep)
       {
@@ -207,33 +198,25 @@ public class ThreadToolsTest
 
       public long getTimeSleptNanonseconds()
       {
-         return timeSleptNanoseconds;
-      }
-
-      public boolean wasInterruptedDuringSecondSleep()
-      {
-         return wasInterruptedDuringSecondSleep;
+         return timeSleptNanosecondsMeasuredExternally;
       }
 
       @Override
       public void run()
       {
          long startTime = System.nanoTime();
-
-         ThreadTools.sleep(millisecondsToSleep, additonalNanosecondsToSleep);
+         long timeSleptMeasuredFromMethod = ThreadTools.sleep(millisecondsToSleep, additonalNanosecondsToSleep);
 
          long endTime = System.nanoTime();
-         timeSleptNanoseconds = endTime - startTime;
-         isDoneSleeping = true;
+         timeSleptNanosecondsMeasuredExternally = endTime - startTime;
 
-         try
+         if (timeSleptNanosecondsMeasuredExternally < timeSleptMeasuredFromMethod)
          {
-            Thread.sleep(100000);
+            throw new AssertionError(
+                  "Huh: timeSleptNanosecondsMeasuredExternally = " + timeSleptNanosecondsMeasuredExternally + ", timeSleptMeasuredFromMethod = "
+                        + timeSleptMeasuredFromMethod);
          }
-         catch (InterruptedException e)
-         {
-            wasInterruptedDuringSecondSleep = true;
-         }
+         isDoneSleeping = true;
       }
    }
 
