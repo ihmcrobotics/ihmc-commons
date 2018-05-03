@@ -40,6 +40,8 @@ public class MutationTestFacilitator
    private static final int NUMBER_OF_HOURS_BEFORE_EXPIRATION = 3;
    private static final String REPORT_DIRECTORY_NAME = "pit-reports";
 
+   private Path projectRoot = Paths.get(".").toAbsolutePath().normalize();
+   private Path pitReports = projectRoot.resolve(REPORT_DIRECTORY_NAME);
    private Set<Class<?>> testClassesToRun = new HashSet<>();
    private Set<String> classPathsToMutate = new TreeSet<>();
    private Set<Mutator> mutators = new TreeSet<>();
@@ -132,8 +134,16 @@ public class MutationTestFacilitator
     */
    public void doMutationTest()
    {
+      // Handle running from src/test, other source set projects
+      if (projectRoot.resolve("..").toAbsolutePath().normalize().getFileName().toString().equals("src"))
+      {
+         projectRoot = Paths.get("..").resolve("..").toAbsolutePath().normalize();
+         pitReports = projectRoot.resolve(REPORT_DIRECTORY_NAME);
+      }
+      PrintTools.info(this, "Using reports directory: " + pitReports);
+
       // Delete all entries older than three hours
-      PathTools.walkFlat(Paths.get(REPORT_DIRECTORY_NAME), new BasicPathVisitor()
+      PathTools.walkFlat(pitReports, new BasicPathVisitor()
       {
          @Override
          public FileVisitResult visitPath(Path path, PathType pathType)
@@ -196,9 +206,12 @@ public class MutationTestFacilitator
          mutatorsList = mutatorsList.substring(0, mutatorsList.lastIndexOf(','));
       }
 
-      MutationCoverageReport
-            .main(new String[] {"--reportDir", REPORT_DIRECTORY_NAME, "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs",
-                  "src,test", "--mutators", mutatorsList});
+      String[] args = {"--reportDir", pitReports.toString(), "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs",
+            projectRoot.resolve("src").toString(), "--mutators", mutatorsList};
+      PrintTools.info(this, "Launching MutationCoverageReport with arguments: ");
+      Arrays.stream(args).forEach(s -> System.out.print(s + " "));
+      System.out.println();
+      MutationCoverageReport.main(args);
    }
 
    /**
@@ -206,15 +219,14 @@ public class MutationTestFacilitator
     */
    public void openResultInBrowser()
    {
-      File reportDirectory = new File(REPORT_DIRECTORY_NAME);
-      if (reportDirectory.isDirectory() && reportDirectory.exists())
+      if (Files.exists(pitReports) && Files.isDirectory(pitReports))
       {
-         String[] list = reportDirectory.list();
+         String[] list = pitReports.toFile().list();
          final String lastDirectoryName = list[list.length - 1];
 
          System.out.println("Found last directory " + lastDirectoryName);
 
-         PathTools.walkFlat(Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName), new BasicPathVisitor()
+         PathTools.walkFlat(pitReports.resolve(lastDirectoryName), new BasicPathVisitor()
          {
             @Override
             public FileVisitResult visitPath(Path path, PathType pathType)
@@ -225,7 +237,7 @@ public class MutationTestFacilitator
                   String newPathName = longPathName.substring(0, 20) + "..." + longPathName.substring(longPathName.length() - 20, longPathName.length());
                   Path newPath = Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName, newPathName);
 
-                  Path indexPath = Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName, "index.html");
+                  Path indexPath = pitReports.resolve(lastDirectoryName).resolve("index.html");
                   List<String> lines = FileTools.readAllLines(indexPath, DefaultExceptionHandler.PRINT_STACKTRACE);
                   ArrayList<String> newLines = new ArrayList<>();
                   for (String originalLine : lines)
@@ -247,7 +259,7 @@ public class MutationTestFacilitator
             }
          });
 
-         File reportFile = new File(reportDirectory, lastDirectoryName + "/index.html");
+         File reportFile = pitReports.resolve(lastDirectoryName).resolve("index.html").toFile();
          String absolutePath;
          try
          {
@@ -290,7 +302,6 @@ public class MutationTestFacilitator
     * Common settings for mutation testing. Runs a test class and mutates the package it resides in.
     * Convenient for a one-liner solution for integration tests where you want to mutate a wider range of classes.
     *
-    * @param applicationClass application class to mutate
     * @param testClass test class to run
     */
    public static void facilitateMutationTestForPackage(Class<?> testClass)
