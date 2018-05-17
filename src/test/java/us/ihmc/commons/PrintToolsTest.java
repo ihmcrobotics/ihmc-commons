@@ -49,6 +49,26 @@ public class PrintToolsTest
       assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:41): Test log tools!"));
    }
 
+   @Test(timeout = 30000)
+   public void testPrintToolsError() throws Exception
+   {
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+      PrintStream systemErr = System.err;
+
+      System.setErr(new PrintStream(byteArrayOutputStream));
+
+      PrintTools.error(this, "Test log tools!");
+
+      System.err.flush();
+
+      System.setErr(systemErr);
+
+      System.err.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
+
+      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[ERROR] (PrintToolsTest.java:61): Test log tools!"));
+   }
+
    public static void main(String[] args)
    {
       MutationTestFacilitator.facilitateMutationTestForClass(PrintTools.class, PrintToolsTest.class);
