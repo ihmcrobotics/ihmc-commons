@@ -1,6 +1,7 @@
 package us.ihmc.robotics.lists;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class RecyclingArrayList<T> implements List<T>
 {
@@ -10,22 +11,22 @@ public class RecyclingArrayList<T> implements List<T>
    private static final int DEFAULT_INITIAL_SIZE = 0;
 
    private T[] elementData;
-   private final GenericTypeBuilder<T> builder;
+   private final Supplier<T> builder;
    protected int size = 0;
 
    public RecyclingArrayList(Class<T> clazz)
    {
-      this(DEFAULT_INITIAL_SIZE, GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz));
+      this(DEFAULT_INITIAL_SIZE, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
-   public RecyclingArrayList(GenericTypeBuilder<T> builder)
+   public RecyclingArrayList(Supplier<T> builder)
    {
       this(DEFAULT_INITIAL_SIZE, builder);
    }
 
    public RecyclingArrayList(int initialSize, Class<T> clazz)
    {
-      this(initialSize, GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz));
+      this(initialSize, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
    public void shuffle(Random random)
@@ -37,7 +38,7 @@ public class RecyclingArrayList<T> implements List<T>
    }
 
    @SuppressWarnings("unchecked")
-   public RecyclingArrayList(int initialSize, GenericTypeBuilder<T> builder)
+   public RecyclingArrayList(int initialSize, Supplier<T> builder)
    {
       elementData = (T[]) new Object[initialSize];
       size = initialSize;
@@ -320,7 +321,7 @@ public class RecyclingArrayList<T> implements List<T>
 
       for (int i = previousArraySize; i < newArraySize; i++)
       {
-         elementData[i] = builder.newInstance();
+         elementData[i] = builder.get();
       }
    }
 
@@ -336,7 +337,7 @@ public class RecyclingArrayList<T> implements List<T>
       for (int i = 0; i < elementData.length; i++)
       {
          if (elementData[i] == null)
-            elementData[i] = builder.newInstance();
+            elementData[i] = builder.get();
       }
    }
 

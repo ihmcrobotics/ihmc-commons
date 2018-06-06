@@ -3,42 +3,43 @@ package us.ihmc.robotics.lists;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.function.Supplier;
 
 /**
  * This is an implementation of ArrayDeque that will reuse objects, making it more allocation efficient.
  *
- * @param <T> the type of object in this deque must extend {@link #Settable}.
+ * @param <T> the type of object in this deque must extend {@link Settable}.
  */
 public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
 {
    private static final long serialVersionUID = 8118722036566615731L;
    private static final int defaultNumberOfElements = 16;
 
-   private final GenericTypeBuilder<T> typeBuilder;
+   private final Supplier<T> typeBuilder;
    private final ArrayDeque<T> unusedObjects;
 
-   public RecyclingArrayDeque(GenericTypeBuilder<T> typeBuilder)
+   public RecyclingArrayDeque(Supplier<T> typeBuilder)
    {
       this(defaultNumberOfElements, typeBuilder);
    }
 
    public RecyclingArrayDeque(Class<T> objectClass)
    {
-      this(defaultNumberOfElements, GenericTypeBuilder.createBuilderWithEmptyConstructor(objectClass));
+      this(defaultNumberOfElements, SupplierBuilder.createFromEmptyConstructor(objectClass));
    }
 
    public RecyclingArrayDeque(int numElements, Class<T> objectClass)
    {
-      this(numElements, GenericTypeBuilder.createBuilderWithEmptyConstructor(objectClass));
+      this(numElements, SupplierBuilder.createFromEmptyConstructor(objectClass));
    }
 
-   public RecyclingArrayDeque(int numElements, GenericTypeBuilder<T> typeBuilder)
+   public RecyclingArrayDeque(int numElements, Supplier<T> typeBuilder)
    {
       super(numElements);
       this.typeBuilder = typeBuilder;
       unusedObjects = new ArrayDeque<>(numElements);
       for (int i = 0; i < numElements; i++)
-         unusedObjects.add(typeBuilder.newInstance());
+         unusedObjects.add(typeBuilder.get());
    }
 
    /** {@inheritDoc} */
@@ -298,7 +299,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    private T getOrCreateUnusedObject()
    {
       if (unusedObjects.isEmpty())
-         return typeBuilder.newInstance();
+         return typeBuilder.get();
       else
          return unusedObjects.poll();
    }
