@@ -3,40 +3,48 @@ package us.ihmc.robotics.lists;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
  * This is an implementation of ArrayDeque that will reuse objects, making it more allocation efficient.
  *
- * @param <T> the type of object in this deque must extend {@link Settable}.
+ * @param <T> the type of object in this deque
  */
-public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
+public class RecyclingArrayDeque<T> extends ArrayDeque<T>
 {
    private static final long serialVersionUID = 8118722036566615731L;
    private static final int defaultNumberOfElements = 16;
 
    private final Supplier<T> typeBuilder;
    private final ArrayDeque<T> unusedObjects;
+   private final BiConsumer<T, T> copier;
 
-   public RecyclingArrayDeque(Supplier<T> typeBuilder)
+   public RecyclingArrayDeque(Supplier<T> typeBuilder, BiConsumer<T, T> copier)
    {
-      this(defaultNumberOfElements, typeBuilder);
+      this(defaultNumberOfElements, typeBuilder, copier);
    }
 
-   public RecyclingArrayDeque(Class<T> objectClass)
+   public RecyclingArrayDeque(Class<T> objectClass, BiConsumer<T, T> copier)
    {
-      this(defaultNumberOfElements, SupplierBuilder.createFromEmptyConstructor(objectClass));
+      this(defaultNumberOfElements, SupplierBuilder.createFromEmptyConstructor(objectClass), copier);
    }
 
-   public RecyclingArrayDeque(int numElements, Class<T> objectClass)
+   public RecyclingArrayDeque(int numElements, Class<T> objectClass, BiConsumer<T, T> copier)
    {
-      this(numElements, SupplierBuilder.createFromEmptyConstructor(objectClass));
+      this(numElements, SupplierBuilder.createFromEmptyConstructor(objectClass), copier);
    }
 
-   public RecyclingArrayDeque(int numElements, Supplier<T> typeBuilder)
+   /**
+    * @param numElements lower bound on initial capacity of the deque
+    * @param typeBuilder builds instance of data type
+    * @param copier copies such that {@link BiConsumer#accept} sets the first argument from the second
+    */
+   public RecyclingArrayDeque(int numElements, Supplier<T> typeBuilder, BiConsumer<T, T> copier)
    {
       super(numElements);
       this.typeBuilder = typeBuilder;
+      this.copier = copier;
       unusedObjects = new ArrayDeque<>(numElements);
       for (int i = 0; i < numElements; i++)
          unusedObjects.add(typeBuilder.get());
@@ -292,7 +300,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    private T copyAndReturnLocalObject(T objectToCopy)
    {
       T localObject = getOrCreateUnusedObject();
-      localObject.set(objectToCopy);
+      copier.accept(localObject, objectToCopy);
       return localObject;
    }
 
