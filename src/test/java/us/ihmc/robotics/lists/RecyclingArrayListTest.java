@@ -6,6 +6,7 @@ import us.ihmc.commons.RandomNumbers;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Random;
 
 import static org.junit.Assert.*;
@@ -13,7 +14,7 @@ import static org.junit.Assert.*;
 public class RecyclingArrayListTest
 {
    @Test(timeout = 30000)
-   public void testConstructor()
+   public void testConstructors()
    {
       RecyclingArrayList<Object> list = new RecyclingArrayList<>(Object.class);
       assertTrue(list.isEmpty());
@@ -22,6 +23,11 @@ public class RecyclingArrayListTest
 
       int expectedSize = 10;
       list = new RecyclingArrayList<>(expectedSize, Object.class);
+      assertFalse(list.isEmpty());
+      assertTrue(list.size() == expectedSize);
+      assertTrue(list.getLast() != null);
+
+      list = new RecyclingArrayList<>(expectedSize, Object.class, Object::new);
       assertFalse(list.isEmpty());
       assertTrue(list.size() == expectedSize);
       assertTrue(list.getLast() != null);
@@ -35,7 +41,7 @@ public class RecyclingArrayListTest
    @Test(timeout = 30000)
    public void testAddAndGet()
    {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(Object.class);
+      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object.class, Object::new);
       ArrayList<Object> expectedList = new ArrayList<>();
 
       int finalSize = 10;
@@ -108,7 +114,7 @@ public class RecyclingArrayListTest
    @Test(timeout = 30000)
    public void testGetAndGrowIfNeeded()
    {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(Object.class);
+      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object.class, Object::new);
 
       assertTrue(list.isEmpty());
       assertTrue(list.size() == 0);
@@ -163,7 +169,7 @@ public class RecyclingArrayListTest
    @Test(timeout = 30000)
    public void growByOne()
    {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(Object.class);
+      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object.class, Object::new);
       assertTrue(list.isEmpty());
 
       int currentSize = 0;
@@ -187,7 +193,7 @@ public class RecyclingArrayListTest
    @Test(timeout = 30000)
    public void growByN()
    {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(Object.class);
+      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object.class, Object::new);
       assertTrue(list.isEmpty());
 
       int currentSize = 0;
@@ -222,7 +228,7 @@ public class RecyclingArrayListTest
    public void testFastRemove()
    {
       int currentSize = 10;
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(currentSize, Object.class);
+      RecyclingArrayList<Object> list = new RecyclingArrayList<>(currentSize, Object.class, Object::new);
       assertTrue(list.size() == currentSize);
 
       ArrayList<Object> savedList = new ArrayList<>();
@@ -257,7 +263,7 @@ public class RecyclingArrayListTest
    public void testRemove()
    {
       int currentSize = 10;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class);
+      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class, MutableInt::new);
       for (int i = 0; i < currentSize; i++)
          list.get(i).setValue(10 + i);
       assertTrue(list.size() == currentSize);
@@ -304,7 +310,7 @@ public class RecyclingArrayListTest
    {
       Random rand = new Random(541964L);
       int currentSize = 10;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class);
+      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class, MutableInt::new);
       for (int i = 0; i < currentSize; i++)
          list.get(i).setValue(10 + i);
       assertTrue(list.size() == currentSize);
@@ -353,7 +359,7 @@ public class RecyclingArrayListTest
    {
       Random rand = new Random(541964L);
       int currentSize = 10;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class);
+      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class, MutableInt::new);
       for (int i = 0; i < currentSize; i++)
          list.get(i).setValue(10 + i);
       assertTrue(list.size() == currentSize);
@@ -394,7 +400,7 @@ public class RecyclingArrayListTest
    {
       Random random = new Random(541964L);
       int currentSize = 100;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class);
+      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class, MutableInt::new);
 
       for (int i = 0; i < currentSize; i++)
       {
@@ -404,7 +410,7 @@ public class RecyclingArrayListTest
       assertTrue(list.size() == currentSize);
 
       int sumBefore = 0;
-      for (int i = 0; i < list.size; i++)
+      for (int i = 0; i < list.size(); i++)
       {
          MutableInt value = list.get(i);
          sumBefore = sumBefore + value.intValue();
@@ -415,12 +421,125 @@ public class RecyclingArrayListTest
       assertTrue(list.size() == currentSize);
 
       int sumAfter = 0;
-      for (int i = 0; i < list.size; i++)
+      for (int i = 0; i < list.size(); i++)
       {
          MutableInt value = list.get(i);
          sumAfter = sumAfter + value.intValue();
       }
 
       assertEquals(sumBefore, sumAfter);
+   }
+
+   @Test(timeout = 30000)
+   public void testIteratorHasNext()
+   {
+      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object.class, Object::new);
+      assertFalse(list.iterator().hasNext());
+
+      int size = 10;
+      for (int i = 0; i < size; i++)
+      {
+         list.add();
+      }
+
+      Iterator<Object> iterator = list.iterator();
+      for (int i = 0; i < size; i++)
+      {
+         assertTrue(iterator.hasNext());
+         iterator.next();
+      }
+
+      assertFalse(iterator.hasNext());
+   }
+
+   @Test(timeout = 30000)
+   public void testIteratorNext()
+   {
+      int size = 15;
+      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(size, MutableInt.class, MutableInt::new);
+
+      for (int i = 0; i < size; i++)
+      {
+         list.get(i).setValue(i);
+      }
+
+      Iterator<MutableInt> iterator = list.iterator();
+      for (int i = 0; i < size; i++)
+      {
+         assertTrue(iterator.next().getValue() == i);
+      }
+   }
+
+   @Test(timeout = 30000)
+   public void testIteratorRemove()
+   {
+      int initialSize = 8;
+      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(initialSize, MutableInt.class, MutableInt::new);
+
+      for (int i = 0; i < initialSize; i++)
+      {
+         list.get(i).setValue(i);
+      }
+
+      Iterator<MutableInt> iterator = list.iterator();
+
+      // can't remove before calling next
+      try
+      {
+         iterator.remove();
+         fail();
+      }
+      catch(IllegalStateException e)
+      {
+      }
+
+      // test removing first object
+      assertTrue(list.size() == initialSize);
+      iterator.next();
+      iterator.remove();
+      assertTrue(list.size() == initialSize - 1);
+
+      // check that correct object was removed
+      for (int i = 0; i < initialSize - 1; i++)
+      {
+         assertTrue(list.get(i).getValue() == i + 1);
+      }
+
+      // test removing remaining objects
+      for (int i = 0; i < initialSize - 1; i++)
+      {
+         iterator.next();
+         iterator.remove();
+         assertTrue(list.size() == initialSize - (i + 2));
+      }
+   }
+
+   @Test(timeout = 30000)
+   public void testIteratorForEachRemaining()
+   {
+      int initialSize = 10;
+      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(initialSize, MutableInt.class, MutableInt::new);
+
+      int testIndex = 5;
+      Iterator<MutableInt> iterator = list.iterator();
+      for (int i = 0; i < testIndex; i++)
+      {
+         iterator.next();
+      }
+
+      iterator.forEachRemaining((value) -> value.setValue(100));
+
+      for (int i = 0; i < initialSize; i++)
+      {
+         int value = list.get(i).getValue();
+         if(i < testIndex)
+         {
+            assertTrue(value == 0);
+         }
+         else
+         {
+            assertTrue(value == 100);
+         }
+      }
    }
 }
