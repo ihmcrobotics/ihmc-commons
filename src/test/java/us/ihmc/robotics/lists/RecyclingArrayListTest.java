@@ -542,4 +542,11 @@ public class RecyclingArrayListTest
          }
       }
    }
+
+   @Test(timeout = 30000)
+   public void testEmptyConstructor()
+   {
+      // check constructor doesn't throw exception
+      new RecyclingArrayList();
+   }
 }
