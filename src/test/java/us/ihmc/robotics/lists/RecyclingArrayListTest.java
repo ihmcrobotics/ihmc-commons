@@ -167,64 +167,6 @@ public class RecyclingArrayListTest
    }
 
    @Test(timeout = 30000)
-   public void growByOne()
-   {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object.class, Object::new);
-      assertTrue(list.isEmpty());
-
-      int currentSize = 0;
-      assertTrue(list.size() == currentSize);
-
-      list.growByOne();
-      currentSize++;
-      assertTrue(list.size() == currentSize);
-
-      list.growByOne();
-      currentSize++;
-      assertTrue(list.size() == currentSize);
-
-      for (int i = 0; i < currentSize; i++)
-      {
-         assertTrue(list.get(i) != null);
-         assertTrue(list.get(i) instanceof Object);
-      }
-   }
-
-   @Test(timeout = 30000)
-   public void growByN()
-   {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object.class, Object::new);
-      assertTrue(list.isEmpty());
-
-      int currentSize = 0;
-      assertTrue(list.size() == currentSize);
-
-      list.growByN(15);
-      currentSize += 15;
-      assertTrue(list.size() == currentSize);
-
-      list.growByN(1);
-      currentSize += 1;
-      assertTrue(list.size() == currentSize);
-
-      for (int i = 0; i < currentSize; i++)
-      {
-         assertTrue(list.get(i) != null);
-         assertTrue(list.get(i) instanceof Object);
-      }
-
-      try
-      {
-         list.growByN(-1);
-         fail();
-      }
-      catch (RuntimeException e)
-      {
-         // Good
-      }
-   }
-
-   @Test(timeout = 30000)
    public void testFastRemove()
    {
       int currentSize = 10;

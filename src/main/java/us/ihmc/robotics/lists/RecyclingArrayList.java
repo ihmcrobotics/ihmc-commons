@@ -4,6 +4,23 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * A list implementation designed to mimic the functionality of ArrayList
+ * while reducing allocation. Once an object is allocated in this list,
+ * its reference is retained for the lifetime of the list even if the
+ * object is nominally removed.
+ *
+ * <p> Objects are added to the list by calling {@link #add()} and operating
+ * on the returned object. None of the List api for adding and setting are supported.
+ * For example:
+ * <ul>
+ * <li> {@code RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(MutableInt.class);}
+ * <li> {@code MutableInt i = list.add();}
+ * <li> {@code i.setValue(5);}
+ * </ul>
+ *
+ * @param <T>
+ */
 public class RecyclingArrayList<T> implements List<T>
 {
    private final Class<T> clazz;
@@ -11,22 +28,44 @@ public class RecyclingArrayList<T> implements List<T>
    private int size = 0;
    private final Supplier<T> allocator;
 
+   /**
+    * Constructs zero-sized array without an allocator
+    */
    @Deprecated
    public RecyclingArrayList()
    {
       this(0, null, null);
    }
 
+   /**
+    * Constructs a zero-sized array. An allocator is created which calls the given class's empty constructor
+    * @param clazz class of element data
+    * @see SupplierBuilder#createFromEmptyConstructor(Class)
+    */
    public RecyclingArrayList(Class<T> clazz)
    {
       this(0, clazz, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
+   /**
+    * Constructs an array with the given initial capacity. An allocator is created which calls the given class's empty constructor
+    * @param initialSize initial capacity of the array
+    * @param clazz class of element data
+    * @see SupplierBuilder#createFromEmptyConstructor(Class)
+    */
    public RecyclingArrayList(int initialSize, Class<T> clazz)
    {
       this(initialSize, clazz, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
+   /**
+    * Constructs an array with the given initial capacity. This array is populated with objects using the allocator. This allocator is also
+    * used for any future allocation.
+    *
+    * @param initialSize initial capacity of the array
+    * @param clazz class of element data
+    * @param allocator generates elements by calling {@link Supplier#get()}
+    */
    @SuppressWarnings("unchecked")
    public RecyclingArrayList(int initialSize, Class<T> clazz, Supplier<T> allocator)
    {
@@ -43,6 +82,12 @@ public class RecyclingArrayList<T> implements List<T>
       fillElementDataIfNeeded();
    }
 
+   /**
+    * Randomly shuffles this list using the random-access implementation described here:
+    * {@link Collections#shuffle(List, Random)}
+    *
+    * @param random number generator used to shuffle list
+    */
    public void shuffle(Random random)
    {
       for (int i = size; i > 1; i--)
@@ -52,9 +97,13 @@ public class RecyclingArrayList<T> implements List<T>
    }
 
    /**
-    * Returns the number of elements in this list.
+    * <p> Returns the nominal number of elements in this list. Only indices in
+    * the range {@code [0, size() - 1]} are acceptable for index-based operations.
     *
-    * @return the number of elements in this list
+    * <p> Note this generally differs from the number of allocated elements
+    * in the underlying array
+    *
+    * @return size of this list
     */
    @Override
    public int size()
@@ -63,9 +112,7 @@ public class RecyclingArrayList<T> implements List<T>
    }
 
    /**
-    * Returns <tt>true</tt> if this list contains no elements.
-    *
-    * @return <tt>true</tt> if this list contains no elements
+    * @return <tt>true</tt> if this list has size 0
     */
    @Override
    public boolean isEmpty()
@@ -185,26 +232,6 @@ public class RecyclingArrayList<T> implements List<T>
       }
 
       return values[index];
-   }
-
-   public void growByOne()
-   {
-      unsafeGrowByN(1);
-   }
-
-   public void growByN(int numberOfElementsToGrow)
-   {
-      if (numberOfElementsToGrow == 0)
-         return;
-      else if (numberOfElementsToGrow < 0)
-         throw new RuntimeException("Cannot grow the list by a negative number. Given number for growing list:" + numberOfElementsToGrow);
-      unsafeGrowByN(numberOfElementsToGrow);
-   }
-
-   protected void unsafeGrowByN(int n)
-   {
-      size += n;
-      ensureCapacity(size);
    }
 
    /**
@@ -431,6 +458,7 @@ public class RecyclingArrayList<T> implements List<T>
       return -1;
    }
 
+   /** {@inheritDoc} */
    @Override
    public Object[] toArray()
    {
