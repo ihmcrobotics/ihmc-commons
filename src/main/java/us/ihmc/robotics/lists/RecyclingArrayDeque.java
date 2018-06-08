@@ -1,5 +1,7 @@
 package us.ihmc.robotics.lists;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Iterator;
@@ -8,6 +10,16 @@ import java.util.function.Supplier;
 
 /**
  * This is an implementation of ArrayDeque that will reuse objects, making it more allocation efficient.
+ * When elements are removed from this queue, they are stored in a secondary queue. When adding to this
+ * queue, the element to add is first copied and the copy is stored in this queue.
+ *
+ * <p> In order to copy data elements, a {@code copier} must be provided, which implements {@code BiConsumer}
+ * such that {@link BiConsumer#accept} sets the first argument from the second.
+ *
+ * <p> For example, to make a RecyclingArrayDeque of type {@link MutableInt} the copier would be:
+ * <p> {@code copier = (object1, object2) -> object1.setValue(object2); }
+ * <p> Functional construction is generally possible too, for example:
+ * <p> {@code RecyclingArrayDeque<MutableInt> list = new RecyclingArrayDeque<>(MutableInt::new, MutableInt::setValue);}
  *
  * @param <T> the type of object in this deque
  */
@@ -194,54 +206,6 @@ public class RecyclingArrayDeque<T> extends ArrayDeque<T>
     * {@inheritDoc}
     */
    @Override
-   public T getFirst()
-   {
-      T objectToReturn = super.getFirst();
-      //      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T getLast()
-   {
-      T objectToReturn = super.getLast();
-      //      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T peekFirst()
-   {
-      T objectToReturn = super.peekFirst();
-      //      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T peekLast()
-   {
-      T objectToReturn = super.peekLast();
-      //      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
    public T remove()
    {
       T objectToReturn = super.remove();
@@ -258,30 +222,6 @@ public class RecyclingArrayDeque<T> extends ArrayDeque<T>
    {
       T objectToReturn = super.poll();
       unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T element()
-   {
-      T objectToReturn = super.element();
-      //      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T peek()
-   {
-      T objectToReturn = super.peek();
-      //      unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
