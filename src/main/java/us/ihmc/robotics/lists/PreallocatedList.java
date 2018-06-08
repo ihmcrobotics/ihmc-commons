@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Preallocated list of Objects.
+ * Preallocated list of objects designed to be allocation-free after construction.
  *
- * This object preallocates the maximum number of instances.
+ * <p> This object preallocates the maximum number of instances.
  * No setter is provided, use add(), remove() and get(i) to add, remove or get elements and change them in place.
  *
  * @author Jesper Smith
@@ -32,6 +32,13 @@ public class PreallocatedList<T>
       values = null;
    }
 
+   /**
+    * Constructs an list that can be grown up to the given maximum size.
+    * <tt>maxSize</tt> elements are pre-allocated using the given allocator.
+    * @param clazz class of element data. used in hashCode() and equals()
+    * @param allocator default element creator
+    * @param maxSize maximum size the list can grow
+    */
    @SuppressWarnings("unchecked")
    public PreallocatedList(Class<T> clazz, Supplier<T> allocator, int maxSize)
    {
@@ -295,6 +302,13 @@ public class PreallocatedList<T>
       }
    }
 
+   /**
+    * Hashcode computed from the class type, size of the array,
+    * and respective hashcodes of the current data.
+    *
+    * @return hashCode for this list
+    * @see Arrays#hashCode(Object[])
+    */
    @Override
    public int hashCode()
    {
@@ -307,6 +321,13 @@ public class PreallocatedList<T>
       return result;
    }
 
+   /**
+    * Equality is checked by type checking the given object
+    * and verifying their data are equal by calling {@link Arrays#equals(Object[], Object[])}
+    *
+    * @param obj
+    * @return if list is identical
+    */
    @Override
    public boolean equals(Object obj)
    {
@@ -326,11 +347,8 @@ public class PreallocatedList<T>
          return false;
       if (pos != other.pos)
          return false;
-      for (int i = 0; i < size(); i++)
-      {
-         if (!values[i].equals(other.values[i]))
-            return false;
-      }
+      if (!Arrays.equals(values, other.values))
+         return false;
       return true;
    }
 
