@@ -189,4 +189,21 @@ public class PreallocatedListTest
          // Good
       }
    }
+
+   @Test(timeout = 30000)
+   public void testSort()
+   {
+      PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, 10);
+      list.add().setValue(-3);
+      list.add().setValue(20);
+      list.add().setValue(-10);
+      list.add().setValue(19);
+      list.add().setValue(50);
+      list.sort(MutableInt::compareTo);
+      assertTrue(list.get(0).getValue() == -10);
+      assertTrue(list.get(1).getValue() == -3);
+      assertTrue(list.get(2).getValue() == 19);
+      assertTrue(list.get(3).getValue() == 20);
+      assertTrue(list.get(4).getValue() == 50);
+   }
 }

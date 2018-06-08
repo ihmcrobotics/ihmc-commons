@@ -2,6 +2,8 @@ package us.ihmc.robotics.lists;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -154,6 +156,17 @@ public class PreallocatedList<T>
       }
 
       unsafeSwap(i, j);
+   }
+
+   /**
+    * Sorts the array in place using {@link Arrays::sort}
+    * @param comparator to determine element ordering
+    */
+   public void sort(Comparator<? super T> comparator)
+   {
+      if(size() == 0)
+         return;
+      Arrays.sort(values, 0, size(), comparator);
    }
 
    private void unsafeSwap(int i, int j)

@@ -549,4 +549,20 @@ public class RecyclingArrayListTest
       // check constructor doesn't throw exception
       new RecyclingArrayList();
    }
+
+   @Test(timeout = 30000)
+   public void testSort()
+   {
+      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(10, MutableInt.class, MutableInt::new);
+      for (int i = 0; i < list.size(); i++)
+      {
+         list.get(i).setValue(i);
+      }
+      list.shuffle(new Random(239032L));
+      list.sort(MutableInt::compareTo);
+      for (int i = 0; i < list.size(); i++)
+      {
+         assertTrue(list.get(i).getValue() == i);
+      }
+   }
 }

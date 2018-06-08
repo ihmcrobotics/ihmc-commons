@@ -307,6 +307,18 @@ public class RecyclingArrayList<T> implements List<T>
       }
    }
 
+   /**
+    * Sorts the array in place using {@link Arrays::sort}
+    * @param comparator to determine element ordering
+    */
+   @Override
+   public void sort(Comparator<? super T> comparator)
+   {
+      if(size() == 0)
+         return;
+      Arrays.sort(values, 0, size(), comparator);
+   }
+
    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
    protected void ensureCapacity(int minCapacity)
