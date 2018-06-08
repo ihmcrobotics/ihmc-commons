@@ -2,6 +2,7 @@ package us.ihmc.robotics.lists;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Preallocated list of Enums.
@@ -263,6 +264,17 @@ public class PreallocatedEnumList<T extends java.lang.Enum>
    public int capacity()
    {
       return values.length;
+   }
+
+   /**
+    * Sorts the array in place using {@link Arrays::sort}
+    * @param comparator to determine element ordering
+    */
+   public void sort(Comparator<? super T> comparator)
+   {
+      if(size() == 0)
+         return;
+      Arrays.sort(values, 0, size(), comparator);
    }
 
    /**

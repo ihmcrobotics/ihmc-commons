@@ -103,15 +103,13 @@ public class PreallocatedListTest
       while (list.size() < currentSize)
          list.add().setValue(10 + list.size());
 
-      System.out.println(list);
-
       ArrayList<MutableInt> expectedList = new ArrayList<>();
       for (int i = 0; i < currentSize; i++)
          expectedList.add(list.get(i));
 
-      int indexOfRemovedOject = 3;
-      list.remove(indexOfRemovedOject);
-      expectedList.remove(indexOfRemovedOject);
+      int indexOfRemovedObject = 3;
+      list.remove(indexOfRemovedObject);
+      expectedList.remove(indexOfRemovedObject);
       currentSize--;
       assertTrue(list.size() == currentSize);
 
@@ -120,9 +118,9 @@ public class PreallocatedListTest
          assertTrue(list.get(i) == expectedList.get(i));
       }
 
-      indexOfRemovedOject = currentSize - 1;
-      list.remove(indexOfRemovedOject);
-      expectedList.remove(indexOfRemovedOject);
+      indexOfRemovedObject = currentSize - 1;
+      list.remove(indexOfRemovedObject);
+      expectedList.remove(indexOfRemovedObject);
       currentSize--;
       assertTrue(list.size() == currentSize);
 
