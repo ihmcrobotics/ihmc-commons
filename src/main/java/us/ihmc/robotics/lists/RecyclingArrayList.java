@@ -28,7 +28,6 @@ public class RecyclingArrayList<T> implements List<T>
     */
    private static final int MINIMUM_POSITIVE_CAPACITY = 8;
 
-   private final Class<T> clazz;
    private T[] values;
    private int size = 0;
    private final Supplier<T> allocator;
@@ -39,7 +38,7 @@ public class RecyclingArrayList<T> implements List<T>
    @Deprecated
    public RecyclingArrayList()
    {
-      this(0, null, null);
+      this(0, (Supplier<T>) null);
    }
 
    /**
@@ -49,7 +48,7 @@ public class RecyclingArrayList<T> implements List<T>
     */
    public RecyclingArrayList(Class<T> clazz)
    {
-      this(0, clazz, SupplierBuilder.createFromEmptyConstructor(clazz));
+      this(0, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
    /**
@@ -60,7 +59,7 @@ public class RecyclingArrayList<T> implements List<T>
     */
    public RecyclingArrayList(int initialCapacity, Class<T> clazz)
    {
-      this(initialCapacity, clazz, SupplierBuilder.createFromEmptyConstructor(clazz));
+      this(initialCapacity, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
    /**
@@ -68,18 +67,16 @@ public class RecyclingArrayList<T> implements List<T>
     * used for any future allocation.
     *
     * @param initialCapacity initial capacity of the array
-    * @param clazz class of element data
     * @param allocator generates elements by calling {@link Supplier#get()}
     */
    @SuppressWarnings("unchecked")
-   public RecyclingArrayList(int initialCapacity, Class<T> clazz, Supplier<T> allocator)
+   public RecyclingArrayList(int initialCapacity, Supplier<T> allocator)
    {
       if(initialCapacity < 0)
       {
          throw new IllegalArgumentException("Illegal capacity: " + initialCapacity);
       }
 
-      this.clazz = clazz;
       this.values = (T[]) new Object[initialCapacity];
       this.allocator = allocator;
 
@@ -482,28 +479,20 @@ public class RecyclingArrayList<T> implements List<T>
       return a;
    }
 
+    /** {@inheritDoc} */
    @Override
    public boolean equals(Object obj)
    {
       if (this == obj)
          return true;
-      if (obj == null)
+      if (!(obj instanceof List))
          return false;
-      if (getClass() != obj.getClass())
-         return false;
-      RecyclingArrayList<?> other = (RecyclingArrayList<?>) obj;
-      if (clazz == null)
-      {
-         if (other.clazz != null)
-            return false;
-      }
-      else if (!clazz.equals(other.clazz))
-         return false;
-      if (size != other.size)
+      List<?> other = (List<?>) obj;
+      if (size != other.size())
          return false;
       for (int i = 0; i < size(); i++)
       {
-         if (!values[i].equals(other.values[i]))
+         if (!values[i].equals(other.get(i)))
             return false;
       }
       return true;
