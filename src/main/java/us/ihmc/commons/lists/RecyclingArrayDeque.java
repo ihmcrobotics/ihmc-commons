@@ -160,34 +160,11 @@ public class RecyclingArrayDeque<T> extends ArrayDeque<T>
     * {@inheritDoc}
     */
    @Override
-   public T removeFirst()
-   {
-      T objectToReturn = super.removeFirst();
-      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T removeLast()
-   {
-      T objectToReturn = super.removeLast();
-      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
    public T pollFirst()
    {
       T objectToReturn = super.pollFirst();
-      unusedObjects.add(objectToReturn);
+      if(objectToReturn != null)
+         unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -199,7 +176,8 @@ public class RecyclingArrayDeque<T> extends ArrayDeque<T>
    public T pollLast()
    {
       T objectToReturn = super.pollLast();
-      unusedObjects.add(objectToReturn);
+      if(objectToReturn != null)
+         unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -223,7 +201,8 @@ public class RecyclingArrayDeque<T> extends ArrayDeque<T>
    public T poll()
    {
       T objectToReturn = super.poll();
-      unusedObjects.add(objectToReturn);
+      if(objectToReturn != null)
+         unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
