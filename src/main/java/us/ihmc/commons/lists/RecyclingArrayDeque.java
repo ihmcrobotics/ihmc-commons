@@ -1,4 +1,4 @@
-package us.ihmc.robotics.lists;
+package us.ihmc.commons.lists;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 

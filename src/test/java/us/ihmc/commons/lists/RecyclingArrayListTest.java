@@ -1,8 +1,9 @@
-package us.ihmc.robotics.lists;
+package us.ihmc.commons.lists;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package us.ihmc.robotics.lists;
+package us.ihmc.commons.lists;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

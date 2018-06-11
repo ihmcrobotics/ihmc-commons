@@ -1,7 +1,8 @@
-package us.ihmc.robotics.lists;
+package us.ihmc.commons.lists;
 
 import org.junit.Assert;
 import org.junit.Test;
+import us.ihmc.commons.lists.PreallocatedEnumList;
 
 import java.util.ArrayList;
 import java.util.Collections;

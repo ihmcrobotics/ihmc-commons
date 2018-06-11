@@ -1,8 +1,9 @@
-package us.ihmc.robotics;
+package us.ihmc.commons;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import us.ihmc.commons.InterpolationTools;
 
 import java.util.Random;
 

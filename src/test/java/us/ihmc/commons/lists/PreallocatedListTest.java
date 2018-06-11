@@ -1,4 +1,4 @@
-package us.ihmc.robotics.lists;
+package us.ihmc.commons.lists;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -10,6 +10,7 @@ import java.util.Random;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Test;
+import us.ihmc.commons.lists.PreallocatedList;
 
 public class PreallocatedListTest
 {
