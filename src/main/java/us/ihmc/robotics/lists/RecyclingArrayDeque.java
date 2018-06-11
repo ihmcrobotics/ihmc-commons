@@ -16,10 +16,12 @@ import java.util.function.Supplier;
  * <p> In order to copy data elements, a {@code copier} must be provided, which implements {@code BiConsumer}
  * such that {@link BiConsumer#accept} sets the first argument from the second.
  *
- * <p> For example, to make a RecyclingArrayDeque of type {@link MutableInt} the copier would be:
- * <p> {@code copier = (object1, object2) -> object1.setValue(object2); }
- * <p> Functional construction is generally possible too, for example:
- * <p> {@code RecyclingArrayDeque<MutableInt> list = new RecyclingArrayDeque<>(MutableInt::new, MutableInt::setValue);}
+ * <p> For example, to make a RecyclingArrayDeque of type {@link MutableInt} the copier would be: <br>
+ * {@code copier = (object1, object2) -> object1.setValue(object2); } </p>
+ *
+ * <p> Functional construction is generally possible too, for example: <br>
+ * {@code RecyclingArrayDeque<MutableInt> list = new RecyclingArrayDeque<>(MutableInt::new, MutableInt::setValue);}
+ * </p>
  *
  * @param <T> the type of object in this deque
  */
