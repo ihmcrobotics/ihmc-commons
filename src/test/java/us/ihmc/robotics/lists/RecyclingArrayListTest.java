@@ -21,18 +21,13 @@ public class RecyclingArrayListTest
       assertTrue(list.size() == 0);
       assertTrue(list.getLast() == null);
 
-      int expectedSize = 10;
-      list = new RecyclingArrayList<>(expectedSize, Object.class);
-      assertFalse(list.isEmpty());
-      assertTrue(list.size() == expectedSize);
-      assertTrue(list.getLast() != null);
+      int capacity = 10;
+      list = new RecyclingArrayList<>(capacity, Object.class);
+      assertTrue(list.isEmpty());
+      assertTrue(list.size() == 0);
+      assertTrue(list.getLast() == null);
 
-      list = new RecyclingArrayList<>(expectedSize, Object.class, Object::new);
-      assertFalse(list.isEmpty());
-      assertTrue(list.size() == expectedSize);
-      assertTrue(list.getLast() != null);
-
-      list.clear();
+      list = new RecyclingArrayList<>(capacity, Object.class, Object::new);
       assertTrue(list.isEmpty());
       assertTrue(list.size() == 0);
       assertTrue(list.getLast() == null);
@@ -171,6 +166,12 @@ public class RecyclingArrayListTest
    {
       int currentSize = 10;
       RecyclingArrayList<Object> list = new RecyclingArrayList<>(currentSize, Object.class, Object::new);
+
+      for (int i = 0; i < currentSize; i++)
+      {
+         list.add();
+      }
+
       assertTrue(list.size() == currentSize);
 
       ArrayList<Object> savedList = new ArrayList<>();
@@ -207,7 +208,7 @@ public class RecyclingArrayListTest
       int currentSize = 10;
       RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class, MutableInt::new);
       for (int i = 0; i < currentSize; i++)
-         list.get(i).setValue(10 + i);
+         list.add().setValue(10 + i);
       assertTrue(list.size() == currentSize);
 
       ArrayList<MutableInt> expectedList = new ArrayList<>();
@@ -254,7 +255,7 @@ public class RecyclingArrayListTest
       int currentSize = 10;
       RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class, MutableInt::new);
       for (int i = 0; i < currentSize; i++)
-         list.get(i).setValue(10 + i);
+         list.add().setValue(10 + i);
       assertTrue(list.size() == currentSize);
 
       ArrayList<MutableInt> expectedList = new ArrayList<>();
@@ -303,7 +304,7 @@ public class RecyclingArrayListTest
       int currentSize = 10;
       RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class, MutableInt::new);
       for (int i = 0; i < currentSize; i++)
-         list.get(i).setValue(10 + i);
+         list.add().setValue(10 + i);
       assertTrue(list.size() == currentSize);
 
       ArrayList<MutableInt> expectedList = new ArrayList<>();
@@ -346,7 +347,7 @@ public class RecyclingArrayListTest
 
       for (int i = 0; i < currentSize; i++)
       {
-         list.get(i).setValue(10 + i);
+         list.add().setValue(10 + i);
       }
 
       assertTrue(list.size() == currentSize);
@@ -402,7 +403,7 @@ public class RecyclingArrayListTest
 
       for (int i = 0; i < size; i++)
       {
-         list.get(i).setValue(i);
+         list.add().setValue(i);
       }
 
       Iterator<MutableInt> iterator = list.iterator();
@@ -420,7 +421,7 @@ public class RecyclingArrayListTest
 
       for (int i = 0; i < initialSize; i++)
       {
-         list.get(i).setValue(i);
+         list.add().setValue(i);
       }
 
       Iterator<MutableInt> iterator = list.iterator();
@@ -461,6 +462,11 @@ public class RecyclingArrayListTest
    {
       int initialSize = 10;
       RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(initialSize, MutableInt.class, MutableInt::new);
+
+      for (int i = 0; i < initialSize; i++)
+      {
+         list.add();
+      }
 
       int testIndex = 5;
       Iterator<MutableInt> iterator = list.iterator();

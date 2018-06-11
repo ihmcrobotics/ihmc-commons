@@ -23,6 +23,11 @@ import java.util.function.Supplier;
  */
 public class RecyclingArrayList<T> implements List<T>
 {
+   /**
+    * Minimum non-zero capacity
+    */
+   private static final int MINIMUM_POSITIVE_CAPACITY = 8;
+
    private final Class<T> clazz;
    private T[] values;
    private int size = 0;
@@ -48,35 +53,34 @@ public class RecyclingArrayList<T> implements List<T>
    }
 
    /**
-    * Constructs an array with the given initial capacity. An allocator is created which calls the given class's empty constructor
-    * @param initialSize initial capacity of the array
+    * Constructs a zero-sized array and allocates the given capacity. An allocator is created which calls the given class's empty constructor
+    * @param initialCapacity initial capacity of the array
     * @param clazz class of element data
     * @see SupplierBuilder#createFromEmptyConstructor(Class)
     */
-   public RecyclingArrayList(int initialSize, Class<T> clazz)
+   public RecyclingArrayList(int initialCapacity, Class<T> clazz)
    {
-      this(initialSize, clazz, SupplierBuilder.createFromEmptyConstructor(clazz));
+      this(initialCapacity, clazz, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
    /**
-    * Constructs an array with the given initial capacity. This array is populated with objects using the allocator. This allocator is also
+    * Constructs a zero-sized array with the given initial capacity. This array is populated with objects using the allocator. This allocator is also
     * used for any future allocation.
     *
-    * @param initialSize initial capacity of the array
+    * @param initialCapacity initial capacity of the array
     * @param clazz class of element data
     * @param allocator generates elements by calling {@link Supplier#get()}
     */
    @SuppressWarnings("unchecked")
-   public RecyclingArrayList(int initialSize, Class<T> clazz, Supplier<T> allocator)
+   public RecyclingArrayList(int initialCapacity, Class<T> clazz, Supplier<T> allocator)
    {
-      if(initialSize < 0)
+      if(initialCapacity < 0)
       {
-         throw new IllegalArgumentException("Illegal size: " + initialSize);
+         throw new IllegalArgumentException("Illegal capacity: " + initialCapacity);
       }
 
       this.clazz = clazz;
-      values = (T[]) new Object[initialSize];
-      size = initialSize;
+      this.values = (T[]) new Object[initialCapacity];
       this.allocator = allocator;
 
       fillElementDataIfNeeded();
@@ -224,11 +228,11 @@ public class RecyclingArrayList<T> implements List<T>
    public T getAndGrowIfNeeded(int index)
    {
       positiveIndexCheck(index);
+      size = Math.max(size, index + 1);
 
-      if (index >= size)
+      if (index >= values.length)
       {
-         size = index + 1;
-         ensureCapacity(size);
+         ensureCapacity(Math.max(MINIMUM_POSITIVE_CAPACITY, size));
       }
 
       return values[index];
