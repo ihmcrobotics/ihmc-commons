@@ -3,10 +3,16 @@ package us.ihmc.commons.lists;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Some tools for moving an index around in a list safely,
+ * wrapping around and staying inside the bounds of the list.
+ */
 public class ListWrappingIndexTools
 {
    /**
     * Wrap the given index such that 0 <= wrappedIndex < list.size().
+    *
+    * "Clamps" the index to the bounds of the list.
     *
     * @param index the index to wrap
     * @param list the list for which the index is to be used.
