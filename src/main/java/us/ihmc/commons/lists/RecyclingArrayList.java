@@ -1,33 +1,94 @@
-package us.ihmc.robotics.lists;
+package us.ihmc.commons.lists;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+/**
+ * A list implementation designed to mimic the functionality of ArrayList
+ * while reducing allocation. Once an object is allocated in this list,
+ * its reference is retained for the lifetime of the list even if the
+ * object is nominally removed.
+ *
+ * <p> Objects are added to the list by calling {@link #add()} and operating
+ * on the returned object. None of the List api for adding and setting are supported.
+ * For example:
+ * <ul>
+ * <li> {@code RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(MutableInt.class);}
+ * <li> {@code MutableInt i = list.add();}
+ * <li> {@code i.setValue(5);}
+ * </ul>
+ *
+ * @param <T>
+ */
 public class RecyclingArrayList<T> implements List<T>
 {
    /**
-    * Default initial capacity.
+    * Minimum non-zero capacity
     */
-   private static final int DEFAULT_INITIAL_SIZE = 0;
+   private static final int MINIMUM_POSITIVE_CAPACITY = 8;
 
-   private T[] elementData;
-   private final GenericTypeBuilder<T> builder;
-   protected int size = 0;
+   private T[] values;
+   private int size = 0;
+   private final Supplier<T> allocator;
 
+   /**
+    * Constructs zero-sized array without an allocator
+    */
+   @Deprecated
+   public RecyclingArrayList()
+   {
+      this(0, (Supplier<T>) null);
+   }
+
+   /**
+    * Constructs a zero-sized array. An allocator is created which calls the given class's empty constructor
+    * @param clazz class of element data
+    * @see SupplierBuilder#createFromEmptyConstructor(Class)
+    */
    public RecyclingArrayList(Class<T> clazz)
    {
-      this(DEFAULT_INITIAL_SIZE, GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz));
+      this(0, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
-   public RecyclingArrayList(GenericTypeBuilder<T> builder)
+   /**
+    * Constructs a zero-sized array and allocates the given capacity. An allocator is created which calls the given class's empty constructor
+    * @param initialCapacity initial capacity of the array
+    * @param clazz class of element data
+    * @see SupplierBuilder#createFromEmptyConstructor(Class)
+    */
+   public RecyclingArrayList(int initialCapacity, Class<T> clazz)
    {
-      this(DEFAULT_INITIAL_SIZE, builder);
+      this(initialCapacity, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
-   public RecyclingArrayList(int initialSize, Class<T> clazz)
+   /**
+    * Constructs a zero-sized array with the given initial capacity. This array is populated with objects using the allocator. This allocator is also
+    * used for any future allocation.
+    *
+    * @param initialCapacity initial capacity of the array
+    * @param allocator generates elements by calling {@link Supplier#get()}
+    */
+   @SuppressWarnings("unchecked")
+   public RecyclingArrayList(int initialCapacity, Supplier<T> allocator)
    {
-      this(initialSize, GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz));
+      if(initialCapacity < 0)
+      {
+         throw new IllegalArgumentException("Illegal capacity: " + initialCapacity);
+      }
+
+      this.values = (T[]) new Object[initialCapacity];
+      this.allocator = allocator;
+
+      fillElementDataIfNeeded();
    }
 
+   /**
+    * Randomly shuffles this list using the random-access implementation described here:
+    * {@link Collections#shuffle(List, Random)}
+    *
+    * @param random number generator used to shuffle list
+    */
    public void shuffle(Random random)
    {
       for (int i = size; i > 1; i--)
@@ -36,20 +97,14 @@ public class RecyclingArrayList<T> implements List<T>
       }
    }
 
-   @SuppressWarnings("unchecked")
-   public RecyclingArrayList(int initialSize, GenericTypeBuilder<T> builder)
-   {
-      elementData = (T[]) new Object[initialSize];
-      size = initialSize;
-      this.builder = builder;
-
-      fillElementDataIfNeeded();
-   }
-
    /**
-    * Returns the number of elements in this list.
+    * <p> Returns the nominal number of elements in this list. Only indices in
+    * the range {@code [0, size() - 1]} are acceptable for index-based operations.
     *
-    * @return the number of elements in this list
+    * <p> Note this generally differs from the number of allocated elements
+    * in the underlying array
+    *
+    * @return size of this list
     */
    @Override
    public int size()
@@ -58,9 +113,7 @@ public class RecyclingArrayList<T> implements List<T>
    }
 
    /**
-    * Returns <tt>true</tt> if this list contains no elements.
-    *
-    * @return <tt>true</tt> if this list contains no elements
+    * @return <tt>true</tt> if this list has size 0
     */
    @Override
    public boolean isEmpty()
@@ -115,7 +168,7 @@ public class RecyclingArrayList<T> implements List<T>
    /**
     * Returns the element at the specified position in this list.
     *
-    * @param index index of the element to return
+    * @param i index of the element to return
     * @return the element at the specified position in this list
     * @throws IndexOutOfBoundsException if the index is out of range
     * (<tt>index &lt; 0 || index &gt;= size()</tt>)
@@ -157,7 +210,7 @@ public class RecyclingArrayList<T> implements List<T>
 
    protected T unsafeGet(int i)
    {
-      return elementData[i];
+      return values[i];
    }
 
    /**
@@ -172,34 +225,14 @@ public class RecyclingArrayList<T> implements List<T>
    public T getAndGrowIfNeeded(int index)
    {
       positiveIndexCheck(index);
+      size = Math.max(size, index + 1);
 
-      if (index >= size)
+      if (index >= values.length)
       {
-         size = index + 1;
-         ensureCapacity(size);
+         ensureCapacity(Math.max(MINIMUM_POSITIVE_CAPACITY, size));
       }
 
-      return elementData[index];
-   }
-
-   public void growByOne()
-   {
-      unsafeGrowByN(1);
-   }
-
-   public void growByN(int numberOfElementsToGrow)
-   {
-      if (numberOfElementsToGrow == 0)
-         return;
-      else if (numberOfElementsToGrow < 0)
-         throw new RuntimeException("Cannot grow the list by a negative number. Given number for growing list:" + numberOfElementsToGrow);
-      unsafeGrowByN(numberOfElementsToGrow);
-   }
-
-   protected void unsafeGrowByN(int n)
-   {
-      size += n;
-      ensureCapacity(size);
+      return values[index];
    }
 
    /**
@@ -245,9 +278,9 @@ public class RecyclingArrayList<T> implements List<T>
 
    private void unsafeFastSwap(int i, int j)
    {
-      T t = elementData[i];
-      elementData[i] = elementData[j];
-      elementData[j] = t;
+      T t = values[i];
+      values[i] = values[j];
+      values[j] = t;
    }
 
    /**
@@ -255,7 +288,7 @@ public class RecyclingArrayList<T> implements List<T>
     * Shifts any subsequent elements to the left (subtracts one from their
     * indices).
     *
-    * @param index the index of the element to be removed
+    * @param i the index of the element to be removed
     * @return null.
     */
    @Override
@@ -268,15 +301,15 @@ public class RecyclingArrayList<T> implements List<T>
       }
       rangeCheck(i);
 
-      T t = elementData[i];
+      T t = values[i];
 
       while (i < size - 1)
       {
-         elementData[i] = elementData[++i];
+         values[i] = values[++i];
       }
 
       // Do not throw away the removed element, put it at the end of the list instead.
-      elementData[size - 1] = t;
+      values[size - 1] = t;
       size--;
       return null;
    }
@@ -302,25 +335,37 @@ public class RecyclingArrayList<T> implements List<T>
       }
    }
 
+   /**
+    * Sorts the array in place using {@link Arrays::sort}
+    * @param comparator to determine element ordering
+    */
+   @Override
+   public void sort(Comparator<? super T> comparator)
+   {
+      if(size() == 0)
+         return;
+      Arrays.sort(values, 0, size(), comparator);
+   }
+
    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
    protected void ensureCapacity(int minCapacity)
    {
-      if (minCapacity <= elementData.length)
+      if (minCapacity <= values.length)
          return;
 
-      int previousArraySize = elementData.length;
+      int previousArraySize = values.length;
       int newArraySize = previousArraySize + (previousArraySize >> 1);
       if (newArraySize - minCapacity < 0)
          newArraySize = minCapacity;
       if (newArraySize - MAX_ARRAY_SIZE > 0)
          newArraySize = checkWithMaxCapacity(minCapacity);
 
-      elementData = Arrays.copyOf(elementData, newArraySize);
+      values = Arrays.copyOf(values, newArraySize);
 
       for (int i = previousArraySize; i < newArraySize; i++)
       {
-         elementData[i] = builder.newInstance();
+         values[i] = allocator.get();
       }
    }
 
@@ -333,10 +378,10 @@ public class RecyclingArrayList<T> implements List<T>
 
    private void fillElementDataIfNeeded()
    {
-      for (int i = 0; i < elementData.length; i++)
+      for (int i = 0; i < values.length; i++)
       {
-         if (elementData[i] == null)
-            elementData[i] = builder.newInstance();
+         if (values[i] == null)
+            values[i] = allocator.get();
       }
    }
 
@@ -389,7 +434,7 @@ public class RecyclingArrayList<T> implements List<T>
       {
          for (int i = 0; i < size; i++)
          {
-            if (object.equals(elementData[i]))
+            if (object.equals(values[i]))
                return i;
          }
       }
@@ -407,17 +452,18 @@ public class RecyclingArrayList<T> implements List<T>
       {
          for (int i = size - 1; i >= 0; i--)
          {
-            if (object.equals(elementData[i]))
+            if (object.equals(values[i]))
                return i;
          }
       }
       return -1;
    }
 
+   /** {@inheritDoc} */
    @Override
    public Object[] toArray()
    {
-      return Arrays.copyOf(elementData, size);
+      return Arrays.copyOf(values, size);
    }
 
    @SuppressWarnings("unchecked")
@@ -426,12 +472,32 @@ public class RecyclingArrayList<T> implements List<T>
    {
       if (a.length < size)
          // Make a new array of a's runtime type, but my contents:
-         return (X[]) Arrays.copyOf(elementData, size, a.getClass());
-      System.arraycopy(elementData, 0, a, 0, size);
+         return (X[]) Arrays.copyOf(values, size, a.getClass());
+      System.arraycopy(values, 0, a, 0, size);
       if (a.length > size)
          a[size] = null;
       return a;
    }
+
+    /** {@inheritDoc} */
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (!(obj instanceof List))
+         return false;
+      List<?> other = (List<?>) obj;
+      if (size != other.size())
+         return false;
+      for (int i = 0; i < size(); i++)
+      {
+         if (!values[i].equals(other.get(i)))
+            return false;
+      }
+      return true;
+   }
+
 
    @Override
    public String toString()
@@ -448,11 +514,11 @@ public class RecyclingArrayList<T> implements List<T>
       return ret;
    }
 
-   /** Unsupported operation. */
+   /** {@inheritDoc} */
    @Override
    public Iterator<T> iterator()
    {
-      throw new UnsupportedOperationException();
+      return new RecyclingArrayListIterator();
    }
 
    /** Unsupported operation. */
@@ -530,5 +596,46 @@ public class RecyclingArrayList<T> implements List<T>
    public List<T> subList(int fromIndex, int toIndex)
    {
       throw new UnsupportedOperationException();
+   }
+
+   private class RecyclingArrayListIterator implements Iterator<T>
+   {
+      int nextIndexToReturn = 0;
+      boolean removeFlag = true;
+
+      @Override
+      public boolean hasNext()
+      {
+         return nextIndexToReturn <= size() - 1;
+      }
+
+      @Override
+      public T next()
+      {
+         removeFlag = false;
+         return get(nextIndexToReturn++);
+      }
+
+      @Override
+      public void remove()
+      {
+         if(removeFlag)
+         {
+            throw new IllegalStateException();
+         }
+
+         RecyclingArrayList.this.remove(nextIndexToReturn - 1);
+         nextIndexToReturn -= 1;
+         removeFlag = true;
+      }
+
+      @Override
+      public void forEachRemaining(Consumer<? super T> action)
+      {
+         while (nextIndexToReturn < size())
+         {
+            action.accept((T) values[nextIndexToReturn++]);
+         }
+      }
    }
 }

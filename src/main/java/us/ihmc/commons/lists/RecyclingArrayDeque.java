@@ -1,44 +1,67 @@
-package us.ihmc.robotics.lists;
+package us.ihmc.commons.lists;
+
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * This is an implementation of ArrayDeque that will reuse objects, making it more allocation efficient.
+ * When elements are removed from this queue, they are stored in a secondary queue. When adding to this
+ * queue, the element to add is first copied and the copy is stored in this queue.
  *
- * @param <T> the type of object in this deque must extend {@link #Settable}.
+ * <p> In order to copy data elements, a {@code copier} must be provided, which implements {@code BiConsumer}
+ * such that {@link BiConsumer#accept} sets the first argument from the second.
+ *
+ * <p> For example, to make a RecyclingArrayDeque of type {@link MutableInt} the copier would be: <br>
+ * {@code copier = (object1, object2) -> object1.setValue(object2); } </p>
+ *
+ * <p> Functional construction is generally possible too, for example: <br>
+ * {@code RecyclingArrayDeque<MutableInt> list = new RecyclingArrayDeque<>(MutableInt::new, MutableInt::setValue);}
+ * </p>
+ *
+ * @param <T> the type of object in this deque
  */
-public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
+public class RecyclingArrayDeque<T> extends ArrayDeque<T>
 {
    private static final long serialVersionUID = 8118722036566615731L;
    private static final int defaultNumberOfElements = 16;
 
-   private final GenericTypeBuilder<T> typeBuilder;
+   private final Supplier<T> typeBuilder;
    private final ArrayDeque<T> unusedObjects;
+   private final BiConsumer<T, T> copier;
 
-   public RecyclingArrayDeque(GenericTypeBuilder<T> typeBuilder)
+   public RecyclingArrayDeque(Supplier<T> typeBuilder, BiConsumer<T, T> copier)
    {
-      this(defaultNumberOfElements, typeBuilder);
+      this(defaultNumberOfElements, typeBuilder, copier);
    }
 
-   public RecyclingArrayDeque(Class<T> objectClass)
+   public RecyclingArrayDeque(Class<T> objectClass, BiConsumer<T, T> copier)
    {
-      this(defaultNumberOfElements, GenericTypeBuilder.createBuilderWithEmptyConstructor(objectClass));
+      this(defaultNumberOfElements, SupplierBuilder.createFromEmptyConstructor(objectClass), copier);
    }
 
-   public RecyclingArrayDeque(int numElements, Class<T> objectClass)
+   public RecyclingArrayDeque(int numElements, Class<T> objectClass, BiConsumer<T, T> copier)
    {
-      this(numElements, GenericTypeBuilder.createBuilderWithEmptyConstructor(objectClass));
+      this(numElements, SupplierBuilder.createFromEmptyConstructor(objectClass), copier);
    }
 
-   public RecyclingArrayDeque(int numElements, GenericTypeBuilder<T> typeBuilder)
+   /**
+    * @param numElements lower bound on initial capacity of the deque
+    * @param typeBuilder builds instance of data type
+    * @param copier copies such that {@link BiConsumer#accept} sets the first argument from the second
+    */
+   public RecyclingArrayDeque(int numElements, Supplier<T> typeBuilder, BiConsumer<T, T> copier)
    {
       super(numElements);
       this.typeBuilder = typeBuilder;
+      this.copier = copier;
       unusedObjects = new ArrayDeque<>(numElements);
       for (int i = 0; i < numElements; i++)
-         unusedObjects.add(typeBuilder.newInstance());
+         unusedObjects.add(typeBuilder.get());
    }
 
    /** {@inheritDoc} */
@@ -137,34 +160,11 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
     * {@inheritDoc}
     */
    @Override
-   public T removeFirst()
-   {
-      T objectToReturn = super.removeFirst();
-      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T removeLast()
-   {
-      T objectToReturn = super.removeLast();
-      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
    public T pollFirst()
    {
       T objectToReturn = super.pollFirst();
-      unusedObjects.add(objectToReturn);
+      if(objectToReturn != null)
+         unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -176,55 +176,8 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    public T pollLast()
    {
       T objectToReturn = super.pollLast();
-      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T getFirst()
-   {
-      T objectToReturn = super.getFirst();
-      //      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T getLast()
-   {
-      T objectToReturn = super.getLast();
-      //      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T peekFirst()
-   {
-      T objectToReturn = super.peekFirst();
-      //      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T peekLast()
-   {
-      T objectToReturn = super.peekLast();
-      //      unusedObjects.add(objectToReturn);
+      if(objectToReturn != null)
+         unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -248,31 +201,8 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    public T poll()
    {
       T objectToReturn = super.poll();
-      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T element()
-   {
-      T objectToReturn = super.element();
-      //      unusedObjects.add(objectToReturn);
-      return objectToReturn;
-   }
-
-   /**
-    * Warning: The returned element will be reused and modified by this deque when adding a new element.
-    * {@inheritDoc}
-    */
-   @Override
-   public T peek()
-   {
-      T objectToReturn = super.peek();
-      //      unusedObjects.add(objectToReturn);
+      if(objectToReturn != null)
+         unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -291,14 +221,14 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    private T copyAndReturnLocalObject(T objectToCopy)
    {
       T localObject = getOrCreateUnusedObject();
-      localObject.set(objectToCopy);
+      copier.accept(localObject, objectToCopy);
       return localObject;
    }
 
    private T getOrCreateUnusedObject()
    {
       if (unusedObjects.isEmpty())
-         return typeBuilder.newInstance();
+         return typeBuilder.get();
       else
          return unusedObjects.poll();
    }

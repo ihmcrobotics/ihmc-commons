@@ -1,4 +1,4 @@
-package us.ihmc.robotics.lists;
+package us.ihmc.commons.lists;
 
 import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.*;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.*;
 
 public class ListWrappingIndexToolsTest
 {
