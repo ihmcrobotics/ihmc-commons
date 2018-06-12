@@ -15,13 +15,9 @@ https://bintray.com/ihmcrobotics/maven-release/ihmc-commons-test
 
 In your `build.gradle`:
 ```groovy
-compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.1"
-testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.19.1"
+compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
+testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.0"
 ```
-
-### Warning
-
-As of 0.12.0, this project will be unstable and a sandbox for refactoring. It will aim become stable again on the 0.13.x release.
 
 ### What's Included
 
@@ -33,12 +29,14 @@ As of 0.12.0, this project will be unstable and a sandbox for refactoring. It wi
 - Tool for printing log-level style messages that show class name and line number.
 - Epsilons for explicitness and convenience.
 - Functional exception handler with defaults.
+- Recycling and preallocated lists, deque.
 
 ###### Testing Distribution
 
 - Support for mutation testing and displaying the results in your browser.
 - Tools for running parallel continuous integration tests in the cloud.
 - Extra assertions. (assertSerializable, assertExceptionThrown, etc.)
+- Tools for allocation testing. (light wrapper for Google's java-allocation-instrumenter)
 
 ### Contributing
 
