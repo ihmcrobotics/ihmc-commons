@@ -1,9 +1,15 @@
 package us.ihmc.commons.lists;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Iterator;
+import java.util.ListIterator;
 
 /**
  * Preallocated list of objects designed to be allocation-free after construction.
