@@ -34,7 +34,7 @@ public class PreallocatedList<T> implements List<T>
    /**
     * Constructs an list that can be grown up to the given maximum size.
     * <tt>maxSize</tt> elements are pre-allocated using the given allocator.
-    * @param clazz class of element data. used in hashCode() and equals()
+    * @param clazz class of element data. used to create underlying array
     * @param allocator default element creator
     * @param maxSize maximum size the list can grow
     */
@@ -67,12 +67,13 @@ public class PreallocatedList<T> implements List<T>
 
    /** {@inheritDoc} */
    @Override
-   public <T> T[] toArray(T[] dest)
+   @SuppressWarnings("unchecked")
+   public <S> S[] toArray(S[] dest)
    {
       int size = size();
       if (dest.length < size)
       {
-         return (T[]) Arrays.copyOf(values, size, dest.getClass());
+         return (S[]) Arrays.copyOf(values, size, dest.getClass());
       }
       System.arraycopy(values, 0, dest, 0, size);
       if (dest.length > size)
@@ -405,7 +406,7 @@ public class PreallocatedList<T> implements List<T>
    }
 
    /**
-    * Hashcode computed from the class type, size of the array,
+    * Hashcode computed from the size of the array,
     * and respective hashcodes of the current data.
     *
     * @return hashCode for this list
@@ -416,20 +417,13 @@ public class PreallocatedList<T> implements List<T>
    {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
-      result = prime * result + 1237;
       result = prime * result + pos;
+      result = prime * result + 1237;
       result = prime * result + Arrays.hashCode(values);
       return result;
    }
 
-   /**
-    * Equality is checked by type checking the given object
-    * and verifying their data are equal by calling {@link Arrays#equals(Object[], Object[])}
-    *
-    * @param obj
-    * @return if list is identical
-    */
+   /** {@inheritDoc} */
    @Override
    public boolean equals(Object obj)
    {
