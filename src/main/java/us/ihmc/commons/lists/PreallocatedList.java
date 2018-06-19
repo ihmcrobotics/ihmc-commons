@@ -469,7 +469,7 @@ public class PreallocatedList<T> implements List<T>
    @Override
    public boolean contains(Object o)
    {
-      for (int i = 0; i < pos; i++)
+      for (int i = 0; i < size(); i++)
       {
          if(values[i].equals(o))
          {
