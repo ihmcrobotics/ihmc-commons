@@ -22,6 +22,11 @@ public class RecyclingArrayListTest
       assertTrue(list.size() == 0);
       assertTrue(list.getLast() == null);
 
+      list = new RecyclingArrayList<>(Object::new);
+      assertTrue(list.isEmpty());
+      assertTrue(list.size() == 0);
+      assertTrue(list.getLast() == null);
+
       int capacity = 10;
       list = new RecyclingArrayList<>(capacity, Object.class);
       assertTrue(list.isEmpty());
