@@ -3,7 +3,13 @@ package us.ihmc.commons.lists;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Iterator;
+import java.util.ListIterator;
 
 /**
  * Preallocated list of objects designed to be allocation-free after construction.
@@ -15,7 +21,7 @@ import java.util.function.Supplier;
  *
  * @param <T>
  */
-public class PreallocatedList<T>
+public class PreallocatedList<T> implements List<T>
 {
    private final Class<T> clazz;
    private final T[] values;
@@ -34,7 +40,7 @@ public class PreallocatedList<T>
    /**
     * Constructs an list that can be grown up to the given maximum size.
     * <tt>maxSize</tt> elements are pre-allocated using the given allocator.
-    * @param clazz class of element data. used in hashCode() and equals()
+    * @param clazz class of element data. used to create underlying array
     * @param allocator default element creator
     * @param maxSize maximum size the list can grow
     */
@@ -56,6 +62,7 @@ public class PreallocatedList<T>
     *
     * @return new array of length size();
     */
+   @Override
    public T[] toArray()
    {
       @SuppressWarnings("unchecked")
@@ -64,21 +71,23 @@ public class PreallocatedList<T>
       return array;
    }
 
-   /**
-    * Copies the elements in this list to dest
-    *
-    * @param dest Destination array. Has to be at least length size()
-    * @throws IndexOutOfBoundsException if the destination array is smaller than size()
-    */
-   public void toArray(T[] dest)
+   /** {@inheritDoc} */
+   @Override
+   @SuppressWarnings("unchecked")
+   public <S> S[] toArray(S[] dest)
    {
-      if (dest.length < size())
+      int size = size();
+      if (dest.length < size)
       {
-         throw new IndexOutOfBoundsException("Cannot copy data in destination array, insufficient space.");
+         return (S[]) Arrays.copyOf(values, size, dest.getClass());
       }
-      System.arraycopy(values, 0, dest, 0, size());
-
+      System.arraycopy(values, 0, dest, 0, size);
+      if (dest.length > size)
+         dest[size] = null;
+      return dest;
    }
+
+
 
    /**
     * Clears the list.
@@ -120,12 +129,13 @@ public class PreallocatedList<T>
     *
     * @param i the index of the element to be removed
     */
-   public void remove(int i)
+   @Override
+   public T remove(int i)
    {
       if (i == pos)
       {
          remove();
-         return;
+         return values[i];
       }
 
       rangeCheck(i);
@@ -140,7 +150,81 @@ public class PreallocatedList<T>
       // Do not throw away the removed element, put it at the end of the list instead.
       values[pos] = t;
       --pos;
-      return;
+      return t;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean remove(Object o)
+   {
+      int index = indexOf(o);
+      if(index == -1)
+      {
+         return false;
+      }
+      else
+      {
+         remove(index);
+         return true;
+      }
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean removeAll(Collection<?> c)
+   {
+      Objects.requireNonNull(c);
+      return filterList(c, true);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean retainAll(Collection<?> c)
+   {
+      Objects.requireNonNull(c);
+      return filterList(c, false);
+   }
+
+   private boolean filterList(Collection<?> c, boolean removeIfPresent)
+   {
+      boolean listModified = false;
+      for (int i = 0; i < size() ;)
+      {
+         if(c.contains(values[i]) == removeIfPresent)
+         {
+            remove(i);
+            listModified = true;
+         }
+         else
+         {
+            i++;
+         }
+      }
+      return listModified;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public int indexOf(Object o)
+   {
+      for (int i = 0; i < size(); i++)
+      {
+         if(values[i].equals(o))
+            return i;
+      }
+      return -1;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public int lastIndexOf(Object o)
+   {
+      for (int i = pos; i >= 0; i--)
+      {
+         if(values[i].equals(o))
+            return i;
+      }
+      return -1;
    }
 
    /**
@@ -168,6 +252,7 @@ public class PreallocatedList<T>
     * Sorts the array in place using {@link Arrays::sort}
     * @param comparator to determine element ordering
     */
+   @Override
    public void sort(Comparator<? super T> comparator)
    {
       if(size() == 0)
@@ -188,6 +273,7 @@ public class PreallocatedList<T>
     * @param i Position to get element at
     * @return Element at position i.
     */
+   @Override
    public T get(int i)
    {
       rangeCheck(i);
@@ -237,6 +323,7 @@ public class PreallocatedList<T>
     * releases
     *
     */
+   @Override
    public void clear()
    {
       resetQuick();
@@ -245,6 +332,7 @@ public class PreallocatedList<T>
    /**
     * Returns the number of active elements in this list
     */
+   @Override
    public int size()
    {
       return pos + 1;
@@ -255,6 +343,7 @@ public class PreallocatedList<T>
     *
     * @return {@code true} if this list contains no elements.
     */
+   @Override
    public boolean isEmpty()
    {
       return size() == 0;
@@ -269,7 +358,6 @@ public class PreallocatedList<T>
    }
 
    /**
-    *
     * @return the remaining space in this sequence (capacity() - size())
     */
    public int remaining()
@@ -302,7 +390,7 @@ public class PreallocatedList<T>
    }
 
    /**
-    * Hashcode computed from the class type, size of the array,
+    * Hashcode computed from the size of the array,
     * and respective hashcodes of the current data.
     *
     * @return hashCode for this list
@@ -313,41 +401,28 @@ public class PreallocatedList<T>
    {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
-      result = prime * result + 1237;
       result = prime * result + pos;
+      result = prime * result + 1237;
       result = prime * result + Arrays.hashCode(values);
       return result;
    }
 
-   /**
-    * Equality is checked by type checking the given object
-    * and verifying their data are equal by calling {@link Arrays#equals(Object[], Object[])}
-    *
-    * @param obj
-    * @return if list is identical
-    */
+   /** {@inheritDoc} */
    @Override
    public boolean equals(Object obj)
    {
       if (this == obj)
          return true;
-      if (obj == null)
+      if (!(obj instanceof List))
          return false;
-      if (getClass() != obj.getClass())
+      List<?> other = (List<?>) obj;
+      if (size() != other.size())
          return false;
-      PreallocatedList<?> other = (PreallocatedList<?>) obj;
-      if (clazz == null)
+      for (int i = 0; i < size(); i++)
       {
-         if (other.clazz != null)
+         if (!values[i].equals(other.get(i)))
             return false;
       }
-      else if (!clazz.equals(other.clazz))
-         return false;
-      if (pos != other.pos)
-         return false;
-      if (!Arrays.equals(values, other.values))
-         return false;
       return true;
    }
 
@@ -366,5 +441,135 @@ public class PreallocatedList<T>
       }
       s += "]";
       return s;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean contains(Object o)
+   {
+      for (int i = 0; i < size(); i++)
+      {
+         if(values[i].equals(o))
+         {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean containsAll(Collection<?> c)
+   {
+      for (Object o : c)
+      {
+         if (!contains(o))
+            return false;
+      }
+      return true;
+   }
+
+   // Unsupported operations
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    * Set elements by calling {@link #get(int)} or {@link #add()}
+    * and operating on the returned object
+    */
+   @Override
+   public T set(int index, T element)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    * Add elements by calling {@link #add()} and operating on the returned object
+    */
+   @Override
+   public boolean add(T t)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    * Set elements by calling {@link #get(int)} or {@link #add()}
+    * and operating on the returned object
+    */
+   @Override
+   public void add(int index, T element)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    * Add elements by calling {@link #add()} and operating on the returned object
+    */
+   @Override
+   public boolean addAll(Collection<? extends T> c)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    * Add elements by calling {@link #add()} and operating on the returned object
+    */
+   @Override
+   public boolean addAll(int index, Collection<? extends T> c)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    * Set elements by calling {@link #get(int)} and operating on the returned object
+    */
+   @Override
+   public void replaceAll(UnaryOperator<T> operator)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    * Iterate using indices and not an iterator
+    */
+   @Override
+   public Iterator<T> iterator()
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    * Iterate using indices and not an iterator
+    */
+   @Override
+   public ListIterator<T> listIterator()
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    * Iterate using indices and not an iterator
+    */
+   @Override
+   public ListIterator<T> listIterator(int index)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * Always throws an {@code UnsupportedOperationException}.
+    */
+   @Override
+   public List<T> subList(int fromIndex, int toIndex)
+   {
+      throw new UnsupportedOperationException();
    }
 }

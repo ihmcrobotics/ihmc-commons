@@ -52,6 +52,16 @@ public class RecyclingArrayList<T> implements List<T>
    }
 
    /**
+    * Constructs a zero-sized, zero-capacity array. This array is populated with objects using the allocator.
+    * This allocator is also used for any future allocation.
+    * @param allocator
+    */
+   public RecyclingArrayList(Supplier<T> allocator)
+   {
+      this(0, allocator);
+   }
+
+   /**
     * Constructs a zero-sized array and allocates the given capacity. An allocator is created which calls the given class's empty constructor
     * @param initialCapacity initial capacity of the array
     * @param clazz class of element data

@@ -1,16 +1,15 @@
 package us.ihmc.commons.lists;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.function.UnaryOperator;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.Test;
-import us.ihmc.commons.lists.PreallocatedList;
+import static org.junit.Assert.*;
 
 public class PreallocatedListTest
 {
@@ -204,5 +203,250 @@ public class PreallocatedListTest
       assertTrue(list.get(2).getValue() == 19);
       assertTrue(list.get(3).getValue() == 20);
       assertTrue(list.get(4).getValue() == 50);
+   }
+
+   @Test(timeout = 30000)
+   public void testRemoveIndex()
+   {
+      int size = 10;
+      PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, size);
+      for (int i = 0; i < size; i++)
+      {
+         list.add().setValue(i);
+      }
+
+      assertTrue(list.remove(8).getValue() == 8);
+      assertTrue(list.size() == size - 1);
+      assertTrue(list.remove(4).getValue() == 4);
+      assertTrue(list.size() == size - 2);
+      assertTrue(list.remove(2).getValue() == 2);
+      assertTrue(list.size() == size - 3);
+      assertTrue(list.remove(size - 4).getValue() == size - 1);
+      assertTrue(list.size() == size - 4);
+   }
+
+   @Test(timeout = 30000)
+   public void testRemoveObject()
+   {
+      int size = 5;
+      PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, size);
+      for (int i = 0; i < size; i++)
+      {
+         list.add().setValue(i);
+      }
+
+      // first element is same as last
+      list.get(0).setValue(size - 1);
+
+      // should remove first element
+      assertTrue(list.remove(new MutableInt(4)));
+      assertTrue(list.size() == size - 1);
+      assertTrue(list.remove(new MutableInt(2)));
+      assertTrue(list.size() == size - 2);
+
+      assertTrue(list.get(0).getValue() == 1);
+      assertTrue(list.get(1).getValue() == 3);
+      assertTrue(list.get(2).getValue() == 4);
+   }
+
+   @Test(timeout = 30000)
+   public void testRemoveAll()
+   {
+      int size = 5;
+      PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, size);
+      for (int i = 0; i < size; i++)
+      {
+         list.add().setValue(i);
+      }
+
+      HashSet<MutableInt> elementsToRemove = new HashSet<>();
+      elementsToRemove.add(new MutableInt(1));
+      elementsToRemove.add(new MutableInt(3));
+
+      list.removeAll(elementsToRemove);
+
+      assertTrue(list.get(0).getValue() == 0);
+      assertTrue(list.get(1).getValue() == 2);
+      assertTrue(list.get(2).getValue() == 4);
+      assertTrue(list.size() == 3);
+   }
+
+   @Test(timeout = 30000)
+   public void testRetainAll()
+   {
+      int size = 5;
+      PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, size);
+      for (int i = 0; i < size; i++)
+      {
+         list.add().setValue(i);
+      }
+
+      HashSet<MutableInt> elementsToRemove = new HashSet<>();
+      elementsToRemove.add(new MutableInt(1));
+      elementsToRemove.add(new MutableInt(3));
+
+      list.retainAll(elementsToRemove);
+
+      assertTrue(list.get(0).getValue() == 1);
+      assertTrue(list.get(1).getValue() == 3);
+      assertTrue(list.size() == 2);
+   }
+
+   @Test(timeout = 30000)
+   public void testIndexOf()
+   {
+      int size = 10;
+      PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, size);
+      for (int i = 0; i < size; i++)
+      {
+         list.add().setValue(i % (size / 2));
+      }
+
+      for (int i = 0; i < size / 2; i++)
+      {
+         assertTrue(list.indexOf(new MutableInt(i)) == i);
+      }
+
+      for (int i = 0; i < size / 2; i++)
+      {
+         assertTrue(list.lastIndexOf(new MutableInt(i)) == i + size / 2);
+      }
+
+      assertTrue(list.indexOf(new MutableInt(398)) == -1);
+      assertTrue(list.lastIndexOf(new MutableInt(398)) == -1);
+   }
+
+   @Test(timeout = 30000)
+   public void testContains()
+   {
+      int size = 5;
+      PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, size);
+      for (int i = 0; i < size; i++)
+      {
+         list.add().setValue(i);
+      }
+
+      for (int i = 0; i < list.size(); i++)
+      {
+         assertTrue(list.contains(new MutableInt(i)));
+      }
+      assertFalse(list.contains(new MutableInt(size)));
+      assertFalse(list.contains(new MutableInt(-1)));
+      assertFalse(list.contains(new MutableInt(0xdeadbeef)));
+   }
+
+   @Test(timeout = 30000)
+   public void testContainsAll()
+   {
+      int size = 5;
+      PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, size);
+      HashSet<MutableInt> elements = new HashSet<>();
+
+      for (int i = 0; i < size; i++)
+      {
+         list.add().setValue(i);
+         elements.add(new MutableInt(i));
+      }
+
+      assertTrue(list.containsAll(elements));
+
+      elements.add(new MutableInt(size));
+      assertFalse(list.containsAll(elements));
+
+      elements.remove(new MutableInt(size));
+      elements.remove(new MutableInt(1));
+      assertTrue(list.containsAll(elements));
+   }
+
+   @Test(timeout = 30000)
+   public void testUnsupportedOperations()
+   {
+      int size = 5;
+      PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, size);
+      for (int i = 0; i < size; i++)
+      {
+         list.add().setValue(i);
+      }
+
+      try
+      {
+         list.set(0, new MutableInt());
+         fail();
+      }
+      catch(UnsupportedOperationException e)
+      {
+      }
+
+      try
+      {
+         list.add(new MutableInt());
+         fail();
+      }
+      catch(UnsupportedOperationException e)
+      {
+      }
+
+      try
+      {
+         list.add(0, new MutableInt());
+         fail();
+      }
+      catch(UnsupportedOperationException e)
+      {
+      }
+
+      try
+      {
+         list.addAll(new HashSet<>());
+         fail();
+      }
+      catch(UnsupportedOperationException e)
+      {
+      }
+
+      try
+      {
+         list.replaceAll(UnaryOperator.identity());
+         fail();
+      }
+      catch(UnsupportedOperationException e)
+      {
+      }
+
+      try
+      {
+         list.iterator();
+         fail();
+      }
+      catch(UnsupportedOperationException e)
+      {
+      }
+
+      try
+      {
+         list.listIterator();
+         fail();
+      }
+      catch(UnsupportedOperationException e)
+      {
+      }
+
+      try
+      {
+         list.listIterator(0);
+         fail();
+      }
+      catch(UnsupportedOperationException e)
+      {
+      }
+
+      try
+      {
+         list.subList(0, 1);
+         fail();
+      }
+      catch(UnsupportedOperationException e)
+      {
+      }
    }
 }
