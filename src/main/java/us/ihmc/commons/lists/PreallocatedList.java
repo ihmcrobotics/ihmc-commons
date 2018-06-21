@@ -207,21 +207,10 @@ public class PreallocatedList<T> implements List<T>
    @Override
    public int indexOf(Object o)
    {
-      if(o == null)
+      for (int i = 0; i < size(); i++)
       {
-         for (int i = 0; i < size(); i++)
-         {
-            if(values[i] == o)
-               return i;
-         }
-      }
-      else
-      {
-         for (int i = 0; i < size(); i++)
-         {
-            if(values[i].equals(o))
-               return i;
-         }
+         if(values[i].equals(o))
+            return i;
       }
       return -1;
    }
@@ -230,21 +219,10 @@ public class PreallocatedList<T> implements List<T>
    @Override
    public int lastIndexOf(Object o)
    {
-      if(o == null)
+      for (int i = pos; i >= 0; i--)
       {
-         for (int i = pos; i >= 0; i--)
-         {
-            if(values[i] == o)
-               return i;
-         }
-      }
-      else
-      {
-         for (int i = pos; i >= 0; i--)
-         {
-            if(values[i].equals(o))
-               return i;
-         }
+         if(values[i].equals(o))
+            return i;
       }
       return -1;
    }
