@@ -37,3 +37,11 @@ testDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("testing")
 }
+
+ihmc.sourceSetProject("test").test {
+   ihmc.sourceSetProject("test").configurations.compile.findAll { it.name.contains("java-allocation-instrumenter") }.each {
+      def javaAgentArg = "-javaagent:" + it.getAbsolutePath()
+      println("[ihmc-commons] Passing JVM arg: " + javaAgentArg)
+      jvmArgs javaAgentArg
+   }
+}

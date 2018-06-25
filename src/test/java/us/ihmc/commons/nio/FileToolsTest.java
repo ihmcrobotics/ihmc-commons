@@ -78,7 +78,7 @@ public class FileToolsTest
       pathNames.addAll(Arrays.asList(packageNames));
       pathNames.add(StringUtils.uncapitalize(clazz.getSimpleName()));
 
-      return Paths.get("testResources", pathNames.toArray(new String[0]));
+      return Paths.get("resources", pathNames.toArray(new String[0]));
    }
 
    @Test(timeout = 30000)
