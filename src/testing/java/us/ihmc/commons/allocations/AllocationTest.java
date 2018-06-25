@@ -24,6 +24,8 @@ public abstract class AllocationTest extends AllocationProfiler
 {
    public AllocationTest()
    {
+      checkInstrumentation();
+
       getClassWhitelist().forEach(className -> addClassToWhitelist(className));
       getClassBlacklist().forEach(className -> addClassToBlacklist(className));
       getMethodBlacklist().forEach(method -> addMethodToBlacklist(method));
