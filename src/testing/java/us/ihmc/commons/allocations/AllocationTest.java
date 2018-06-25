@@ -2,6 +2,9 @@ package us.ihmc.commons.allocations;
 
 import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import us.ihmc.commons.RunnableThatThrows;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 import java.lang.reflect.Method;
@@ -28,6 +31,8 @@ public interface AllocationTest
     * classes of interest here. (i.e. "whitelist") This avoids recording any garbage generated
     * in other places such as SCS. You should add you controller class here. No classes
     * outside of these and the classes they create and the methods they call will be recorded.
+    *
+    * If this list is empty, all classes and methods will be recorded.
     *
     * @return classes that should be monitored for allocations.
     */
@@ -64,6 +69,21 @@ public interface AllocationTest
     */
    default List<Throwable> runAndCollectAllocations(Runnable runnable)
    {
+      return runAndCollectAllocations(() -> runnable.run(), DefaultExceptionHandler.PROCEED_SILENTLY);
+   }
+
+   /**
+    * Will run the provided runnable and return a list of places where allocations occurred.
+    * If the returned list is empty no allocations where detected.
+    *
+    * Allows for exceptions to be handled easily.
+    *
+    * @param runnable contains the code to be profiled. Can throw exceptions.
+    * @param exceptionHandler Callback for handling exceptions.
+    * @return a list of places where objects were allocated.
+    */
+   default List<Throwable> runAndCollectAllocations(RunnableThatThrows runnable, ExceptionHandler exceptionHandler)
+   {
       checkInstrumentation();
 
       AllocationSampler sampler = new AllocationSampler();
@@ -72,7 +92,14 @@ public interface AllocationTest
       getMethodsToIgnore().forEach(method -> sampler.addBlacklistMethod(method));
 
       AllocationRecorder.addSampler(sampler);
-      runnable.run();
+      try
+      {
+         runnable.run();
+      }
+      catch (Throwable e)
+      {
+         exceptionHandler.handleException(e);
+      }
       sampler.stop();
       AllocationRecorder.removeSampler(sampler);
 
