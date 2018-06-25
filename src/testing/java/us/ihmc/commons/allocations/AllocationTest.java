@@ -1,15 +1,14 @@
 package us.ihmc.commons.allocations;
 
+import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import us.ihmc.commons.lists.RecyclingArrayList;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
-import us.ihmc.commons.lists.RecyclingArrayList;
 
 /**
  * This interface provides the means to profile the garbage generation of code. This is useful
@@ -26,8 +25,9 @@ public interface AllocationTest
 {
    /**
     * To avoid recording allocations that are of no interest it is possible to specify
-    * classes of interest here. This avoids recording any garbage generated in other places
-    * such as SCS. You should add you controller class here.
+    * classes of interest here. (i.e. "whitelist") This avoids recording any garbage generated
+    * in other places such as SCS. You should add you controller class here. No classes
+    * outside of these and the classes they create and the methods they call will be recorded.
     *
     * @return classes that should be monitored for allocations.
     */
