@@ -21,8 +21,8 @@ public class AllocationProfiler
 
    private boolean stopped = true;
 
-   private boolean recordConstructorAllocations = false;
-   private boolean recordStaticMemberInitialization = false;
+   private boolean recordConstructorAllocations = true;
+   private boolean recordStaticMemberInitialization = true;
 
    public AllocationProfiler()
    {
@@ -187,7 +187,7 @@ public class AllocationProfiler
       }
 
       // Skip static member initializations.
-      if (stackTrace[0].getMethodName().contains("<clinit>"))
+      if (!recordStaticMemberInitialization && stackTrace[0].getMethodName().contains("<clinit>"))
       {
          return;
       }
