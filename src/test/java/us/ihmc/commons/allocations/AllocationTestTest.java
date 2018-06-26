@@ -23,7 +23,7 @@ public class AllocationTestTest
    public void testSettingOfVector()
    {
       MutableDouble data = new MutableDouble();
-      List<Throwable> allocations = new Tester().runAndCollectAllocations(() -> data.setValue(1.0));
+      List<Throwable> allocations = new AllocationProfiler().recordAllocations(() -> data.setValue(1.0));
       Assert.assertEquals(0, allocations.size());
    }
 
@@ -32,7 +32,7 @@ public class AllocationTestTest
    @Test(timeout = 3000)
    public void testAllocationOfArray()
    {
-      List<Throwable> allocations = new Tester().runAndCollectAllocations(() -> {
+      List<Throwable> allocations = new AllocationProfiler().recordAllocations(() -> {
          double[] someArray = new double[12];
       });
 
@@ -45,7 +45,7 @@ public class AllocationTestTest
    @Test(timeout = 3000)
    public void testSingleAllocation()
    {
-      List<Throwable> allocations = new Tester().runAndCollectAllocations(() -> new MutableDouble());
+      List<Throwable> allocations = new AllocationProfiler().recordAllocations(() -> new MutableDouble());
       Assert.assertEquals(1, allocations.size());
       Assert.assertTrue(allocations.get(0).getMessage().contains(MutableDouble.class.getSimpleName()));
       PrintTools.info(allocations.get(0).getMessage());
@@ -56,7 +56,7 @@ public class AllocationTestTest
    public void testSwitchTable()
    {
       // First time the switch statement is called for an enum a switch table is generated:
-      List<Throwable> allocations = new Tester().runAndCollectAllocations(() -> {
+      List<Throwable> allocations = new AllocationProfiler().recordAllocations(() -> {
          switch (MyEnum.A)
          {
          default:
@@ -66,7 +66,7 @@ public class AllocationTestTest
       Assert.assertFalse(allocations.isEmpty());
 
       // The second time there are no allocations:
-      allocations = new Tester().runAndCollectAllocations(() -> {
+      allocations = new AllocationProfiler().recordAllocations(() -> {
          switch (MyEnum.B)
          {
          default:
@@ -74,20 +74,5 @@ public class AllocationTestTest
          }
       });
       Assert.assertTrue(allocations.isEmpty());
-   }
-
-   private class Tester implements AllocationTest
-   {
-      @Override
-      public List<Class<?>> getClassesOfInterest()
-      {
-         return Collections.emptyList();
-      }
-
-      @Override
-      public List<Class<?>> getClassesToIgnore()
-      {
-         return Collections.emptyList();
-      }
    }
 }

@@ -11,7 +11,7 @@ apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    group = "us.ihmc"
-   version = "0.20.1"
+   version = "0.21.0"
    vcsUrl = "https://github.com/ihmcrobotics/ihmc-commons"
    openSource = true
    maintainer = "Duncan Calvert"
@@ -36,4 +36,12 @@ testingDependencies {
 testDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("testing")
+}
+
+ihmc.sourceSetProject("test").test {
+   ihmc.sourceSetProject("test").configurations.compile.findAll { it.name.contains("java-allocation-instrumenter") }.each {
+      def javaAgentArg = "-javaagent:" + it.getAbsolutePath()
+      println("[ihmc-commons] Passing JVM arg: " + javaAgentArg)
+      jvmArgs javaAgentArg
+   }
 }

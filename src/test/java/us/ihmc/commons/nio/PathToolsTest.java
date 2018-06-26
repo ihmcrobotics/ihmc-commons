@@ -84,12 +84,12 @@ public class PathToolsTest
 
       PrintTools.info(this, "Camel cased simple name: " + camelCasedClassSimpleName);
 
-      Path firstPath = PathTools.findFirstPathMatchingGlob(Paths.get("testResources"), "**/" + camelCasedClassSimpleName);
+      Path firstPath = PathTools.findFirstPathMatchingGlob(Paths.get("resources"), "**/" + camelCasedClassSimpleName);
 
       if (firstPath == null)
          PrintTools.error(this, "Path not found!");
 
-      assertTrue("directoryHasGlob not working.", PathTools.directoryHasGlob(Paths.get("testResources"), "**/" + camelCasedClassSimpleName));
+      assertTrue("directoryHasGlob not working.", PathTools.directoryHasGlob(Paths.get("resources"), "**/" + camelCasedClassSimpleName));
 
       PrintTools.info(this, "First path: " + firstPath.toString());
       PrintTools.info(this, "First path fileName: " + firstPath.getFileName());
@@ -138,7 +138,7 @@ public class PathToolsTest
    {
       String[] split = PathToolsTest.class.getPackage().getName().split("\\.");
       List<String> packageParts = new ArrayList<>();
-      packageParts.add("testResources");
+      packageParts.add("resources");
       packageParts.addAll(Arrays.asList(split));
       packageParts.add(StringUtils.uncapitalize(PathToolsTest.class.getSimpleName()));
       packageParts.add(PathToolsTest.class.getSimpleName() + ".java.fake");
