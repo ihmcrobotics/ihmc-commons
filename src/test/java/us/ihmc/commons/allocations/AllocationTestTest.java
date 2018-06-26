@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,7 +24,7 @@ public class AllocationTestTest
    public void testSettingOfVector()
    {
       MutableDouble data = new MutableDouble();
-      List<Throwable> allocations = new AllocationProfiler().recordAllocations(() -> data.setValue(1.0));
+      List<AllocationRecord> allocations = new AllocationProfiler().recordAllocations(() -> data.setValue(1.0));
       Assert.assertEquals(0, allocations.size());
    }
 
@@ -32,23 +33,67 @@ public class AllocationTestTest
    @Test(timeout = 3000)
    public void testAllocationOfArray()
    {
-      List<Throwable> allocations = new AllocationProfiler().recordAllocations(() -> {
+      List<AllocationRecord> allocations = new AllocationProfiler().recordAllocations(() -> {
          double[] someArray = new double[12];
       });
 
       Assert.assertEquals(1, allocations.size());
-      Assert.assertTrue(allocations.get(0).getMessage().contains(double.class.getSimpleName() + "[]"));
-      PrintTools.info(allocations.get(0).getMessage());
+      Assert.assertTrue(allocations.get(0).getNewObject().getClass().equals(double[].class));
+      PrintTools.info(allocations.get(0).toString());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testSingleAllocation()
    {
-      List<Throwable> allocations = new AllocationProfiler().recordAllocations(() -> new MutableDouble());
+      List<AllocationRecord> allocations = new AllocationProfiler().recordAllocations(() -> new MutableDouble());
       Assert.assertEquals(1, allocations.size());
-      Assert.assertTrue(allocations.get(0).getMessage().contains(MutableDouble.class.getSimpleName()));
-      PrintTools.info(allocations.get(0).getMessage());
+      Assert.assertTrue(allocations.get(0).getNewObject().getClass().equals(MutableDouble.class));
+      PrintTools.info(allocations.get(0).toString());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 3000)
+   public void testSingleAllocationConstructorFilter()
+   {
+      List<AllocationRecord> allocations;
+      AllocationProfiler allocationProfiler = new AllocationProfiler();
+
+      allocationProfiler.setRecordConstructorAllocations(true);
+      allocations = allocationProfiler.recordAllocations(() -> new LilAllocator());
+      printAllocations(allocations);
+      Assert.assertEquals(3, allocations.size());
+
+      allocationProfiler.setRecordConstructorAllocations(false);
+      allocations = allocationProfiler.recordAllocations(() -> new LilAllocator());
+      printAllocations(allocations);
+      Assert.assertEquals(1, allocations.size());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 3000)
+   public void testSingleAllocationClassBlacklist()
+   {
+      List<AllocationRecord> allocations;
+      AllocationProfiler allocationProfiler = new AllocationProfiler();
+
+      allocationProfiler.setRecordConstructorAllocations(true);
+      allocations = allocationProfiler.recordAllocations(() -> new LilAllocator());
+      printAllocations(allocations);
+      Assert.assertEquals(3, allocations.size());
+
+      allocationProfiler.addClassToBlacklist(MutableInt.class.getName());
+      allocations = allocationProfiler.recordAllocations(() -> new LilAllocator());
+      printAllocations(allocations);
+      Assert.assertEquals(1, allocations.size());
+   }
+
+   private void printAllocations(List<AllocationRecord> allocations)
+   {
+      for (AllocationRecord allocation : allocations)
+      {
+         PrintTools.info(allocation.toString());
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
@@ -56,7 +101,7 @@ public class AllocationTestTest
    public void testSwitchTable()
    {
       // First time the switch statement is called for an enum a switch table is generated:
-      List<Throwable> allocations = new AllocationProfiler().recordAllocations(() -> {
+      List<AllocationRecord> allocations = new AllocationProfiler().recordAllocations(() -> {
          switch (MyEnum.A)
          {
          default:
@@ -74,5 +119,16 @@ public class AllocationTestTest
          }
       });
       Assert.assertTrue(allocations.isEmpty());
+   }
+
+   private class LilAllocator
+   {
+      private MutableInt mutableInt;
+      private MutableDouble mutableDouble = new MutableDouble(); // outside constructor
+
+      public LilAllocator()
+      {
+         mutableInt = new MutableInt(); // inside constructor, these both count
+      }
    }
 }

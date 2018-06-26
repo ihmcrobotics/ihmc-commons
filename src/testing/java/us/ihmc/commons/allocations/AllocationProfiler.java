@@ -2,6 +2,7 @@ package us.ihmc.commons.allocations;
 
 import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
@@ -17,7 +18,7 @@ public class AllocationProfiler
    private final Set<String> classBlacklist = new HashSet<>();
    private final Set<String> classWhitelist = new HashSet<>();
 
-   private final Queue<Throwable> allocations = new ConcurrentLinkedQueue<>();
+   private final Queue<AllocationRecord> allocations = new ConcurrentLinkedQueue<>();
 
    private boolean stopped = true;
 
@@ -60,15 +61,15 @@ public class AllocationProfiler
       this.recordStaticMemberInitialization = recordStaticMemberInitialization;
    }
 
-   public List<Throwable> pollAllocations()
+   public List<AllocationRecord> pollAllocations()
    {
-      return removeDuplicateStackTraces(pollAllocationsIncludingDuplicates());
+      return removeDuplicateRecords(pollAllocationsIncludingDuplicates());
    }
 
-   public List<Throwable> pollAllocationsIncludingDuplicates()
+   public List<AllocationRecord> pollAllocationsIncludingDuplicates()
    {
-      List<Throwable> allocations = new ArrayList<>();
-      Throwable allocation;
+      List<AllocationRecord> allocations = new ArrayList<>();
+      AllocationRecord allocation;
       while ((allocation = this.allocations.poll()) != null)
       {
          allocations.add(allocation);
@@ -97,7 +98,7 @@ public class AllocationProfiler
     * @param runnable contains the code to be profiled.
     * @return a list of places where objects were allocated.
     */
-   public List<Throwable> recordAllocations(Runnable runnable)
+   public List<AllocationRecord> recordAllocations(Runnable runnable)
    {
       return recordAllocations(() -> runnable.run(), DefaultExceptionHandler.PROCEED_SILENTLY);
    }
@@ -112,7 +113,7 @@ public class AllocationProfiler
     * @param exceptionHandler Callback for handling exceptions.
     * @return a list of places where objects were allocated.
     */
-   public List<Throwable> recordAllocations(RunnableThatThrows runnable, ExceptionHandler exceptionHandler)
+   public List<AllocationRecord> recordAllocations(RunnableThatThrows runnable, ExceptionHandler exceptionHandler)
    {
       startRecordingAllocations();
 
@@ -156,75 +157,91 @@ public class AllocationProfiler
    }
 
    /**
-    * Helper method to remove duplicate stack traces from a list of throwables.
+    * Helper method to remove duplicate stack traces from a list of allocations.
     *
-    * @param throwables list to prune of duplicate stack traces.
-    * @return list of throwables with unique stack traces.
+    * @param allocations list to prune of duplicate stack traces.
+    * @return list of allocations with unique stack traces.
     */
-   public static List<Throwable> removeDuplicateStackTraces(List<Throwable> throwables)
+   public static List<AllocationRecord> removeDuplicateRecords(List<AllocationRecord> allocations)
    {
-      Map<String, Throwable> map = new HashMap<>();
-      throwables.forEach(t -> map.put(ExceptionUtils.getStackTrace(t), t));
+      Map<String, AllocationRecord> map = new HashMap<>();
+      allocations.forEach(t -> map.put(t.toString(), t));
       return new ArrayList<>(map.values());
    }
 
-   private void sampleAllocation(int count, String desc, Object newObj, long size)
+   private void sampleAllocation(int count, String description, Object newObject, long size)
    {
       if (stopped)
       {
          return;
       }
 
-      StackTraceElement[] stackTrace = getCleanedStackTace();
+      if (description.equals("com/google/monitoring/runtime/instrumentation/Sampler"))
+      {
+         return; // this happens when samplers get added and removed
+      }
 
-      if (!checkIfWhitelisted(stackTrace))
-      {
-         return;
-      }
-      if (checkIfBlacklisted(stackTrace))
-      {
-         return;
-      }
+      AllocationRecord allocation = new AllocationRecord(description, newObject, size);
 
       // Skip static member initializations.
-      if (!recordStaticMemberInitialization && stackTrace[0].getMethodName().contains("<clinit>"))
+      if (!recordStaticMemberInitialization && allocation.getStackTrace()[0].getMethodName().contains("<clinit>"))
       {
          return;
       }
       // Skip things inside constructors.
-      if (!recordConstructorAllocations && stackTrace[0].getMethodName().contains("<init>"))
+      if (!recordConstructorAllocations && allocation.getStackTrace()[0].getMethodName().contains("<init>"))
       {
          return;
       }
 
-      Throwable throwable = new Throwable("Allocation of Object: " + newObj.getClass().getSimpleName());
-      throwable.setStackTrace(stackTrace);
-      allocations.add(throwable);
+      if (!checkIfWhitelisted(allocation.getStackTrace()))
+      {
+         return;
+      }
+      if (checkIfBlacklisted(allocation.getStackTrace()))
+      {
+         return;
+      }
+
+      PrintTools.debug(this, description);
+
+      allocations.add(allocation);
    }
 
    private boolean checkIfWhitelisted(StackTraceElement[] stackTrace)
    {
+      boolean whitelistedResult = false; // exclude everything
+
       if (methodWhitelist.isEmpty() && classWhitelist.isEmpty())
       {
-         return true;
+         whitelistedResult = true;
       }
-
-      for (StackTraceElement el : stackTrace)
+      else
       {
-         String qualifiedMethodName = el.getClassName() + "." + el.getMethodName();
-         if (methodWhitelist.contains(qualifiedMethodName))
+         for (StackTraceElement el : stackTrace)
          {
-            return true;
-         }
-         for (String packet : classWhitelist)
-         {
-            if (el.getClassName().startsWith(packet))
+            String qualifiedMethodName = el.getClassName() + "." + el.getMethodName();
+            if (methodWhitelist.contains(qualifiedMethodName))
             {
-               return true;
+               whitelistedResult = true;
+            }
+            else
+            {
+               for (String packet : classWhitelist)
+               {
+                  if (el.getClassName().startsWith(packet))
+                  {
+                     whitelistedResult = true;
+                     break;
+                  }
+               }
             }
          }
       }
-      return false;
+
+      PrintTools.debug(this, "Whitelisted: " + whitelistedResult);
+
+      return whitelistedResult;
    }
 
    private boolean checkIfBlacklisted(StackTraceElement[] stackTrace)
@@ -250,21 +267,5 @@ public class AllocationProfiler
          }
       }
       return false;
-   }
-
-   private StackTraceElement[] getCleanedStackTace()
-   {
-      String recordClass = AllocationRecorder.class.getName();
-      List<StackTraceElement> stackTrace = Arrays.asList(Thread.currentThread().getStackTrace());
-      int skip = 0;
-      while (!stackTrace.get(skip).toString().contains(recordClass))
-      {
-         skip++;
-      }
-      while (stackTrace.get(skip).toString().contains(recordClass))
-      {
-         skip++;
-      }
-      return stackTrace.subList(skip, stackTrace.size()).toArray(new StackTraceElement[0]);
    }
 }

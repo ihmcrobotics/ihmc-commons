@@ -20,7 +20,7 @@ public class AllocationRecordingDemo extends AllocationTest
 {
    public AllocationRecordingDemo()
    {
-      List<Throwable> allocations;
+      List<AllocationRecord> allocations;
 
       int initialSize = 6;
       RecyclingArrayList<MutableDouble> myList = new RecyclingArrayList<>(initialSize, MutableDouble.class);
@@ -39,14 +39,14 @@ public class AllocationRecordingDemo extends AllocationTest
       allocations = pollAllocations(); // get results
 
       PrintTools.info("Number of places where allocations occured: " + allocations.size());
-      allocations.forEach(allocation -> allocation.printStackTrace());
+      allocations.forEach(allocation -> System.out.println(allocation.toString()));
 
       // This should allocate a new Vector3D
       allocations = recordAllocations(() -> myList.add()); // convenience method, start, run, stop, poll in one step
 
       PrintTools.info("Number of places where allocations occured: " + allocations.size());
 
-      allocations.forEach(allocation -> allocation.printStackTrace());
+      allocations.forEach(allocation -> System.out.println(allocation.toString()));
    }
 
    @Override

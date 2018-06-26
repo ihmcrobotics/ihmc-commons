@@ -157,11 +157,11 @@ public class ListAllocationTest extends AllocationTest
 
    private void testInternal(Runnable whatToTestFor)
    {
-      List<Throwable> allocations = recordAllocations(whatToTestFor);
+      List<AllocationRecord> allocations = recordAllocations(whatToTestFor);
 
       if (!allocations.isEmpty())
       {
-         allocations.forEach(Throwable::printStackTrace);
+         allocations.forEach(it -> System.out.println(it.toString()));
          fail("Found allocations.");
       }
    }
