@@ -1,17 +1,13 @@
 package us.ihmc.commons.allocations;
 
 import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This interface provides the means to profile the garbage generation of code. This is useful
@@ -24,122 +20,55 @@ import java.util.Map;
  * </p>
  * @author Georg
  */
-public interface AllocationTest
+public abstract class AllocationTest extends AllocationProfiler
 {
-   /**
-    * To avoid recording allocations that are of no interest it is possible to specify
-    * classes of interest here. (i.e. "whitelist") This avoids recording any garbage generated
-    * in other places such as SCS. You should add you controller class here. No classes
-    * outside of these and the classes they create and the methods they call will be recorded.
-    *
-    * If this list is empty, all classes and methods will be recorded.
-    *
-    * @return classes that should be monitored for allocations.
-    */
-   List<Class<?>> getClassesOfInterest();
+   public AllocationTest()
+   {
+      checkInstrumentation();
+
+      getClassWhitelist().forEach(className -> addClassToWhitelist(className));
+      getClassBlacklist().forEach(className -> addClassToBlacklist(className));
+      getMethodBlacklist().forEach(method -> addMethodToBlacklist(method));
+      getMethodBlacklist().forEach(method -> addMethodToWhitelist(method));
+   }
 
    /**
-    * To avoid recording allocations that are of no interest it is possible to specify
-    * classes that should be ignored here. This avoids recording any garbage generated in
-    * places like the {@link ClassLoader} or in places that are simulation specific.
+    * Limit allocation recording to these classes. Leave empty to allow all.
     *
-    * @return classes that will be ignored when monitoring for allocations.
+    * @return class name whitelist
     */
-   List<Class<?>> getClassesToIgnore();
-
-   /**
-    * To avoid recording allocations that are of no interest it is possible to specify
-    * methods that should be ignored here. This avoids recording any garbage generated in
-    * safe places like the {@link RecyclingArrayList#add} or in places that are
-    * simulation specific.
-    *
-    * @return classes that will be ignored when monitoring for allocations.
-    */
-   default List<String> getMethodsToIgnore()
+   public List<String> getClassWhitelist()
    {
       return new ArrayList<>();
    }
 
    /**
-    * Will run the provided runnable and return a list of places where allocations occurred.
-    * If the returned list is empty no allocations where detected.
+    * Ignore allocations from classes matching these names.
     *
-    * @param runnable contains the code to be profiled.
-    * @return a list of places where objects were allocated.
+    * @return class name blacklist
     */
-   default List<Throwable> runAndCollectAllocations(Runnable runnable)
+   public List<String> getClassBlacklist()
    {
-      return runAndCollectAllocations(() -> runnable.run(), DefaultExceptionHandler.PROCEED_SILENTLY);
+      return new ArrayList<>();
    }
 
    /**
-    * Will run the provided runnable and return a list of places where allocations occurred.
-    * If the returned list is empty no allocations where detected.
+    * Ignore allocations from methods matching these names.
     *
-    * Allows for exceptions to be handled easily.
-    *
-    * @param runnable contains the code to be profiled. Can throw exceptions.
-    * @param exceptionHandler Callback for handling exceptions.
-    * @return a list of places where objects were allocated.
+    * @return method name blacklist
     */
-   default List<Throwable> runAndCollectAllocations(RunnableThatThrows runnable, ExceptionHandler exceptionHandler)
+   public List<String> getMethodBlacklist()
    {
-      checkInstrumentation();
-
-      AllocationSampler sampler = new AllocationSampler();
-      getClassesOfInterest().forEach(clazz -> sampler.addClassToWatch(clazz.getName()));
-      getClassesToIgnore().forEach(clazz -> sampler.addClassToIgnore(clazz.getName()));
-      getMethodsToIgnore().forEach(method -> sampler.addBlacklistMethod(method));
-
-      AllocationRecorder.addSampler(sampler);
-      try
-      {
-         runnable.run();
-      }
-      catch (Throwable e)
-      {
-         exceptionHandler.handleException(e);
-      }
-      sampler.stop();
-      AllocationRecorder.removeSampler(sampler);
-
-      return removeDuplicateStackTraces(sampler.getAndClearAllocations());
+      return new ArrayList<>();
    }
 
    /**
-    * This methos will check if the {@link AllocationRecorder} has an instrumentation. If this is not the case
-    * the JVM was probably not started using the correct javaagent. To fix this start the JVM with the argument<br>
-    * {@code -javaagent:[your/path/to/]java-allocation-instrumenter-3.1.0.jar}<br>
+    * Limit allocation recording to methods matching these names. Leave empty to allow all.
     *
-    * @throws RuntimeException if no instrumentation exists or check for instrumentation failed.
+    * @return method name whitelist
     */
-   static void checkInstrumentation()
+   public List<String> getMethodWhitelist()
    {
-      try
-      {
-         Method method = AllocationRecorder.class.getDeclaredMethod("getInstrumentation");
-         method.setAccessible(true);
-         if (method.invoke(null) == null)
-         {
-            throw new RuntimeException(AllocationRecorder.class.getSimpleName() + " has no instrumentation.");
-         }
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
-
-   /**
-    * Helper method to remove duplicate stack traces from a list of throwables.
-    *
-    * @param throwables list to prune of duplicate stack traces.
-    * @return list of throwables with unique stack traces.
-    */
-   static List<Throwable> removeDuplicateStackTraces(List<Throwable> throwables)
-   {
-      Map<String, Throwable> map = new HashMap<>();
-      throwables.forEach(t -> map.put(ExceptionUtils.getStackTrace(t), t));
-      return new ArrayList<>(map.values());
+      return new ArrayList<>();
    }
 }

@@ -14,7 +14,7 @@ import java.util.List;
 
 import static org.junit.Assert.fail;
 
-public class ListAllocationTest implements AllocationTest
+public class ListAllocationTest extends AllocationTest
 {
    @Test(timeout = 30000)
    public void testRecyclingArrayList()
@@ -157,7 +157,7 @@ public class ListAllocationTest implements AllocationTest
 
    private void testInternal(Runnable whatToTestFor)
    {
-      List<Throwable> allocations = runAndCollectAllocations(whatToTestFor);
+      List<Throwable> allocations = recordAllocations(whatToTestFor);
 
       if (!allocations.isEmpty())
       {
@@ -167,20 +167,14 @@ public class ListAllocationTest implements AllocationTest
    }
 
    @Override
-   public List<Class<?>> getClassesOfInterest()
+   public List<String> getClassWhitelist()
    {
-      List<Class<?>> classesOfInterest = new ArrayList<>();
-      classesOfInterest.add(MutableInt.class);
-      classesOfInterest.add(RecyclingArrayList.class);
-      classesOfInterest.add(RecyclingArrayDeque.class);
-      classesOfInterest.add(PreallocatedList.class);
-      classesOfInterest.add(PreallocatedEnumList.class);
+      List<String> classesOfInterest = new ArrayList<>();
+      classesOfInterest.add(MutableInt.class.getName());
+      classesOfInterest.add(RecyclingArrayList.class.getName());
+      classesOfInterest.add(RecyclingArrayDeque.class.getName());
+      classesOfInterest.add(PreallocatedList.class.getName());
+      classesOfInterest.add(PreallocatedEnumList.class.getName());
       return classesOfInterest;
-   }
-
-   @Override
-   public List<Class<?>> getClassesToIgnore()
-   {
-      return new ArrayList<>();
    }
 }
