@@ -1,7 +1,6 @@
 package us.ihmc.commons.allocations;
 
 import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -22,13 +21,15 @@ public class AllocationProfiler
 
    private boolean stopped = true;
 
-   private boolean recordConstructorAllocations = true;
-   private boolean recordStaticMemberInitialization = true;
+   private boolean recordConstructorAllocations;
+   private boolean recordStaticMemberInitialization;
 
    public AllocationProfiler()
    {
-      addClassToBlacklist(AllocationRecorder.class.getName());
-      addClassToBlacklist(ClassLoader.class.getName());
+      setRecordConstructorAllocations(true);
+      setRecordStaticMemberInitialization(true);
+      setRecordClassLoader(false);
+      setRecordSelf(false);
    }
 
    public void addMethodToBlacklist(String methodName)
@@ -59,6 +60,22 @@ public class AllocationProfiler
    public void setRecordStaticMemberInitialization(boolean staticMemberInitialization)
    {
       this.recordStaticMemberInitialization = recordStaticMemberInitialization;
+   }
+
+   public void setRecordClassLoader(boolean recordClassLoader)
+   {
+      if (recordClassLoader)
+         classBlacklist.remove(ClassLoader.class.getName());
+      else
+         classBlacklist.add(ClassLoader.class.getName());
+   }
+
+   public void setRecordSelf(boolean recordSelf)
+   {
+      if (recordSelf)
+         classBlacklist.remove(AllocationRecorder.class.getName());
+      else
+         classBlacklist.add(AllocationRecorder.class.getName());
    }
 
    public List<AllocationRecord> pollAllocations()
@@ -131,7 +148,6 @@ public class AllocationProfiler
       return pollAllocations();
    }
 
-
    /**
     * This method will check if the {@link AllocationRecorder} has an instrumentation. If this is not the case
     * the JVM was probably not started using the correct javaagent. To fix this start the JVM with the argument<br>
@@ -194,78 +210,97 @@ public class AllocationProfiler
          return;
       }
 
-      if (!checkIfWhitelisted(allocation.getStackTrace()))
+      if (!passesWhiteFilter(allocation))
       {
          return;
       }
-      if (checkIfBlacklisted(allocation.getStackTrace()))
+      if (!passesBlackFilter(allocation))
       {
          return;
       }
 
-      PrintTools.debug(this, description);
+      //      PrintTools.debug(this, description);
 
       allocations.add(allocation);
    }
 
-   private boolean checkIfWhitelisted(StackTraceElement[] stackTrace)
+   private boolean passesWhiteFilter(AllocationRecord record)
    {
-      boolean whitelistedResult = false; // exclude everything
+      boolean passes = false; // exclude everything
 
-      if (methodWhitelist.isEmpty() && classWhitelist.isEmpty())
+      if (methodWhitelist.isEmpty() && classWhitelist.isEmpty()) // special case if both whitelists are empty
       {
-         whitelistedResult = true;
+         passes = true; // allow everything
       }
       else
       {
-         for (StackTraceElement el : stackTrace)
+         traceloop:
+         for (StackTraceElement traceElement : record.getStackTrace()) // check entire stack trace
          {
-            String qualifiedMethodName = el.getClassName() + "." + el.getMethodName();
-            if (methodWhitelist.contains(qualifiedMethodName))
+            String qualifiedMethodName = traceElement.getClassName() + "." + traceElement.getMethodName();
+            if (methodWhitelist.contains(qualifiedMethodName)) // allow methods from whitelist
             {
-               whitelistedResult = true;
+               PrintTools.debug(this, "WHITE: qualifiedMethodName: " + record.toString());
+               passes = true;
+               break traceloop;
             }
             else
             {
-               for (String packet : classWhitelist)
+               for (String className : classWhitelist)
                {
-                  if (el.getClassName().startsWith(packet))
+//                  if (record.getNewObject().getClass().getName().startsWith(className) // the whitelisted class itself or it's subclass got allocated
+//                        || traceElement.getClassName().startsWith(className)) // some allocation in side this class or it's subclass
+                  if (traceElement.getClassName().startsWith(className)) // some allocation in side this class or it's subclass
                   {
-                     whitelistedResult = true;
-                     break;
+                     PrintTools.debug(this, "WHITE: className: " + record.toString());
+                     passes = true;
+                     break traceloop;
                   }
                }
             }
          }
       }
 
-      PrintTools.debug(this, "Whitelisted: " + whitelistedResult);
+      //      PrintTools.debug(this, "Whitelisted: " + passes + " : " + record.getDescription());
 
-      return whitelistedResult;
+      return passes;
    }
 
-   private boolean checkIfBlacklisted(StackTraceElement[] stackTrace)
+   private boolean passesBlackFilter(AllocationRecord record)
    {
-      if (methodBlacklist.isEmpty() && classBlacklist.isEmpty())
-      {
-         return false;
-      }
+      boolean passes = true; // nothing is blacklisted by default
 
-      for (StackTraceElement el : stackTrace)
+      if (methodBlacklist.isEmpty() && classBlacklist.isEmpty()) // optimization check, nothing to block
       {
-         String qualifiedMethodName = el.getClassName() + "." + el.getMethodName();
-         if (methodBlacklist.contains(qualifiedMethodName))
+         passes = true; // don't bother checking anything
+      }
+      else
+      {
+         traceloop:
+         for (StackTraceElement traceElement : record.getStackTrace())
          {
-            return true;
-         }
-         for (String packet : classBlacklist)
-         {
-            if (el.getClassName().startsWith(packet))
+            String qualifiedMethodName = traceElement.getClassName() + "." + traceElement.getMethodName();
+            if (methodBlacklist.contains(qualifiedMethodName))
             {
-               return true;
+               passes = false;
+               break traceloop;
+            }
+            else
+            {
+               for (String className : classBlacklist)
+               {
+                  if (traceElement.getClassName().startsWith(className))
+                  {
+                     passes = false;
+                     break traceloop;
+                  }
+               }
             }
          }
       }
-      return false;
+
+      //      PrintTools.debug(this, "Blacklisted: " + passes + " : " + record.toString());
+
+      return passes;
    }
 }

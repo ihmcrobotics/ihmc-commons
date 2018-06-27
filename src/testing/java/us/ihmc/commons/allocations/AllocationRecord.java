@@ -40,7 +40,7 @@ public class AllocationRecord
 
    public String toString()
    {
-      String s = "AllocationRecord: " + description + " : " + newObject.getClass().getName() + "\n";
+      String s = "AllocationRecord: " + description + " : " + newObject.getClass().getName() + " : size " + size + "\n";
       for (StackTraceElement e : stackTrace)
       {
          s += "\tat " + e.toString() + "\n";

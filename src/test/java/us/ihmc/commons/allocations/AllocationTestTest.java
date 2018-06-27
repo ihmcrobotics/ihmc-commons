@@ -1,6 +1,5 @@
 package us.ihmc.commons.allocations;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
@@ -72,21 +71,65 @@ public class AllocationTestTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
-   public void testSingleAllocationClassBlacklist()
+   public void testWhitelist()
    {
       List<AllocationRecord> allocations;
       AllocationProfiler allocationProfiler = new AllocationProfiler();
+      allocationProfiler.setRecordConstructorAllocations(false);
 
-      allocationProfiler.setRecordConstructorAllocations(true);
-      allocations = allocationProfiler.recordAllocations(() -> new LilAllocator());
-      printAllocations(allocations);
-      Assert.assertEquals(3, allocations.size());
+      LilAllocator lilAllocator;
+      MutableInt mutableInt;
 
-      allocationProfiler.addClassToBlacklist(MutableInt.class.getName());
-      allocations = allocationProfiler.recordAllocations(() -> new LilAllocator());
+      // test control; no black or white lists
+      allocationProfiler.startRecordingAllocations();
+      lilAllocator = new LilAllocator(); // allocates 1 but ignore, stuff inside does not count
+      mutableInt = new MutableInt(); // random new thing
+      lilAllocator.doStuff(); // allocates 2 things inside
+      allocationProfiler.stopRecordingAllocations();
+
+      allocations = allocationProfiler.pollAllocations();
       printAllocations(allocations);
-      Assert.assertEquals(1, allocations.size());
+      Assert.assertEquals(4, allocations.size());
+
+      // add one class to whitelist
+      allocationProfiler.addClassToWhitelist(LilAllocator.class.getName());
+      allocationProfiler.startRecordingAllocations();
+      lilAllocator = new LilAllocator(); // does not count
+      mutableInt = new MutableInt(); // random new thing, but not in whitelist
+      lilAllocator.doStuff(); // allocates 2 things inside
+      allocationProfiler.stopRecordingAllocations();
+
+      allocations = allocationProfiler.pollAllocations();
+      printAllocations(allocations);
+      Assert.assertEquals(2, allocations.size());
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 3000)
+   public void testBlacklist()
+   {
+      List<AllocationRecord> allocations;
+      AllocationProfiler allocationProfiler = new AllocationProfiler();
+      allocationProfiler.setRecordConstructorAllocations(false);
+
+      LilAllocator lilAllocator;
+      MutableInt mutableInt;
+
+      // add one class to whitelist
+      allocationProfiler.addClassToBlacklist(LilAllocator.class.getName());
+      allocationProfiler.startRecordingAllocations();
+      lilAllocator = new LilAllocator(); // allocates 1, stuff inside does not count
+      mutableInt = new MutableInt(); // random new thing, but not in whitelist
+      lilAllocator.doStuff(); // allocates 2 things inside
+      allocationProfiler.stopRecordingAllocations();
+
+      allocations = allocationProfiler.pollAllocations();
+      printAllocations(allocations);
+      Assert.assertTrue(allocations.get(0).getNewObject().getClass().equals(LilAllocator.class));
+      Assert.assertTrue(allocations.get(1).getNewObject().getClass().equals(MutableInt.class));
+      Assert.assertEquals(2, allocations.size());
+   }
+
 
    private void printAllocations(List<AllocationRecord> allocations)
    {
@@ -123,12 +166,38 @@ public class AllocationTestTest
 
    private class LilAllocator
    {
-      private MutableInt mutableInt;
-      private MutableDouble mutableDouble = new MutableDouble(); // outside constructor
+      private BrokenClass brokenClass; // "class of interest"
+      private KnownAllocator knownAllocator = new KnownAllocator(); // outside constructor
 
       public LilAllocator()
       {
-         mutableInt = new MutableInt(); // inside constructor, these both count
+         brokenClass = new BrokenClass(); // inside constructor, these both count
+      }
+
+      public void doStuff()
+      {
+         brokenClass.imNotSupposedToAllocate();
+         knownAllocator.whoCaresIfIAllocate();
+      }
+   }
+
+   private class BrokenClass
+   {
+      public MutableInt mutableInt;
+
+      public void imNotSupposedToAllocate()
+      {
+         mutableInt = new MutableInt();
+      }
+   }
+
+   private class KnownAllocator
+   {
+      public MutableInt mutableInt;
+
+      public void whoCaresIfIAllocate()
+      {
+         mutableInt = new MutableInt();
       }
    }
 }
