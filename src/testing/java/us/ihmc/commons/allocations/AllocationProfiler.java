@@ -296,11 +296,13 @@ public class AllocationProfiler
       {
          excludeAllocationsInsideTheseClasses.remove(AllocationRecorder.class.getName());
          excludeAllocationsInsideTheseMethods.remove("us.ihmc.commons.allocations.AllocationProfiler.startRecordingAllocations");
+         excludeAllocationsWhoseTracesContainTheseKeywords.remove("org.gradle.internal");
       }
       else
       {
          excludeAllocationsInsideTheseClasses.add(AllocationRecorder.class.getName());
          excludeAllocationsInsideTheseMethods.add("us.ihmc.commons.allocations.AllocationProfiler.startRecordingAllocations");
+         excludeAllocationsWhoseTracesContainTheseKeywords.add("org.gradle.internal");
       }
    }
 
