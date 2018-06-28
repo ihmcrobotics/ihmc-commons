@@ -2,6 +2,7 @@ package us.ihmc.commons.allocations;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.lists.PreallocatedEnumList;
 import us.ihmc.commons.lists.PreallocatedList;
@@ -14,8 +15,22 @@ import java.util.List;
 
 import static org.junit.Assert.fail;
 
-public class ListAllocationTest extends AllocationTest
+public class ListAllocationTest
 {
+   private AllocationProfiler allocationProfiler;
+
+   @Before
+   public void setUp()
+   {
+      allocationProfiler = new AllocationProfiler();
+      allocationProfiler.setIncludeAllAllocations(false);
+      allocationProfiler.includeAllocationsInsideClass(MutableInt.class.getName());
+      allocationProfiler.includeAllocationsInsideClass(RecyclingArrayList.class.getName());
+      allocationProfiler.includeAllocationsInsideClass(RecyclingArrayDeque.class.getName());
+      allocationProfiler.includeAllocationsInsideClass(PreallocatedList.class.getName());
+      allocationProfiler.includeAllocationsInsideClass(PreallocatedEnumList.class.getName());
+   }
+
    @Test(timeout = 30000)
    public void testRecyclingArrayList()
    {
@@ -157,24 +172,12 @@ public class ListAllocationTest extends AllocationTest
 
    private void testInternal(Runnable whatToTestFor)
    {
-      List<AllocationRecord> allocations = recordAllocations(whatToTestFor);
+      List<AllocationRecord> allocations = allocationProfiler.recordAllocations(whatToTestFor);
 
       if (!allocations.isEmpty())
       {
          allocations.forEach(it -> System.out.println(it.toString()));
          fail("Found allocations.");
       }
-   }
-
-   @Override
-   public List<String> getClassWhitelist()
-   {
-      List<String> classesOfInterest = new ArrayList<>();
-      classesOfInterest.add(MutableInt.class.getName());
-      classesOfInterest.add(RecyclingArrayList.class.getName());
-      classesOfInterest.add(RecyclingArrayDeque.class.getName());
-      classesOfInterest.add(PreallocatedList.class.getName());
-      classesOfInterest.add(PreallocatedEnumList.class.getName());
-      return classesOfInterest;
    }
 }
