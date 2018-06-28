@@ -20,7 +20,6 @@ public class AllocationRecordingDemo
    public AllocationRecordingDemo()
    {
       AllocationProfiler allocationProfiler = new AllocationProfiler();
-      allocationProfiler.setIncludeAllAllocations(false);
       allocationProfiler.includeAllocationsInsideClass(RecyclingArrayList.class.getName());
 
       List<AllocationRecord> allocations;

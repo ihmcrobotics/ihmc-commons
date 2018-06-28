@@ -159,7 +159,7 @@ public class AllocationProfiler
          isIncluded = true;
       }
       // do an fast search to see if this allocation was of an included class, match using `startsWith` to include nested classes
-      else if (includeAllocationsOfTheseClasses.stream().anyMatch(className -> record.getNewObject().getClass().getName().startsWith(className)))
+      else if (includeAllocationsOfTheseClasses.stream().anyMatch(className -> record.getAllocatedObject().getClass().getName().startsWith(className)))
       {
          isIncluded = true;
       }
@@ -192,7 +192,7 @@ public class AllocationProfiler
    {
       boolean isExcluded = false; // nothing is blacklisted by default
 
-      if (excludeAllocationsOfTheseClasses.stream().anyMatch(className -> record.getNewObject().getClass().getName().startsWith(className)))
+      if (excludeAllocationsOfTheseClasses.stream().anyMatch(className -> record.getAllocatedObject().getClass().getName().startsWith(className)))
       {
          isExcluded = true;
       }
@@ -228,6 +228,7 @@ public class AllocationProfiler
 
    public void includeAllocationsInsideClass(String className)
    {
+      setIncludeAllAllocations(false); // otherwise this method would do nothing
       includeAllocationsInsideTheseClasses.add(className);
    }
 
@@ -236,14 +237,21 @@ public class AllocationProfiler
       excludeAllocationsInsideTheseClasses.add(className);
    }
 
+   public void includeAllocationsOfClass(String className)
+   {
+      setIncludeAllAllocations(false); // otherwise this method would do nothing
+      includeAllocationsOfTheseClasses.add(className);
+   }
+
    public void excludeAllocationsOfClass(String className)
    {
       excludeAllocationsOfTheseClasses.add(className);
    }
 
-   public void includeAllocationsOfClass(String className)
+   public void includeAllocationsInsideMethod(String qualifiedMethodName)
    {
-      includeAllocationsOfTheseClasses.add(className);
+      setIncludeAllAllocations(false); // otherwise this method would do nothing
+      includeAllocationsInsideTheseMethods.add(qualifiedMethodName);
    }
 
    public void excludeAllocationsInsideMethod(String qualifiedMethodName)
@@ -251,13 +259,9 @@ public class AllocationProfiler
       excludeAllocationsInsideTheseMethods.add(qualifiedMethodName);
    }
 
-   public void includeAllocationsInsideMethod(String qualifiedMethodName)
-   {
-      includeAllocationsInsideTheseMethods.add(qualifiedMethodName);
-   }
-
    public void includeAllocationsContainingKeyword(String keyword)
    {
+      setIncludeAllAllocations(false); // otherwise this method would do nothing
       includeAllocationsWhoseTracesContainTheseKeywords.add(keyword);
    }
 

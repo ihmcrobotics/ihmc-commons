@@ -39,7 +39,7 @@ public class AllocationTestTest
       });
 
       Assert.assertEquals(1, allocations.size());
-      Assert.assertTrue(allocations.get(0).getNewObject().getClass().equals(double[].class));
+      Assert.assertTrue(allocations.get(0).getAllocatedObject().getClass().equals(double[].class));
       PrintTools.info(allocations.get(0).toString());
    }
 
@@ -50,7 +50,7 @@ public class AllocationTestTest
       List<AllocationRecord> allocations = new AllocationProfiler().recordAllocations(() -> new MutableDouble());
       printAllocations(allocations);
       Assert.assertEquals(1, allocations.size());
-      Assert.assertTrue(allocations.get(0).getNewObject().getClass().equals(MutableDouble.class));
+      Assert.assertTrue(allocations.get(0).getAllocatedObject().getClass().equals(MutableDouble.class));
       PrintTools.info(allocations.get(0).toString());
    }
 
@@ -128,8 +128,8 @@ public class AllocationTestTest
 
       allocations = allocationProfiler.pollAllocations();
       printAllocations(allocations);
-      Assert.assertTrue(allocations.get(0).getNewObject().getClass().equals(LilAllocator.class));
-      Assert.assertTrue(allocations.get(1).getNewObject().getClass().equals(MutableInt.class));
+      Assert.assertTrue(allocations.get(0).getAllocatedObject().getClass().equals(LilAllocator.class));
+      Assert.assertTrue(allocations.get(1).getAllocatedObject().getClass().equals(MutableInt.class));
       Assert.assertEquals(2, allocations.size());
    }
 
@@ -144,7 +144,6 @@ public class AllocationTestTest
       MutableInt mutableInt;
 
       // add one class to whitelist
-      allocationProfiler.setIncludeAllAllocations(false);
       String qualifiedMethodName = "us.ihmc.commons.allocations.AllocationTestTest$BrokenClass.imNotSupposedToAllocate";
       allocationProfiler.includeAllocationsInsideMethod(qualifiedMethodName);
       allocationProfiler.startRecordingAllocations();

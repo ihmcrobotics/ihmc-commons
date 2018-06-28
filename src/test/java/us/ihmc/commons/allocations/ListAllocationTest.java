@@ -23,7 +23,6 @@ public class ListAllocationTest
    public void setUp()
    {
       allocationProfiler = new AllocationProfiler();
-      allocationProfiler.setIncludeAllAllocations(false);
       allocationProfiler.includeAllocationsInsideClass(MutableInt.class.getName());
       allocationProfiler.includeAllocationsInsideClass(RecyclingArrayList.class.getName());
       allocationProfiler.includeAllocationsInsideClass(RecyclingArrayDeque.class.getName());
