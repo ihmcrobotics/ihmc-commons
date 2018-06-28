@@ -1,22 +1,24 @@
 package us.ihmc.commons.allocations;
 
-import java.util.List;
-
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+
+import java.util.List;
 
 public class AllocationTestTest
 {
    private enum MyEnum
    {
       A, B, C, D
-   };
+   }
+
+   ;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
@@ -46,6 +48,7 @@ public class AllocationTestTest
    public void testSingleAllocation()
    {
       List<AllocationRecord> allocations = new AllocationProfiler().recordAllocations(() -> new MutableDouble());
+      printAllocations(allocations);
       Assert.assertEquals(1, allocations.size());
       Assert.assertTrue(allocations.get(0).getNewObject().getClass().equals(MutableDouble.class));
       PrintTools.info(allocations.get(0).toString());
@@ -177,6 +180,7 @@ public class AllocationTestTest
       }
    }
 
+   @Ignore // this switch doesn't allocate when run with Gradle. It therefore no longer reliably tests the application logic so ignoring it. - @dcalvert
    @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testSwitchTable()
@@ -189,7 +193,8 @@ public class AllocationTestTest
             break;
          }
       });
-      Assert.assertFalse(allocations.isEmpty());
+      printAllocations(allocations);
+      Assert.assertEquals("allocated", 2, allocations.size());
 
       // The second time there are no allocations:
       allocations = new AllocationProfiler().recordAllocations(() -> {
@@ -199,7 +204,8 @@ public class AllocationTestTest
             break;
          }
       });
-      Assert.assertTrue(allocations.isEmpty());
+      printAllocations(allocations);
+      Assert.assertEquals("allocated", 0, allocations.size());
    }
 
    private class LilAllocator
