@@ -75,12 +75,12 @@ public class AllocationTestTest
    {
       List<AllocationRecord> allocations;
       AllocationProfiler allocationProfiler = new AllocationProfiler();
-      allocationProfiler.setRecordConstructorAllocations(false);
 
       LilAllocator lilAllocator;
       MutableInt mutableInt;
 
       // test control; no black or white lists
+      allocationProfiler.setIncludeAllAllocations(false); // exclude everything
       allocationProfiler.startRecordingAllocations();
       lilAllocator = new LilAllocator(); // allocates 1 but ignore, stuff inside does not count
       mutableInt = new MutableInt(); // random new thing
@@ -89,12 +89,12 @@ public class AllocationTestTest
 
       allocations = allocationProfiler.pollAllocations();
       printAllocations(allocations);
-      Assert.assertEquals(4, allocations.size());
+      Assert.assertEquals(0, allocations.size()); // nothing was included so should be 0
 
       // add one class to whitelist
-      allocationProfiler.addClassToWhitelist(LilAllocator.class.getName());
+      allocationProfiler.includeAllocationsInsideClass(LilAllocator.class.getName());
       allocationProfiler.startRecordingAllocations();
-      lilAllocator = new LilAllocator(); // does not count
+      lilAllocator = new LilAllocator(); // does not count, constructor exclusion
       mutableInt = new MutableInt(); // random new thing, but not in whitelist
       lilAllocator.doStuff(); // allocates 2 things inside
       allocationProfiler.stopRecordingAllocations();
@@ -116,7 +116,7 @@ public class AllocationTestTest
       MutableInt mutableInt;
 
       // add one class to whitelist
-      allocationProfiler.addClassToBlacklist(LilAllocator.class.getName());
+      allocationProfiler.excludeAllocationsInsideClass(LilAllocator.class.getName());
       allocationProfiler.startRecordingAllocations();
       lilAllocator = new LilAllocator(); // allocates 1, stuff inside does not count
       mutableInt = new MutableInt(); // random new thing, but not in whitelist
@@ -130,6 +130,44 @@ public class AllocationTestTest
       Assert.assertEquals(2, allocations.size());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 3000)
+   public void testMethodIncludeExclude()
+   {
+      List<AllocationRecord> allocations;
+      AllocationProfiler allocationProfiler = new AllocationProfiler();
+
+      LilAllocator lilAllocator;
+      MutableInt mutableInt;
+
+      // add one class to whitelist
+      allocationProfiler.setIncludeAllAllocations(false);
+      String qualifiedMethodName = "us.ihmc.commons.allocations.AllocationTestTest$BrokenClass.imNotSupposedToAllocate";
+      allocationProfiler.includeAllocationsInsideMethod(qualifiedMethodName);
+      allocationProfiler.startRecordingAllocations();
+      lilAllocator = new LilAllocator(); // allocates 1, stuff inside does not count
+      mutableInt = new MutableInt(); // random new thing, but not in whitelist
+      lilAllocator.doStuff(); // allocates 2 things inside
+      allocationProfiler.stopRecordingAllocations();
+
+      allocations = allocationProfiler.pollAllocations();
+      printAllocations(allocations);
+      Assert.assertTrue(allocations.get(0).toString().contains(qualifiedMethodName));
+      Assert.assertEquals(1, allocations.size());
+
+      // add one class to whitelist
+      allocationProfiler.setIncludeAllAllocations(true);
+      allocationProfiler.excludeAllocationsInsideMethod(qualifiedMethodName);
+      allocationProfiler.startRecordingAllocations();
+      lilAllocator = new LilAllocator(); // allocates 1, stuff inside does not count
+      mutableInt = new MutableInt(); // random new thing, but not in whitelist
+      lilAllocator.doStuff(); // allocates 2 things inside, but one excluded
+      allocationProfiler.stopRecordingAllocations();
+
+      allocations = allocationProfiler.pollAllocations();
+      printAllocations(allocations);
+      Assert.assertEquals(3, allocations.size());
+   }
 
    private void printAllocations(List<AllocationRecord> allocations)
    {

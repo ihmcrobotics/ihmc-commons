@@ -1,11 +1,5 @@
 package us.ihmc.commons.allocations;
 
-import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
-import us.ihmc.commons.RunnableThatThrows;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionHandler;
-import us.ihmc.commons.lists.RecyclingArrayList;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,10 +20,10 @@ public abstract class AllocationTest extends AllocationProfiler
    {
       checkInstrumentation();
 
-      getClassWhitelist().forEach(className -> addClassToWhitelist(className));
-      getClassBlacklist().forEach(className -> addClassToBlacklist(className));
-      getMethodBlacklist().forEach(method -> addMethodToBlacklist(method));
-      getMethodWhitelist().forEach(method -> addMethodToWhitelist(method));
+      getClassWhitelist().forEach(className -> includeAllocationsInsideClass(className));
+      getClassBlacklist().forEach(className -> excludeAllocationsInsideClass(className));
+      getMethodBlacklist().forEach(method -> excludeAllocationsInsideMethod(method));
+      getMethodWhitelist().forEach(method -> includeAllocationsInsideMethod(method));
    }
 
    /**
