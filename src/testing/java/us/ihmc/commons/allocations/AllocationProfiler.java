@@ -9,27 +9,65 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * A tool for finding and testing for allocations. Features include and exclude filters for scoping in on
+ * certain classes and methods, but excluding known or "okay" allocations, or finding literally all allocations made
+ * in the JVM between {@link AllocationProfiler#startRecordingAllocations()} and {@link AllocationProfiler#stopRecordingAllocations()}.
+ */
 public class AllocationProfiler
 {
-   private boolean recording = true;
+   /** State boolean for recording. True between {@link AllocationProfiler#startRecordingAllocations()}
+    * and {@link AllocationProfiler#stopRecordingAllocations()} */
+   private boolean recording = false;
 
+   /** The allocation queue that fills up as allocations are recorded. */
    private final Queue<AllocationRecord> allocations = new ConcurrentLinkedQueue<>();
 
-   private boolean includeAllAllocations = false;
+   /** Special flag to include everything. */
+   private boolean includeAllAllocations;
+
+   /** Exclude allocations that happen inside these methods. */
    private final Set<String> excludeAllocationsInsideTheseMethods = new HashSet<>();
+
+   /** Include allocations that happen inside these methods. */
    private final Set<String> includeAllocationsInsideTheseMethods = new HashSet<>();
+
+   /** Exclude allocations that happen inside these classes. */
    private final Set<String> excludeAllocationsInsideTheseClasses = new HashSet<>();
+
+   /** Include allocations that happen inside these classes. */
    private final Set<String> includeAllocationsInsideTheseClasses = new HashSet<>();
+
+   /** Exclude allocations of the classes (i.e. new ClassName()). */
    private final Set<String> excludeAllocationsOfTheseClasses = new HashSet<>();
+
+   /** Include allocations of the classes (i.e. new ClassName()). */
    private final Set<String> includeAllocationsOfTheseClasses = new HashSet<>();
+
+   /** Include allocations whose stack trace leading up to the allocation contains one of these keywords. */
    private final Set<String> includeAllocationsWhoseTracesContainTheseKeywords = new HashSet<>();
+
+   /** Exclude allocations whose stack trace leading up to the allocation contains one of these keywords. */
    private final Set<String> excludeAllocationsWhoseTracesContainTheseKeywords = new HashSet<>();
 
+   /**
+    * <p>Create a new allocation profiler and call {@link AllocationProfiler#reset()}.</p>
+    *
+    * <p>By default, records all allocations EXCEPT:</p>
+    * <li>Do not record any allocations inside constructors</li>
+    * <li>Do not record any allocations from and resulting from static member initialization</li>
+    * <li>Do not record anything as a result of the ClassLoader loading classes</li>
+    * <li>Do not record any allocations made by this profiler, Gradle, or JUnit</li>
+    *
+    */
    public AllocationProfiler()
    {
-      clear();
+      reset();
    }
 
+   /**
+    * Start recording allocations.
+    */
    public void startRecordingAllocations()
    {
       checkInstrumentation();
@@ -38,12 +76,20 @@ public class AllocationProfiler
       AllocationRecorder.addSampler(this::sampleAllocation);
    }
 
+   /**
+    * Stop recording allocations.
+    */
    public void stopRecordingAllocations()
    {
       recording = false;
-      AllocationRecorder.removeSampler(this::sampleAllocation);
+      AllocationRecorder.removeSampler(this::sampleAllocation); // remove sampler to speed up execution of unmonitored code
    }
 
+   /**
+    * Poll the recorded allocations excluding duplicate entries. This removes them from the queue.
+    *
+    * @return allocations
+    */
    public List<AllocationRecord> pollAllocations()
    {
       return removeDuplicateRecords(pollAllocationsIncludingDuplicates());
@@ -62,6 +108,10 @@ public class AllocationProfiler
       return new ArrayList<>(map.values());
    }
 
+   /**
+    *
+    * @return
+    */
    public List<AllocationRecord> pollAllocationsIncludingDuplicates()
    {
       List<AllocationRecord> allocations = new ArrayList<>();
@@ -137,6 +187,13 @@ public class AllocationProfiler
       }
    }
 
+   /**
+    *
+    * @param count
+    * @param description
+    * @param newObject
+    * @param size
+    */
    private void sampleAllocation(int count, String description, Object newObject, long size)
    {
       if (recording)
@@ -150,6 +207,11 @@ public class AllocationProfiler
       }
    }
 
+   /**
+    *
+    * @param record
+    * @return
+    */
    private boolean isIncluded(AllocationRecord record)
    {
       boolean isIncluded = false; // initialize, only have a single return in the method
@@ -188,6 +250,11 @@ public class AllocationProfiler
       return isIncluded;
    }
 
+   /**
+    *
+    * @param record
+    * @return
+    */
    private boolean isExcluded(AllocationRecord record)
    {
       boolean isExcluded = false; // nothing is blacklisted by default
@@ -221,55 +288,95 @@ public class AllocationProfiler
       return isExcluded;
    }
 
+   /**
+    *
+    * @param includeAllAllocations
+    */
    public void setIncludeAllAllocations(boolean includeAllAllocations)
    {
       this.includeAllAllocations = includeAllAllocations;
    }
 
+   /**
+    *
+    * @param className
+    */
    public void includeAllocationsInsideClass(String className)
    {
       setIncludeAllAllocations(false); // otherwise this method would do nothing
       includeAllocationsInsideTheseClasses.add(className);
    }
 
+   /**
+    *
+    * @param className
+    */
    public void excludeAllocationsInsideClass(String className)
    {
       excludeAllocationsInsideTheseClasses.add(className);
    }
 
+   /**
+    *
+    * @param className
+    */
    public void includeAllocationsOfClass(String className)
    {
       setIncludeAllAllocations(false); // otherwise this method would do nothing
       includeAllocationsOfTheseClasses.add(className);
    }
 
+   /**
+    *
+    * @param className
+    */
    public void excludeAllocationsOfClass(String className)
    {
       excludeAllocationsOfTheseClasses.add(className);
    }
 
+   /**
+    *
+    * @param qualifiedMethodName
+    */
    public void includeAllocationsInsideMethod(String qualifiedMethodName)
    {
       setIncludeAllAllocations(false); // otherwise this method would do nothing
       includeAllocationsInsideTheseMethods.add(qualifiedMethodName);
    }
 
+   /**
+    *
+    * @param qualifiedMethodName
+    */
    public void excludeAllocationsInsideMethod(String qualifiedMethodName)
    {
       excludeAllocationsInsideTheseMethods.add(qualifiedMethodName);
    }
 
+   /**
+    *
+    * @param keyword
+    */
    public void includeAllocationsContainingKeyword(String keyword)
    {
       setIncludeAllAllocations(false); // otherwise this method would do nothing
       includeAllocationsWhoseTracesContainTheseKeywords.add(keyword);
    }
 
+   /**
+    *
+    * @param keyword
+    */
    public void excludeAllocationsContainingKeyword(String keyword)
    {
       excludeAllocationsWhoseTracesContainTheseKeywords.add(keyword);
    }
 
+   /**
+    *
+    * @param recordConstructorAllocations
+    */
    public void setRecordConstructorAllocations(boolean recordConstructorAllocations)
    {
       if (recordConstructorAllocations)
@@ -278,6 +385,10 @@ public class AllocationProfiler
          excludeAllocationsWhoseTracesContainTheseKeywords.add("<init>");
    }
 
+   /**
+    *
+    * @param recordStaticMemberInitialization
+    */
    public void setRecordStaticMemberInitialization(boolean recordStaticMemberInitialization)
    {
       if (recordStaticMemberInitialization)
@@ -286,6 +397,10 @@ public class AllocationProfiler
          excludeAllocationsWhoseTracesContainTheseKeywords.add("<clinit>");
    }
 
+   /**
+    *
+    * @param recordClassLoader
+    */
    public void setRecordClassLoader(boolean recordClassLoader)
    {
       if (recordClassLoader)
@@ -294,24 +409,42 @@ public class AllocationProfiler
          excludeAllocationsInsideTheseClasses.add(ClassLoader.class.getName());
    }
 
+   /**
+    *
+    * @param recordSelf
+    */
    public void setRecordSelf(boolean recordSelf)
    {
       if (recordSelf)
       {
          excludeAllocationsInsideTheseClasses.remove(AllocationRecorder.class.getName());
          excludeAllocationsInsideTheseMethods.remove("us.ihmc.commons.allocations.AllocationProfiler.startRecordingAllocations");
+         excludeAllocationsInsideTheseMethods.remove("java.util.concurrent.FutureTask.awaitDone");
          excludeAllocationsWhoseTracesContainTheseKeywords.remove("org.gradle.internal");
       }
       else
       {
          excludeAllocationsInsideTheseClasses.add(AllocationRecorder.class.getName());
          excludeAllocationsInsideTheseMethods.add("us.ihmc.commons.allocations.AllocationProfiler.startRecordingAllocations");
+         excludeAllocationsInsideTheseMethods.add("java.util.concurrent.FutureTask.awaitDone");
          excludeAllocationsWhoseTracesContainTheseKeywords.add("org.gradle.internal");
       }
    }
 
-   public void clear()
+   /**
+    * <p>Resets this profiler, clearing all user settings and queues, stopping recording, and resetting to defaults:</p>
+    *
+    * <p>Record all allocations EXCEPT:</p>
+    * <li>Do not record any allocations inside constructors</li>
+    * <li>Do not record any allocations from and resulting from static member initialization</li>
+    * <li>Do not record anything as a result of the ClassLoader loading classes</li>
+    * <li>Do not record any allocations made by this profiler, Gradle, or JUnit</li>
+    */
+   public void reset()
    {
+      if (recording)
+         stopRecordingAllocations();
+
       includeAllAllocations = true;
 
       excludeAllocationsInsideTheseMethods.clear();
@@ -327,5 +460,7 @@ public class AllocationProfiler
       setRecordStaticMemberInitialization(false);
       setRecordClassLoader(false);
       setRecordSelf(false);
+
+      allocations.clear();
    }
 }

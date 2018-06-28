@@ -171,6 +171,38 @@ public class AllocationTestTest
       Assert.assertEquals(3, allocations.size());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 3000)
+   public void testReset()
+   {
+      List<AllocationRecord> allocations;
+      AllocationProfiler allocationProfiler = new AllocationProfiler();
+      LilAllocator lilAllocator;
+      MutableInt mutableInt;
+
+      String qualifiedMethodName = "us.ihmc.commons.allocations.AllocationTestTest$BrokenClass.imNotSupposedToAllocate";
+      allocationProfiler.includeAllocationsInsideMethod(qualifiedMethodName);
+      allocationProfiler.startRecordingAllocations();
+      lilAllocator = new LilAllocator(); // allocates 1, stuff inside does not count
+      mutableInt = new MutableInt(); // random new thing, but not in whitelist
+      lilAllocator.doStuff(); // allocates 2 things inside
+      allocationProfiler.stopRecordingAllocations();
+      allocations = allocationProfiler.pollAllocations();
+      printAllocations(allocations);
+      Assert.assertTrue(allocations.get(0).toString().contains(qualifiedMethodName));
+      Assert.assertEquals(1, allocations.size());
+
+      allocationProfiler.reset();
+      allocationProfiler.startRecordingAllocations();
+      lilAllocator = new LilAllocator(); // allocates 1, stuff inside does not count
+      mutableInt = new MutableInt(); // random new thing, but not in whitelist
+      lilAllocator.doStuff(); // allocates 2 things inside, but one excluded
+      allocationProfiler.stopRecordingAllocations();
+      allocations = allocationProfiler.pollAllocations();
+      printAllocations(allocations);
+      Assert.assertEquals(4, allocations.size());
+   }
+
    private void printAllocations(List<AllocationRecord> allocations)
    {
       for (AllocationRecord allocation : allocations)
