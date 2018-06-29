@@ -109,8 +109,9 @@ public class AllocationProfiler
    }
 
    /**
+    * Poll all allocations including duplicates.
     *
-    * @return
+    * @return allocations
     */
    public List<AllocationRecord> pollAllocationsIncludingDuplicates()
    {
@@ -125,7 +126,7 @@ public class AllocationProfiler
 
    /**
     * Will run the provided runnable and return a list of places where allocations occurred.
-    * If the returned list is empty no allocations where detected.
+    * If the returned list is empty no allocations were detected.
     *
     * @param runnable contains the code to be profiled.
     * @return a list of places where objects were allocated.
@@ -178,7 +179,8 @@ public class AllocationProfiler
          method.setAccessible(true);
          if (method.invoke(null) == null)
          {
-            throw new RuntimeException(AllocationRecorder.class.getSimpleName() + " has no instrumentation.");
+            throw new RuntimeException(AllocationRecorder.class.getSimpleName() + " has no instrumentation. "
+                                             + "Please add VM arg -javaagent:/path/to/java-allocation-instrumenter-X.X.X.jar");
          }
       }
       catch (Exception e)
@@ -188,11 +190,18 @@ public class AllocationProfiler
    }
 
    /**
+    * Method implementing functional interface {@link com.google.monitoring.runtime.instrumentation.Sampler}.
     *
-    * @param count
-    * @param description
-    * @param newObject
-    * @param size
+    * @param count the <code>int</code> count of how many instances are being
+    *         allocated.  -1 means a simple new to distinguish from a 1-element array. 0
+    *         shows up as a value here sometimes; one reason is T[] toArray()-type
+    *         methods that require an array type argument (see ArrayList.toArray() for
+    *         example).
+    * @param description the <code>String</code> descriptor of the class/primitive type
+    *         being allocated.
+    * @param newObject the new <code>Object</code> whose allocation we're
+    *         recording.
+    * @param size the size of the object being allocated.
     */
    private void sampleAllocation(int count, String description, Object newObject, long size)
    {
@@ -200,7 +209,7 @@ public class AllocationProfiler
       {
          AllocationRecord record = new AllocationRecord(description, newObject, size);
 
-         if (isIncluded(record) && !isExcluded(record))
+         if (isIncluded(record) && !isExcluded(record)) // excludes override inclusions
          {
             allocations.add(record);
          }
@@ -208,9 +217,7 @@ public class AllocationProfiler
    }
 
    /**
-    *
-    * @param record
-    * @return
+    * The method for determining inclusions.
     */
    private boolean isIncluded(AllocationRecord record)
    {
@@ -251,9 +258,7 @@ public class AllocationProfiler
    }
 
    /**
-    *
-    * @param record
-    * @return
+    * The method for determining exclusions.
     */
    private boolean isExcluded(AllocationRecord record)
    {
@@ -289,6 +294,7 @@ public class AllocationProfiler
    }
 
    /**
+    * Set a special boolean that makes the include filter include everything.
     *
     * @param includeAllAllocations
     */
@@ -298,6 +304,9 @@ public class AllocationProfiler
    }
 
    /**
+    * Include allocations from inside a class or resulting from something happening
+    * inside the class, but not allocations of the class itself. (Unless the class
+    * were to allocate itself)
     *
     * @param className
     */
@@ -308,6 +317,9 @@ public class AllocationProfiler
    }
 
    /**
+    * Exclude allocations from inside a class or resulting from something happening
+    * inside the class, but not allocations of the class itself. (Unless the class
+    * were to allocate itself)
     *
     * @param className
     */
@@ -317,6 +329,7 @@ public class AllocationProfiler
    }
 
    /**
+    * Include allocations of a class that happen anywhere. (i.e. new ClassName())
     *
     * @param className
     */
@@ -327,6 +340,7 @@ public class AllocationProfiler
    }
 
    /**
+    * Exclude allocations of a class that happen anywhere. (i.e. new ClassName())
     *
     * @param className
     */
@@ -336,6 +350,7 @@ public class AllocationProfiler
    }
 
    /**
+    * Include allocations happening inside this method or resulting from this method.
     *
     * @param qualifiedMethodName
     */
@@ -346,6 +361,7 @@ public class AllocationProfiler
    }
 
    /**
+    * Exclude allocations happening inside this method or resulting from this method.
     *
     * @param qualifiedMethodName
     */
@@ -355,6 +371,8 @@ public class AllocationProfiler
    }
 
    /**
+    * Include allocations whose stack trace contain this keyword. Useful for including
+    * a package or interface methods.
     *
     * @param keyword
     */
@@ -365,6 +383,8 @@ public class AllocationProfiler
    }
 
    /**
+    * Exclude allocations whose stack trace contain this keyword. Useful for excluding
+    * a package or interface methods.
     *
     * @param keyword
     */
@@ -374,6 +394,8 @@ public class AllocationProfiler
    }
 
    /**
+    * Set whether allocations inside constructors are recorded. Usually, constructors
+    * are designed to allocate stuff and aren't of interest.
     *
     * @param recordConstructorAllocations
     */
@@ -386,6 +408,8 @@ public class AllocationProfiler
    }
 
    /**
+    * Set whether to record static member initialization. Usually, you would not normally care
+    * about this, but maybe you want to make sure your app has no static member initialization.
     *
     * @param recordStaticMemberInitialization
     */
@@ -398,6 +422,8 @@ public class AllocationProfiler
    }
 
    /**
+    * Set whether to record the class loader loading classes. Sometimes you might not care about
+    * this because classes are only loaded once.
     *
     * @param recordClassLoader
     */
@@ -410,6 +436,8 @@ public class AllocationProfiler
    }
 
    /**
+    * Set whether to record allocations resulting from this class or it's infrastructure.
+    * Most of the time you would not want this.
     *
     * @param recordSelf
     */
