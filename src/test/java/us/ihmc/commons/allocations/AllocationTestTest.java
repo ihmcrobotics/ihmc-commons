@@ -5,6 +5,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -129,6 +130,8 @@ public class AllocationTestTest
       allocations = allocationProfiler.pollAllocations();
       printAllocations(allocations);
       Assert.assertTrue(allocations.get(0).getAllocatedObject().getClass().equals(LilAllocator.class));
+      Assert.assertTrue(allocations.get(0).getDescription().equals("us/ihmc/commons/allocations/AllocationTestTest$LilAllocator"));
+      Assert.assertTrue(allocations.get(0).getSize() == 24);
       Assert.assertTrue(allocations.get(1).getAllocatedObject().getClass().equals(MutableInt.class));
       Assert.assertEquals(2, allocations.size());
    }
@@ -274,5 +277,10 @@ public class AllocationTestTest
       {
          mutableInt = new MutableInt();
       }
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(AllocationProfiler.class, AllocationTestTest.class);
    }
 }
