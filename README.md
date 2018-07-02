@@ -15,8 +15,8 @@ https://bintray.com/ihmcrobotics/maven-release/ihmc-commons-test
 
 In your `build.gradle`:
 ```groovy
-compile group: "us.ihmc", name: "ihmc-commons", version: "0.21.1"
-testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.21.1"
+compile group: "us.ihmc", name: "ihmc-commons", version: "0.22.0"
+testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.22.0"
 ```
 
 ### What's Included
@@ -36,7 +36,7 @@ testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.21.1"
 - Support for mutation testing and displaying the results in your browser.
 - Tools for running parallel continuous integration tests in the cloud.
 - Extra assertions. (assertSerializable, assertExceptionThrown, etc.)
-- Tools for allocation testing. (light wrapper for Google's java-allocation-instrumenter)
+- Tools for allocation testing. (Filtering on top of google/java-allocation-instrumenter)
 
 ### Contributing
 
