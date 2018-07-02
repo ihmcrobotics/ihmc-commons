@@ -1,6 +1,7 @@
 package us.ihmc.commons;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
@@ -127,6 +128,7 @@ public class FormattingToolsTest
       PrintTools.debug(this, FormattingTools.getDateString());
    }
 
+   @Ignore // this test seems fairly useless and it's flaky
    @Test(timeout = 30000)
    public void testGetTimeString()
    {
