@@ -5,7 +5,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,16 +15,19 @@ import java.util.List;
  * </p>
  * @author Georg
  */
-public class AllocationRecordingDemo extends AllocationTest
+public class AllocationRecordingDemo
 {
    public AllocationRecordingDemo()
    {
-      List<Throwable> allocations;
+      AllocationProfiler allocationProfiler = new AllocationProfiler();
+      allocationProfiler.includeAllocationsInsideClass(RecyclingArrayList.class.getName());
+
+      List<AllocationRecord> allocations;
 
       int initialSize = 6;
       RecyclingArrayList<MutableDouble> myList = new RecyclingArrayList<>(initialSize, MutableDouble.class);
 
-      startRecordingAllocations(); // start recording
+      allocationProfiler.startRecordingAllocations(); // start recording
 
       // This should not allocate objects since the list is large enough.
       myList.clear();
@@ -34,31 +36,19 @@ public class AllocationRecordingDemo extends AllocationTest
          myList.add();
       }
 
-      stopRecordingAllocations(); // stop recording
+      allocationProfiler.stopRecordingAllocations(); // stop recording
 
-      allocations = pollAllocations(); // get results
+      allocations = allocationProfiler.pollAllocations(); // get results
 
       PrintTools.info("Number of places where allocations occured: " + allocations.size());
-      allocations.forEach(allocation -> allocation.printStackTrace());
+      allocations.forEach(allocation -> System.out.println(allocation.toString()));
 
       // This should allocate a new Vector3D
-      allocations = recordAllocations(() -> myList.add()); // convenience method, start, run, stop, poll in one step
+      allocations = allocationProfiler.recordAllocations(() -> myList.add()); // convenience method, start, run, stop, poll in one step
 
       PrintTools.info("Number of places where allocations occured: " + allocations.size());
 
-      allocations.forEach(allocation -> allocation.printStackTrace());
-   }
-
-   @Override
-   public List<String> getClassWhitelist()
-   {
-      return Collections.singletonList(RecyclingArrayList.class.getName()); // look at allocations from only RecyclingArrayList
-   }
-
-   @Override
-   public List<String> getClassBlacklist()
-   {
-      return Collections.emptyList(); // no need to override this, just an example
+      allocations.forEach(allocation -> System.out.println(allocation.toString()));
    }
 
    public static void main(String[] args) throws IOException
