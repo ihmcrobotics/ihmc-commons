@@ -2,6 +2,8 @@ package us.ihmc.commons.lists;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Test;
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 
 import java.util.ArrayList;
@@ -14,25 +16,51 @@ import static org.junit.Assert.*;
 public class BoundedRecyclingArrayListTest
 {
    @Test(timeout = 30000)
+   public void testOutOfMemoryError()
+   {
+      BoundedRecyclingArrayList<MutableInt> list = new BoundedRecyclingArrayList<>(5, MutableInt::new);
+
+      for (int i = 0; i < 5; i++)
+      {
+         list.add();
+      }
+
+      Assertions.assertExceptionThrown(OutOfMemoryError.class, () -> {
+            list.add();
+      });
+
+      BoundedRecyclingArrayList<MutableInt> list2 = new BoundedRecyclingArrayList<>(500, MutableInt::new);
+
+      for (int i = 0; i < 500; i++)
+      {
+         list2.add();
+      }
+
+      Assertions.assertExceptionThrown(OutOfMemoryError.class, () -> {
+            list2.add();
+      });
+   }
+
+   @Test(timeout = 30000)
    public void testConstructors()
    {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(Object.class);
+      BoundedRecyclingArrayList<Object> list = new BoundedRecyclingArrayList<>(50, Object.class);
       assertTrue(list.isEmpty());
       assertTrue(list.size() == 0);
       assertTrue(list.getLast() == null);
 
-      list = new RecyclingArrayList<>(Object::new);
+      list = new BoundedRecyclingArrayList<>(50, Object::new);
       assertTrue(list.isEmpty());
       assertTrue(list.size() == 0);
       assertTrue(list.getLast() == null);
 
       int capacity = 10;
-      list = new RecyclingArrayList<>(capacity, Object.class);
+      list = new BoundedRecyclingArrayList<>(capacity, Object.class);
       assertTrue(list.isEmpty());
       assertTrue(list.size() == 0);
       assertTrue(list.getLast() == null);
 
-      list = new RecyclingArrayList<>(capacity, Object::new);
+      list = new BoundedRecyclingArrayList<>(capacity, Object::new);
       assertTrue(list.isEmpty());
       assertTrue(list.size() == 0);
       assertTrue(list.getLast() == null);
@@ -41,7 +69,7 @@ public class BoundedRecyclingArrayListTest
    @Test(timeout = 30000)
    public void testAddAndGet()
    {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object::new);
+      BoundedRecyclingArrayList<Object> list = new BoundedRecyclingArrayList<>(0, 50, Object::new);
       ArrayList<Object> expectedList = new ArrayList<>();
 
       int finalSize = 10;
@@ -114,7 +142,7 @@ public class BoundedRecyclingArrayListTest
    @Test(timeout = 30000)
    public void testGetAndGrowIfNeeded()
    {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object::new);
+      BoundedRecyclingArrayList<Object> list = new BoundedRecyclingArrayList<>(0, 50, Object::new);
 
       assertTrue(list.isEmpty());
       assertTrue(list.size() == 0);
@@ -170,7 +198,7 @@ public class BoundedRecyclingArrayListTest
    public void testFastRemove()
    {
       int currentSize = 10;
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(currentSize, Object::new);
+      BoundedRecyclingArrayList<Object> list = new BoundedRecyclingArrayList<>(currentSize, 50, Object::new);
 
       for (int i = 0; i < currentSize; i++)
       {
@@ -211,7 +239,7 @@ public class BoundedRecyclingArrayListTest
    public void testRemove()
    {
       int currentSize = 10;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt::new);
+      BoundedRecyclingArrayList<MutableInt> list = new BoundedRecyclingArrayList<>(currentSize, 50, MutableInt::new);
       for (int i = 0; i < currentSize; i++)
          list.add().setValue(10 + i);
       assertTrue(list.size() == currentSize);
@@ -258,7 +286,7 @@ public class BoundedRecyclingArrayListTest
    {
       Random rand = new Random(541964L);
       int currentSize = 10;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt::new);
+      BoundedRecyclingArrayList<MutableInt> list = new BoundedRecyclingArrayList<>(currentSize, 50, MutableInt::new);
       for (int i = 0; i < currentSize; i++)
          list.add().setValue(10 + i);
       assertTrue(list.size() == currentSize);
@@ -307,7 +335,7 @@ public class BoundedRecyclingArrayListTest
    {
       Random rand = new Random(541964L);
       int currentSize = 10;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt::new);
+      BoundedRecyclingArrayList<MutableInt> list = new BoundedRecyclingArrayList<>(currentSize, 50, MutableInt::new);
       for (int i = 0; i < currentSize; i++)
          list.add().setValue(10 + i);
       assertTrue(list.size() == currentSize);
@@ -348,7 +376,7 @@ public class BoundedRecyclingArrayListTest
    {
       Random random = new Random(541964L);
       int currentSize = 100;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt::new);
+      BoundedRecyclingArrayList<MutableInt> list = new BoundedRecyclingArrayList<>(currentSize, 50, MutableInt::new);
 
       for (int i = 0; i < currentSize; i++)
       {
@@ -381,7 +409,7 @@ public class BoundedRecyclingArrayListTest
    @Test(timeout = 30000)
    public void testIteratorHasNext()
    {
-      RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object::new);
+      BoundedRecyclingArrayList<Object> list = new BoundedRecyclingArrayList<>(0, 50, Object::new);
       assertFalse(list.iterator().hasNext());
 
       int size = 10;
@@ -404,7 +432,7 @@ public class BoundedRecyclingArrayListTest
    public void testIteratorNext()
    {
       int size = 15;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(size, MutableInt::new);
+      BoundedRecyclingArrayList<MutableInt> list = new BoundedRecyclingArrayList<>(size, 50, MutableInt::new);
 
       for (int i = 0; i < size; i++)
       {
@@ -422,7 +450,7 @@ public class BoundedRecyclingArrayListTest
    public void testIteratorRemove()
    {
       int initialSize = 8;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(initialSize, MutableInt::new);
+      BoundedRecyclingArrayList<MutableInt> list = new BoundedRecyclingArrayList<>(initialSize, 50, MutableInt::new);
 
       for (int i = 0; i < initialSize; i++)
       {
@@ -437,7 +465,7 @@ public class BoundedRecyclingArrayListTest
          iterator.remove();
          fail();
       }
-      catch(IllegalStateException e)
+      catch (IllegalStateException e)
       {
       }
 
@@ -466,7 +494,7 @@ public class BoundedRecyclingArrayListTest
    public void testIteratorForEachRemaining()
    {
       int initialSize = 10;
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(initialSize, MutableInt::new);
+      BoundedRecyclingArrayList<MutableInt> list = new BoundedRecyclingArrayList<>(initialSize, 50, MutableInt::new);
 
       for (int i = 0; i < initialSize; i++)
       {
@@ -485,7 +513,7 @@ public class BoundedRecyclingArrayListTest
       for (int i = 0; i < initialSize; i++)
       {
          int value = list.get(i).getValue();
-         if(i < testIndex)
+         if (i < testIndex)
          {
             assertTrue(value == 0);
          }
@@ -500,13 +528,13 @@ public class BoundedRecyclingArrayListTest
    public void testEmptyConstructor()
    {
       // check constructor doesn't throw exception
-      new RecyclingArrayList();
+      new BoundedRecyclingArrayList();
    }
 
    @Test(timeout = 30000)
    public void testSort()
    {
-      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(10, MutableInt::new);
+      BoundedRecyclingArrayList<MutableInt> list = new BoundedRecyclingArrayList<>(10, 50, MutableInt::new);
       for (int i = 0; i < list.size(); i++)
       {
          list.get(i).setValue(i);
@@ -517,5 +545,10 @@ public class BoundedRecyclingArrayListTest
       {
          assertTrue(list.get(i).getValue() == i);
       }
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(BoundedRecyclingArrayList.class, BoundedRecyclingArrayListTest.class);
    }
 }

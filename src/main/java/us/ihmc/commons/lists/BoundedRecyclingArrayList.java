@@ -5,10 +5,13 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * A list implementation designed to mimic the functionality of ArrayList
+ * <p> A list implementation designed to mimic the functionality of ArrayList
  * while reducing allocation. Once an object is allocated in this list,
  * its reference is retained for the lifetime of the list even if the
- * object is nominally removed.
+ * object is nominally removed.<p>
+ *
+ * <p> This version has a max capacity, meaning a RuntimeException will be
+ * thrown if too many elements are added.<p>
  *
  * <p> Objects are added to the list by calling {@link #add()} and operating
  * on the returned object. None of the List api for adding and setting are supported.
@@ -26,10 +29,12 @@ public class BoundedRecyclingArrayList<T> implements List<T>
    /**
     * Minimum non-zero capacity
     */
-   private static final int MINIMUM_POSITIVE_CAPACITY = 8;
-
    private T[] values;
    private int size = 0;
+   /** The capacity bound before OutOfMemoryException */
+   private final int maxCapacity;
+   /** Minimum non-zero capacity */
+   private final int minimumPositiveCapacity;
    private final Supplier<T> allocator;
 
    /**
@@ -38,38 +43,41 @@ public class BoundedRecyclingArrayList<T> implements List<T>
    @Deprecated
    public BoundedRecyclingArrayList()
    {
-      this(0, (Supplier<T>) null);
+      this(0, 0, (Supplier<T>) null);
    }
 
    /**
     * Constructs a zero-sized array. An allocator is created which calls the given class's empty constructor
+    * @param maxCapacity maximum capacity of the list
     * @param clazz class of element data
     * @see SupplierBuilder#createFromEmptyConstructor(Class)
     */
-   public BoundedRecyclingArrayList(Class<T> clazz)
+   public BoundedRecyclingArrayList(int maxCapacity, Class<T> clazz)
    {
-      this(0, SupplierBuilder.createFromEmptyConstructor(clazz));
+      this(0, maxCapacity, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
    /**
     * Constructs a zero-sized, zero-capacity array. This array is populated with objects using the allocator.
     * This allocator is also used for any future allocation.
+    * @param maxCapacity maximum capacity of the list
     * @param allocator
     */
-   public BoundedRecyclingArrayList(Supplier<T> allocator)
+   public BoundedRecyclingArrayList(int maxCapacity, Supplier<T> allocator)
    {
-      this(0, allocator);
+      this(0, maxCapacity, allocator);
    }
 
    /**
     * Constructs a zero-sized array and allocates the given capacity. An allocator is created which calls the given class's empty constructor
     * @param initialCapacity initial capacity of the array
+    * @param maxCapacity maximum capacity of the list
     * @param clazz class of element data
     * @see SupplierBuilder#createFromEmptyConstructor(Class)
     */
-   public BoundedRecyclingArrayList(int initialCapacity, Class<T> clazz)
+   public BoundedRecyclingArrayList(int initialCapacity, int maxCapacity, Class<T> clazz)
    {
-      this(initialCapacity, SupplierBuilder.createFromEmptyConstructor(clazz));
+      this(initialCapacity, maxCapacity, SupplierBuilder.createFromEmptyConstructor(clazz));
    }
 
    /**
@@ -77,16 +85,19 @@ public class BoundedRecyclingArrayList<T> implements List<T>
     * used for any future allocation.
     *
     * @param initialCapacity initial capacity of the array
+    * @param maxCapacity maximum capacity of the list
     * @param allocator generates elements by calling {@link Supplier#get()}
     */
    @SuppressWarnings("unchecked")
-   public BoundedRecyclingArrayList(int initialCapacity, Supplier<T> allocator)
+   public BoundedRecyclingArrayList(int initialCapacity, int maxCapacity, Supplier<T> allocator)
    {
       if(initialCapacity < 0)
       {
          throw new IllegalArgumentException("Illegal capacity: " + initialCapacity);
       }
 
+      this.maxCapacity = maxCapacity;
+      this.minimumPositiveCapacity = Math.min(8, maxCapacity);
       this.values = (T[]) new Object[initialCapacity];
       this.allocator = allocator;
 
@@ -120,6 +131,26 @@ public class BoundedRecyclingArrayList<T> implements List<T>
    public int size()
    {
       return size;
+   }
+
+   /**
+    * Returns the size at which reallocation will occur.
+    *
+    * @return current internal array capacity
+    */
+   public int capacity()
+   {
+      return values.length;
+   }
+
+   /**
+    * The maximum capacity of the list.
+    *
+    * @return max list size
+    */
+   public int getMaxCapacity()
+   {
+      return maxCapacity;
    }
 
    /**
@@ -239,7 +270,7 @@ public class BoundedRecyclingArrayList<T> implements List<T>
 
       if (index >= values.length)
       {
-         ensureCapacity(Math.max(MINIMUM_POSITIVE_CAPACITY, size));
+         ensureCapacity(Math.max(minimumPositiveCapacity, size));
       }
 
       return values[index];
@@ -357,19 +388,20 @@ public class BoundedRecyclingArrayList<T> implements List<T>
       Arrays.sort(values, 0, size(), comparator);
    }
 
-   private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
-
    protected void ensureCapacity(int minCapacity)
    {
       if (minCapacity <= values.length)
          return;
 
+      if (minCapacity > maxCapacity) // max capacity exceeded
+         throw new OutOfMemoryError("Requested capacity (" + minCapacity + ") is greater than max capacity (" + maxCapacity + ")!");
+
       int previousArraySize = values.length;
-      int newArraySize = previousArraySize + (previousArraySize >> 1);
-      if (newArraySize - minCapacity < 0)
+      int newArraySize = previousArraySize + (previousArraySize >> 1); // Add 50%
+      if (newArraySize - maxCapacity > 0) // if +50% is more than max, set at max
+         newArraySize = maxCapacity;
+      if (newArraySize - minCapacity < 0) // if requested more than 50%, raise it the rest
          newArraySize = minCapacity;
-      if (newArraySize - MAX_ARRAY_SIZE > 0)
-         newArraySize = checkWithMaxCapacity(minCapacity);
 
       values = Arrays.copyOf(values, newArraySize);
 
@@ -377,13 +409,6 @@ public class BoundedRecyclingArrayList<T> implements List<T>
       {
          values[i] = allocator.get();
       }
-   }
-
-   private static int checkWithMaxCapacity(int minCapacity)
-   {
-      if (minCapacity < 0) // overflow
-         throw new OutOfMemoryError();
-      return (minCapacity > MAX_ARRAY_SIZE) ? Integer.MAX_VALUE : MAX_ARRAY_SIZE;
    }
 
    private void fillElementDataIfNeeded()
