@@ -7,8 +7,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 
 import java.util.List;
 
@@ -21,7 +19,6 @@ public class AllocationTestTest
 
    ;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testSettingOfVector()
    {
@@ -31,7 +28,6 @@ public class AllocationTestTest
    }
 
    @SuppressWarnings("unused")
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testAllocationOfArray()
    {
@@ -44,7 +40,6 @@ public class AllocationTestTest
       PrintTools.info(allocations.get(0).toString());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testSingleAllocation()
    {
@@ -55,7 +50,6 @@ public class AllocationTestTest
       PrintTools.info(allocations.get(0).toString());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testSingleAllocationConstructorFilter()
    {
@@ -73,7 +67,6 @@ public class AllocationTestTest
       Assert.assertEquals(1, allocations.size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testWhitelist()
    {
@@ -108,7 +101,6 @@ public class AllocationTestTest
       Assert.assertEquals(2, allocations.size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testBlacklist()
    {
@@ -136,7 +128,6 @@ public class AllocationTestTest
       Assert.assertEquals(2, allocations.size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testMethodIncludeExclude()
    {
@@ -174,7 +165,6 @@ public class AllocationTestTest
       Assert.assertEquals(3, allocations.size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testReset()
    {
@@ -215,7 +205,6 @@ public class AllocationTestTest
    }
 
    @Ignore // this switch doesn't allocate when run with Gradle. It therefore no longer reliably tests the application logic so ignoring it. - @dcalvert
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 3000)
    public void testSwitchTable()
    {

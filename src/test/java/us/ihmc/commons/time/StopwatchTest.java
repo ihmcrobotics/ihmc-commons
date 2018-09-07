@@ -5,7 +5,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 import java.util.function.DoubleSupplier;
@@ -15,7 +14,6 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings(value = "unused")
 public class StopwatchTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testConstructor()
    {
@@ -50,7 +48,6 @@ public class StopwatchTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.8)
    @Test(timeout = 30000)
    public void testStopwatchWithRealTime() throws InterruptedException
    {
@@ -118,7 +115,6 @@ public class StopwatchTest
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_HUNDREDTH);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.8)
    @Test(timeout = 30000)
    public void testStopwatch()
    {
@@ -187,7 +183,6 @@ public class StopwatchTest
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, Epsilons.ONE_TEN_BILLIONTH);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSuspendAndResume()
    {

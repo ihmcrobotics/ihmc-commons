@@ -1,7 +1,6 @@
 package us.ihmc.commons;
 
 import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 
@@ -259,7 +258,6 @@ public class ConversionsTest
       assertTrue(Double.isInfinite(decibels));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testMinutesSecondsConversions()
    {
