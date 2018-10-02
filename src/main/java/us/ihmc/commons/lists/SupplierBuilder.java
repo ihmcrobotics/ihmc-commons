@@ -2,6 +2,9 @@ package us.ihmc.commons.lists;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 public class SupplierBuilder
@@ -45,6 +48,40 @@ public class SupplierBuilder
             e.printStackTrace();
             throw new RuntimeException(
                   "Something went wrong in the empty constructor implemented in the class: " + emptyConstructor.getDeclaringClass().getSimpleName());
+         }
+      };
+   }
+
+   public static <T> Supplier<T> indexedSupplier(IntFunction<T> indexBasedSupplier)
+   {
+      return indexedSupplier(indexBasedSupplier, 0);
+   }
+
+   /**
+    * <br> Returns a Supplier that creates an object as a function of an index, starting at the given index.
+    * On the {@code n}-th call to {@link Supplier#get}, the object returned is {@code indexBasedSupplier.apply(startingIndex + (n - 1))}
+    *
+    * <br> For instance, given the following Supplier:
+    *
+    * <br> Supplier&lt;String&gt; stringSupplier = indexedSupplier((index) -> "string_" + index, 3);
+    *
+    * <br> Successively calling {@code stringSupplier.get()} will return: string_3, string_4, string_5, ...
+    *
+    * @param indexBasedSupplier creates an object as a function of the current index
+    * @param startingIndex initial index
+    * @param <T>
+    * @return index-based supplier
+    */
+   public static <T> Supplier<T> indexedSupplier(IntFunction<T> indexBasedSupplier, int startingIndex)
+   {
+      return new Supplier<T>()
+      {
+         int currentIndex = startingIndex;
+
+         @Override
+         public T get()
+         {
+            return indexBasedSupplier.apply(currentIndex++);
          }
       };
    }
