@@ -35,4 +35,14 @@ public class SupplierBuilderTest
          Assert.assertEquals((long) mutableInt.getValue(), (long) indexFunction.apply(i + initialIndex).getValue());
       }
    }
+
+   @Test(timeout = 30000)
+   public void testMutableIntSupplierFromConstructor()
+   {
+      Supplier<MutableInt> supplier = SupplierBuilder.createFromEmptyConstructor(MutableInt.class);
+      for (int i = 0; i < 10; i++)
+      {
+         Assert.assertEquals((long) supplier.get().getValue(), 0);
+      }
+   }
 }
