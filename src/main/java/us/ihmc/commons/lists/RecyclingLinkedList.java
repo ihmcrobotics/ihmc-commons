@@ -394,7 +394,10 @@ public class RecyclingLinkedList<T>
             throw new NoSuchElementException();
          }
 
-         copier.accept(objectToPack, nextCursor.element);
+         if (objectToPack != null)
+         {
+            copier.accept(objectToPack, nextCursor.element);
+         }
          nextCursor = reverse ? nextCursor.previous : nextCursor.next;
       }
    }

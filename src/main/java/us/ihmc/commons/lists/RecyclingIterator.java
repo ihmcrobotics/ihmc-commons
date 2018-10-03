@@ -42,4 +42,12 @@ public interface RecyclingIterator<T>
     * {@link RecyclingIterator#reset()}.
     */
    void next(T objectToPack);
+
+   /**
+    * Advances the iterator by one step without packing an element.
+    */
+   default void next()
+   {
+      next(null);
+   }
 }

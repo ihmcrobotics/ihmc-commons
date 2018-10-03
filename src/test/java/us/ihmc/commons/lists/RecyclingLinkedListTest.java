@@ -183,8 +183,8 @@ public class RecyclingLinkedListTest
             fail("Iterator should have stopped.");
          }
 
-         forwardIterator.next(element);
-         Assert.assertEquals(expected++, element.intValue());
+         forwardIterator.next();
+         expected++;
       }
       Assert.assertEquals(expected, 21);
 
@@ -197,8 +197,8 @@ public class RecyclingLinkedListTest
             fail("Iterator should have stopped.");
          }
 
-         backwardIterator.next(element);
-         Assert.assertEquals(expected--, element.intValue());
+         backwardIterator.next();
+         expected--;
       }
       Assert.assertEquals(expected, -21);
 
