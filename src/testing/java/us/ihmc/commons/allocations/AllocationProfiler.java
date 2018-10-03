@@ -54,10 +54,10 @@ public class AllocationProfiler
     * <p>Create a new allocation profiler and call {@link AllocationProfiler#reset()}.</p>
     *
     * <p>By default, records all allocations EXCEPT:</p>
-    * <li>Do not record any allocations inside constructors</li>
-    * <li>Do not record any allocations from and resulting from static member initialization</li>
-    * <li>Do not record anything as a result of the ClassLoader loading classes</li>
-    * <li>Do not record any allocations made by this profiler, Gradle, or JUnit</li>
+    * <li>Does not record any allocations inside constructors</li>
+    * <li>Does not record any allocations from and resulting from static member initialization</li>
+    * <li>Does not record anything as a result of the ClassLoader loading classes</li>
+    * <li>Does not record any allocations made by this profiler, Gradle, or JUnit</li>
     *
     */
    public AllocationProfiler()
