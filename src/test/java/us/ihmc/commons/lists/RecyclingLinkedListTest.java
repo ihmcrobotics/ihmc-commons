@@ -27,6 +27,9 @@ public class RecyclingLinkedListTest
 
    public void doOperationsAndAsserts(RecyclingLinkedList<MutableInt> linkedList, boolean reverse)
    {
+      Assert.assertEquals(0, linkedList.size());
+      Assert.assertTrue(linkedList.isEmpty());
+
       MutableInt element = new MutableInt();
       RecyclingIterator<MutableInt> forwardIterator = linkedList.createForwardIterator();
       RecyclingIterator<MutableInt> backwardIterator = linkedList.createBackwardIterator();
@@ -36,16 +39,21 @@ public class RecyclingLinkedListTest
       {
          // Add elements such that the result is a list from 5 to 9:
          addElementsToBack(linkedList, forwardIterator, backwardIterator);
+         Assert.assertEquals(5, linkedList.size());
          // Add elements such that the result is a list from 0 to 9:
          addElementsToFront(linkedList, forwardIterator, backwardIterator);
+         Assert.assertEquals(10, linkedList.size());
       }
       else
       {
          // Add elements such that the result is a list from 0 to 9:
          addElementsToFront(linkedList, forwardIterator, backwardIterator);
+         Assert.assertEquals(5, linkedList.size());
          // Add elements such that the result is a list from 5 to 9:
          addElementsToBack(linkedList, forwardIterator, backwardIterator);
+         Assert.assertEquals(10, linkedList.size());
       }
+      Assert.assertFalse(linkedList.isEmpty());
 
       // Check the first and last elements:
       linkedList.peekFirst(element);
@@ -199,18 +207,33 @@ public class RecyclingLinkedListTest
       {
          for (int i = -20; i <= 20; i++)
          {
-            linkedList.removeFirst(element);
-            Assert.assertEquals(i, element.intValue());
+            if (i % 2 == 0)
+            {
+               linkedList.removeFirst(element);
+               Assert.assertEquals(i, element.intValue());
+            }
+            else
+            {
+               linkedList.removeFirst();
+            }
          }
       }
       else
       {
          for (int i = 20; i >= -20; i--)
          {
-            linkedList.removeLast(element);
-            Assert.assertEquals(i, element.intValue());
+            if (i % 2 == 0)
+            {
+               linkedList.removeLast(element);
+               Assert.assertEquals(i, element.intValue());
+            }
+            else
+            {
+               linkedList.removeLast();
+            }
          }
       }
+      Assert.assertTrue(linkedList.isEmpty());
 
       // Make sure there is no more elements:
       try

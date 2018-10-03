@@ -40,6 +40,7 @@ public class RecyclingLinkedList<T>
 
    private Element first;
    private Element last;
+   private int size;
 
    /**
     * Creates a new {@link RecyclingLinkedList} with the default initial size.
@@ -117,6 +118,8 @@ public class RecyclingLinkedList<T>
       {
          first.next.previous = first;
       }
+
+      size++;
    }
 
    /**
@@ -143,6 +146,16 @@ public class RecyclingLinkedList<T>
       {
          last.previous.next = last;
       }
+
+      size++;
+   }
+
+   /**
+    * Removes the first element of the linked list.
+    */
+   public void removeFirst()
+   {
+      removeFirst(null);
    }
 
    /**
@@ -154,7 +167,10 @@ public class RecyclingLinkedList<T>
    public void removeFirst(T objectToPack)
    {
       disableIterators();
-      peekFirst(objectToPack);
+      if (objectToPack != null)
+      {
+         peekFirst(objectToPack);
+      }
 
       Element newFirst = first.next;
       release(first);
@@ -164,6 +180,16 @@ public class RecyclingLinkedList<T>
       {
          last = null;
       }
+
+      size--;
+   }
+
+   /**
+    * Removes the last element of the linked list.
+    */
+   public void removeLast()
+   {
+      removeLast(null);
    }
 
    /**
@@ -175,7 +201,10 @@ public class RecyclingLinkedList<T>
    public void removeLast(T objectToPack)
    {
       disableIterators();
-      peekLast(objectToPack);
+      if (objectToPack != null)
+      {
+         peekLast(objectToPack);
+      }
 
       Element newLast = last.previous;
       release(last);
@@ -185,6 +214,8 @@ public class RecyclingLinkedList<T>
       {
          first = null;
       }
+
+      size--;
    }
 
    /**
@@ -215,6 +246,26 @@ public class RecyclingLinkedList<T>
       }
 
       copier.accept(objectToPack, last.element);
+   }
+
+   /**
+    * Checks whether the linked list contains any elements.
+    *
+    * @return {@code true} if the data structure is empty.
+    */
+   public boolean isEmpty()
+   {
+      return first == null;
+   }
+
+   /**
+    * Gets the current number of elements in the linked list.
+    *
+    * @return the size of the data structure.
+    */
+   public int size()
+   {
+      return size;
    }
 
    /**
