@@ -3,7 +3,6 @@ package us.ihmc.commons;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -337,7 +336,6 @@ public class MathToolsTest
       MathTools.intervalContains(5.0, min, max);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testIsBoundedByMethods()
    {
@@ -613,7 +611,6 @@ public class MathToolsTest
       assertTrue(MathTools.isLessThanWithSignificantFigures(2.00019000, 2.00020000, 6));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRoundToPrecision()
    {
@@ -625,7 +622,6 @@ public class MathToolsTest
       assertEquals("not equal", 123.45, MathTools.roundToPrecision(123.46, 0.05), 0.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testFloorToPrecision()
    {
@@ -641,7 +637,6 @@ public class MathToolsTest
       assertEquals("not equal", 123.45, MathTools.floorToPrecision(123.49, 0.05), 0.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testCeilToPrecision()
    {

@@ -3,7 +3,6 @@ package us.ihmc.commons;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -16,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 public class FormattingToolsTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFormattedDecimal3D()
    {
@@ -42,7 +40,6 @@ public class FormattingToolsTest
       assertTrue(resultingFormattedString.equals("-22.023"));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCapitalizeFirstLetter()
    {
@@ -64,7 +61,6 @@ public class FormattingToolsTest
       assertTrue(resultingString.equals("robot"));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testUnderScoredToCamelCase()
    {
@@ -79,7 +75,6 @@ public class FormattingToolsTest
       assertTrue(resultingFormattedString.equals("1234@$%Bcdf"));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 3000000)
    public void testFormatToSignificantFigures()
    {
