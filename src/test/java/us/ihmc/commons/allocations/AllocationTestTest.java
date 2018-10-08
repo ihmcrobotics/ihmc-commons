@@ -110,7 +110,6 @@ public class AllocationTestTest
       allocationProfiler.setRecordConstructorAllocations(false);
 
       LilAllocator lilAllocator;
-      MutableInt mutableInt;
 
       // add one class to whitelist
       allocationProfiler.excludeAllocationsInsideClass(LilAllocator.class.getName());
@@ -121,7 +120,7 @@ public class AllocationTestTest
       if (lilAllocator != null)
       {
          ThreadTools.sleep(10); // otherwise apparently MutableInt will get allocated early and fail the test
-         mutableInt = new MutableInt(); // random new thing, but not in whitelist
+         new MutableInt(); // random new thing, but not in whitelist
       }
 
       lilAllocator.doStuff(); // allocates 2 things inside
