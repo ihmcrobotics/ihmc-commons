@@ -7,6 +7,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 import java.util.List;
 
@@ -114,8 +115,15 @@ public class AllocationTestTest
       // add one class to whitelist
       allocationProfiler.excludeAllocationsInsideClass(LilAllocator.class.getName());
       allocationProfiler.startRecordingAllocations();
+
       lilAllocator = new LilAllocator(); // allocates 1, stuff inside does not count
-      mutableInt = new MutableInt(); // random new thing, but not in whitelist
+
+      if (lilAllocator != null)
+      {
+         ThreadTools.sleep(10); // otherwise apparently MutableInt will get allocated early and fail the test
+         mutableInt = new MutableInt(); // random new thing, but not in whitelist
+      }
+
       lilAllocator.doStuff(); // allocates 2 things inside
       allocationProfiler.stopRecordingAllocations();
 
