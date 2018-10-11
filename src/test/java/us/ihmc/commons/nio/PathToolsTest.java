@@ -5,8 +5,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.log.LogTools;
 
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -48,7 +49,7 @@ public class PathToolsTest
    {
       List<Path> matchingPaths = PathTools.findAllPathsRecursivelyThatMatchRegex(Paths.get("resources"), ".*[\\\\/]PathTools\\.java\\.fake$");
 
-      PrintTools.info(this, "Matched " + matchingPaths.size() + " file(s).");
+      LogTools.info("Matched " + matchingPaths.size() + " file(s).");
 
       assertTrue("Didn't match exactly one file.", matchingPaths.size() == 1);
    }
@@ -60,7 +61,7 @@ public class PathToolsTest
 
       String baseName = PathTools.getBaseName(pathToThisTest);
 
-      PrintTools.info(this, "Base name of this test: " + baseName);
+      LogTools.info("Base name of this test: " + baseName);
 
       assertTrue("Base name not correct.", baseName.equals(PathToolsTest.class.getSimpleName()));
    }
@@ -72,7 +73,7 @@ public class PathToolsTest
 
       String extensionName = PathTools.getExtension(pathToThisTest);
 
-      PrintTools.info(this, "Extension name of this test: " + extensionName);
+      LogTools.info("Extension name of this test: " + extensionName);
 
       assertTrue("Extension name not correct.", extensionName.equals("java"));
    }
@@ -82,17 +83,17 @@ public class PathToolsTest
    {
       String camelCasedClassSimpleName = StringUtils.uncapitalize(PathToolsTest.class.getSimpleName());
 
-      PrintTools.info(this, "Camel cased simple name: " + camelCasedClassSimpleName);
+      LogTools.info("Camel cased simple name: " + camelCasedClassSimpleName);
 
       Path firstPath = PathTools.findFirstPathMatchingGlob(Paths.get("resources"), "**/" + camelCasedClassSimpleName);
 
       if (firstPath == null)
-         PrintTools.error(this, "Path not found!");
+         LogTools.error("Path not found!");
 
       assertTrue("directoryHasGlob not working.", PathTools.directoryHasGlob(Paths.get("resources"), "**/" + camelCasedClassSimpleName));
 
-      PrintTools.info(this, "First path: " + firstPath.toString());
-      PrintTools.info(this, "First path fileName: " + firstPath.getFileName());
+      LogTools.info("First path: " + firstPath.toString());
+      LogTools.info("First path fileName: " + firstPath.getFileName());
 
       assertTrue("First path not correct.", firstPath.getFileName().toString().equals(camelCasedClassSimpleName));
    }
@@ -101,7 +102,7 @@ public class PathToolsTest
    public void testTemporaryDirectoryPath()
    {
       String tempPath = PathTools.systemTemporaryDirectory().toString();
-      PrintTools.info(this, "Java temp directory: " + tempPath);
+      LogTools.info("Java temp directory: " + tempPath);
       assertNotNull("Java temp directory is null.", tempPath);
    }
 
@@ -115,7 +116,7 @@ public class PathToolsTest
          @Override
          public FileVisitResult visitPath(Path path, PathType pathType)
          {
-            PrintTools.info(path.toString() + " " + pathType.toString());
+            LogTools.info(path.toString() + " " + pathType.toString());
             if (path.equals(TEST_DIRECTORIES[0]) || path.equals(TEST_DIRECTORIES[1]))
             {
                assertTrue("Falsely reported directory", pathType.equals(PathType.DIRECTORY));

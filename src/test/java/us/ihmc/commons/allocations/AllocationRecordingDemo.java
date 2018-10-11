@@ -1,7 +1,7 @@
 package us.ihmc.commons.allocations;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 import java.io.IOException;
@@ -40,13 +40,13 @@ public class AllocationRecordingDemo
 
       allocations = allocationProfiler.pollAllocations(); // get results
 
-      PrintTools.info("Number of places where allocations occured: " + allocations.size());
+      LogTools.info("Number of places where allocations occured: " + allocations.size());
       allocations.forEach(allocation -> System.out.println(allocation.toString()));
 
       // This should allocate a new Vector3D
       allocations = allocationProfiler.recordAllocations(() -> myList.add()); // convenience method, start, run, stop, poll in one step
 
-      PrintTools.info("Number of places where allocations occured: " + allocations.size());
+      LogTools.info("Number of places where allocations occured: " + allocations.size());
 
       allocations.forEach(allocation -> System.out.println(allocation.toString()));
    }

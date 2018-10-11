@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.commons.thread.ThreadTools;
 
 import java.util.List;
@@ -38,7 +38,7 @@ public class AllocationTestTest
 
       Assert.assertEquals(1, allocations.size());
       Assert.assertTrue(allocations.get(0).getAllocatedObject().getClass().equals(double[].class));
-      PrintTools.info(allocations.get(0).toString());
+      LogTools.info(allocations.get(0).toString());
    }
 
    @Test(timeout = 3000)
@@ -48,7 +48,7 @@ public class AllocationTestTest
       printAllocations(allocations);
       Assert.assertEquals(1, allocations.size());
       Assert.assertTrue(allocations.get(0).getAllocatedObject().getClass().equals(MutableDouble.class));
-      PrintTools.info(allocations.get(0).toString());
+      LogTools.info(allocations.get(0).toString());
    }
 
    @Test(timeout = 3000)
@@ -207,7 +207,7 @@ public class AllocationTestTest
    {
       for (AllocationRecord allocation : allocations)
       {
-         PrintTools.info(allocation.toString());
+         LogTools.info(allocation.toString());
       }
    }
 

@@ -4,7 +4,7 @@ import org.junit.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 
 import java.util.Random;
 import java.util.function.DoubleSupplier;
@@ -54,7 +54,7 @@ public class StopwatchTest
       Stopwatch stopwatch = new Stopwatch();
 
       double averageLap = stopwatch.averageLap();
-      PrintTools.debug(this, "Lap: " + stopwatch.lap());
+      LogTools.debug("Lap: " + stopwatch.lap());
       assertEquals("averageLap incorrect", Double.NaN, averageLap, Epsilons.ONE_HUNDREDTH);
 
       assertEquals("return ref not equal", stopwatch, stopwatch.start());
@@ -122,7 +122,7 @@ public class StopwatchTest
       Stopwatch stopwatch = new Stopwatch(fakeTimeProvider);
 
       double averageLap = stopwatch.averageLap();
-      PrintTools.debug(this, "Lap: " + stopwatch.lap());
+      LogTools.debug("Lap: " + stopwatch.lap());
       assertEquals("averageLap incorrect", Double.NaN, averageLap, Epsilons.ONE_TEN_BILLIONTH);
 
       assertEquals("return ref not equal", stopwatch, stopwatch.start());
@@ -309,9 +309,9 @@ public class StopwatchTest
 
    private void assertTimeEquals(double expected, double actual)
    {
-      PrintTools.info("Expected: " + expected + " (s)  Actual: " + actual + " (s)");
+      LogTools.info("Expected: " + expected + " (s)  Actual: " + actual + " (s)");
       assertEquals("Expected time incorrect", expected, actual, Epsilons.ONE_TEN_BILLIONTH);
-      PrintTools.info("Assertions passed!");
+      LogTools.info("Assertions passed!");
    }
 
    private double randomTime(Random random)

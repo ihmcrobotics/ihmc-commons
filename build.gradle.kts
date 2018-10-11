@@ -17,6 +17,7 @@ ihmc {
 dependencies {
    compile("org.apache.commons:commons-lang3:3.8.1")
    compile("commons-io:commons-io:2.6")
+   compile("us.ihmc:log-tools:0.2.2")
 }
 
 ihmc.sourceSetProject("testing").dependencies {
@@ -29,7 +30,6 @@ ihmc.sourceSetProject("testing").dependencies {
 ihmc.sourceSetProject("test").dependencies {
    compile(ihmc.sourceSetProject("main"))
    compile(ihmc.sourceSetProject("testing"))
-   compile("us.ihmc:log-tools:0.2.2")
 }
 
 ihmc.sourceSetProject("test").tasks.withType<Test> {
