@@ -6,6 +6,7 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.log.LogTools;
 
 import java.awt.*;
 import java.io.File;
@@ -140,7 +141,7 @@ public class MutationTestFacilitator
          projectRoot = Paths.get("..").resolve("..").toAbsolutePath().normalize();
          pitReports = projectRoot.resolve(REPORT_DIRECTORY_NAME);
       }
-      PrintTools.info(this, "Using reports directory: " + pitReports);
+      LogTools.info("Using reports directory: " + pitReports);
 
       // Delete all entries older than three hours
       PathTools.walkFlat(pitReports, new BasicPathVisitor()
@@ -208,7 +209,7 @@ public class MutationTestFacilitator
 
       String[] args = {"--reportDir", pitReports.toString(), "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs",
             projectRoot.resolve("src").toString(), "--mutators", mutatorsList};
-      PrintTools.info(this, "Launching MutationCoverageReport with arguments: ");
+      LogTools.info("Launching MutationCoverageReport with arguments: ");
       Arrays.stream(args).forEach(s -> System.out.print(s + " "));
       System.out.println();
       MutationCoverageReport.main(args);

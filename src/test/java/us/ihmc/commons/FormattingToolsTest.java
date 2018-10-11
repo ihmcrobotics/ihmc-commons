@@ -3,6 +3,7 @@ package us.ihmc.commons;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import us.ihmc.log.LogTools;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -120,7 +121,7 @@ public class FormattingToolsTest
 
       assertEquals(dateBuilder.toString(), dateToolsDateString);
 
-      PrintTools.debug(this, FormattingTools.getDateString());
+      LogTools.debug(FormattingTools.getDateString());
    }
 
    @Ignore // this test seems fairly useless and it's flaky
@@ -148,7 +149,7 @@ public class FormattingToolsTest
          timeBuilder.append(minutes);
 
       assertEquals(timeBuilder.toString(), timeString);
-      PrintTools.debug(this, FormattingTools.getTimeString());
+      LogTools.debug(FormattingTools.getTimeString());
 
       if (seconds / 10 < 1)
          timeBuilder.append("0" + seconds);
@@ -157,6 +158,6 @@ public class FormattingToolsTest
 
       assertEquals(timeBuilder.toString(), timeSecondsString);
 
-      PrintTools.debug(this, FormattingTools.getTimeStringWithSeconds());
+      LogTools.debug(FormattingTools.getTimeStringWithSeconds());
    }
 }

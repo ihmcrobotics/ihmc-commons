@@ -14,4 +14,3 @@ import us.ihmc.build.IHMCSettingsConfigurator
 def ihmcSettingsConfigurator = new IHMCSettingsConfigurator(settings, logger, ext)
 ihmcSettingsConfigurator.checkRequiredPropertiesAreSet()
 ihmcSettingsConfigurator.configureExtraSourceSets()
-ihmcSettingsConfigurator.findAndIncludeCompositeBuilds()

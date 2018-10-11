@@ -6,7 +6,8 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class AllocationTestTest
 
       Assert.assertEquals(1, allocations.size());
       Assert.assertTrue(allocations.get(0).getAllocatedObject().getClass().equals(double[].class));
-      PrintTools.info(allocations.get(0).toString());
+      LogTools.info(allocations.get(0).toString());
    }
 
    @Test(timeout = 3000)
@@ -47,7 +48,7 @@ public class AllocationTestTest
       printAllocations(allocations);
       Assert.assertEquals(1, allocations.size());
       Assert.assertTrue(allocations.get(0).getAllocatedObject().getClass().equals(MutableDouble.class));
-      PrintTools.info(allocations.get(0).toString());
+      LogTools.info(allocations.get(0).toString());
    }
 
    @Test(timeout = 3000)
@@ -109,13 +110,19 @@ public class AllocationTestTest
       allocationProfiler.setRecordConstructorAllocations(false);
 
       LilAllocator lilAllocator;
-      MutableInt mutableInt;
 
       // add one class to whitelist
       allocationProfiler.excludeAllocationsInsideClass(LilAllocator.class.getName());
       allocationProfiler.startRecordingAllocations();
+
       lilAllocator = new LilAllocator(); // allocates 1, stuff inside does not count
-      mutableInt = new MutableInt(); // random new thing, but not in whitelist
+
+      if (lilAllocator != null)
+      {
+         ThreadTools.sleep(10); // otherwise apparently MutableInt will get allocated early and fail the test
+         new MutableInt(); // random new thing, but not in whitelist
+      }
+
       lilAllocator.doStuff(); // allocates 2 things inside
       allocationProfiler.stopRecordingAllocations();
 
@@ -200,7 +207,7 @@ public class AllocationTestTest
    {
       for (AllocationRecord allocation : allocations)
       {
-         PrintTools.info(allocation.toString());
+         LogTools.info(allocation.toString());
       }
    }
 

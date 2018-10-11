@@ -3,6 +3,8 @@ package us.ihmc.commons;
 /**
  * Conveniently prints useful messages to the console. Uses logging style prefixes
  * and IDE compatible class line number clickable link.
+ *
+ * @deprecated Use us.ihmc.log.LogTools instead.
  */
 public class PrintTools
 {
@@ -28,6 +30,7 @@ public class PrintTools
     *
     * @param debug if false, do nothing
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void debug(boolean debug, String message)
    {
@@ -45,6 +48,7 @@ public class PrintTools
     * @param debug if false, do nothing
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void debug(boolean debug, String message, boolean useSystemError)
    {
@@ -60,6 +64,7 @@ public class PrintTools
     * <p>Example: [DEBUG] (YourClass:19): Your message here</p>
     *
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void debug(String message)
    {
@@ -73,6 +78,7 @@ public class PrintTools
     *
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void debug(String message, boolean useSystemError)
    {
@@ -87,6 +93,7 @@ public class PrintTools
     * @param debug if false, do nothing
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void debug(boolean debug, Object containingObjectOrClass, String message)
    {
@@ -105,6 +112,7 @@ public class PrintTools
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void debug(boolean debug, Object containingObjectOrClass, String message, boolean useSystemError)
    {
@@ -121,6 +129,7 @@ public class PrintTools
     *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void debug(Object containingObjectOrClass, String message)
    {
@@ -135,6 +144,7 @@ public class PrintTools
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void debug(Object containingObjectOrClass, String message, boolean useSystemError)
    {
@@ -148,6 +158,7 @@ public class PrintTools
     *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void info(Object containingObjectOrClass, String message)
    {
@@ -160,6 +171,7 @@ public class PrintTools
     * <p>Example: [INFO] (YourClass:19): Your message here</p>
     *
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void info(String message)
    {
@@ -174,6 +186,7 @@ public class PrintTools
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void info(Object containingObjectOrClass, String message, boolean useSystemError)
    {
@@ -187,6 +200,7 @@ public class PrintTools
     *
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void info(String message, boolean useSystemError)
    {
@@ -200,6 +214,7 @@ public class PrintTools
     *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void warn(Object containingObjectOrClass, String message)
    {
@@ -212,6 +227,7 @@ public class PrintTools
     * <p>Example: [WARN] (YourClass:19): Your message here</p>
     *
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void warn(String message)
    {
@@ -226,6 +242,7 @@ public class PrintTools
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void warn(Object containingObjectOrClass, String message, boolean useSystemError)
    {
@@ -239,6 +256,7 @@ public class PrintTools
     *
     * @param message message to print
     * @param useSystemError if true, use system error, if false, use system out
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void warn(String message, boolean useSystemError)
    {
@@ -252,6 +270,7 @@ public class PrintTools
     *
     * @param containingObjectOrClass passed in calling class to avoid using reflection
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void error(Object containingObjectOrClass, String message)
    {
@@ -264,6 +283,7 @@ public class PrintTools
     * <p>Example: [ERROR] (YourClass:19): Your message here</p>
     *
     * @param message message to print
+    * @deprecated Use us.ihmc.log.LogTools instead.
     */
    public static void error(String message)
    {
