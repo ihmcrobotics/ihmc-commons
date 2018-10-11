@@ -15,12 +15,17 @@ In your build.gradle:
 
 ### What's Included
 
+##### Dependencies
+
+- Apache Commons Lang 3
+- Apache Commons I/O
+- IHMC's Log Tools logging library providing setting log level from CLI
+
 ##### Main Distribution
 
 - File and Path tools that interface using Java's NIO.2 API.
 - Minimal Stopwatch with friendly API.
 - Commonly needed conversions. (Data information units, etc.)
-- Tool for printing log-level style messages that show class name and line number.
 - Epsilons for explicitness and convenience.
 - Functional exception handler with defaults.
 - Recycling and preallocated lists, deque.
