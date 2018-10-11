@@ -5,7 +5,7 @@ plugins {
 
 ihmc {
    group = "us.ihmc"
-   version = "0.23.2"
+   version = "0.24.0"
    vcsUrl = "https://github.com/ihmcrobotics/ihmc-commons"
    openSource = true
    maintainer = "Duncan Calvert"
