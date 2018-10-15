@@ -5,9 +5,12 @@ import static org.junit.Assert.fail;
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.Before;
-import org.junit.Test;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import us.ihmc.commons.lists.PreallocatedEnumList;
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
@@ -18,7 +21,7 @@ public class ListAllocationTest
 {
    private AllocationProfiler allocationProfiler;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       allocationProfiler = new AllocationProfiler();
@@ -30,7 +33,9 @@ public class ListAllocationTest
       allocationProfiler.includeAllocationsInsideClass(RecyclingLinkedList.class.getName());
    }
 
-   @Test(timeout = 30000)
+   @Tag("allocation")
+   @Execution(ExecutionMode.SAME_THREAD)
+   @Test
    public void testRecyclingArrayList()
    {
       int capacity = 5;
@@ -56,7 +61,9 @@ public class ListAllocationTest
                    });
    }
 
-   @Test(timeout = 30000)
+   @Tag("allocation")
+   @Execution(ExecutionMode.SAME_THREAD)
+   @Test
    public void testRecyclingArrayDeque()
    {
       int capacity = 8;
@@ -90,7 +97,9 @@ public class ListAllocationTest
                    });
    }
 
-   @Test(timeout = 30000)
+   @Tag("allocation")
+   @Execution(ExecutionMode.SAME_THREAD)
+   @Test
    public void testPreallocatedList()
    {
       int capacity = 8;
@@ -117,7 +126,9 @@ public class ListAllocationTest
                    });
    }
 
-   @Test(timeout = 30000)
+   @Tag("allocation")
+   @Execution(ExecutionMode.SAME_THREAD)
+   @Test
    public void testPreallocatedEnumList()
    {
       int capacity = 8;
@@ -164,6 +175,8 @@ public class ListAllocationTest
                    });
    }
 
+   @Tag("allocation")
+   @Execution(ExecutionMode.SAME_THREAD)
    @Test
    public void testRecyclingLinkedList()
    {
