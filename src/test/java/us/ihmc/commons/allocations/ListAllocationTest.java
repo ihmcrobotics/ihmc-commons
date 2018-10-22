@@ -16,6 +16,7 @@ import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.RecyclingLinkedList;
+import us.ihmc.log.LogTools;
 
 public class ListAllocationTest
 {
@@ -253,7 +254,7 @@ public class ListAllocationTest
 
       if (!allocations.isEmpty())
       {
-         allocations.forEach(it -> System.out.println(it.toString()));
+         allocations.forEach(it -> LogTools.info(it.toString()));
          fail("Found allocations.");
       }
    }
