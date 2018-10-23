@@ -1,6 +1,6 @@
 package us.ihmc.commons.allocations;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 

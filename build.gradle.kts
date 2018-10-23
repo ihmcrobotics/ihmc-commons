@@ -15,6 +15,11 @@ ihmc {
    configurePublications()
 }
 
+categories.create("fast") {
+   maxJVMs = 1
+   maxParallelTests = 1
+}
+
 categories.create("allocation") {
    maxJVMs = 1
    maxParallelTests = 1
@@ -30,7 +35,7 @@ dependencies {
 
 ihmc.sourceSetProject("testing").dependencies {
    compile(ihmc.sourceSetProject("main"))
-   compile("junit:junit:4.12")
+   compile("org.junit.jupiter:junit-jupiter-api:5.3.1")
    compile("org.pitest:pitest-command-line:1.4.3")
    compile("com.google.code.java-allocation-instrumenter:java-allocation-instrumenter:3.1.0") // should be runtimeOnly?
 }

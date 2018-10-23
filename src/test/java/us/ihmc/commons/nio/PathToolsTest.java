@@ -1,13 +1,12 @@
 package us.ihmc.commons.nio;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.log.LogTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.log.LogTools;
 
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -17,8 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PathToolsTest
 {
@@ -27,7 +25,7 @@ public class PathToolsTest
    private static final Path[] TEST_DIRECTORIES = {PARENT_DIRECTORY.resolve("testDir1"), PARENT_DIRECTORY.resolve("testDir2")};
    private static final Path[] TEST_FILES = {TEST_DIRECTORIES[0].resolve("testFile1.txt"), TEST_DIRECTORIES[1].resolve("testFile2.txt")};
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       FileTools.ensureFileExists(TEST_FILES[0], DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -37,24 +35,24 @@ public class PathToolsTest
       FileTools.writeAllLines(createFakeJavaFile(), FAKE_JAVA_FILE_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       FileTools.deleteQuietly(PARENT_DIRECTORY);
       FileTools.deleteQuietly(FAKE_JAVA_FILE_PATH);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindAllPathsRecursivelyThatMatchRegex()
    {
       List<Path> matchingPaths = PathTools.findAllPathsRecursivelyThatMatchRegex(Paths.get("resources"), ".*[\\\\/]PathTools\\.java\\.fake$");
 
       LogTools.info("Matched " + matchingPaths.size() + " file(s).");
 
-      assertTrue("Didn't match exactly one file.", matchingPaths.size() == 1);
+      assertTrue(matchingPaths.size() == 1, "Didn't match exactly one file.");
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testGetBaseName()
    {
       Path pathToThisTest = FileSystems.getDefault().getPath("test/us/ihmc/utilities/io/files/PathToolsTest.java");
@@ -63,10 +61,10 @@ public class PathToolsTest
 
       LogTools.info("Base name of this test: " + baseName);
 
-      assertTrue("Base name not correct.", baseName.equals(PathToolsTest.class.getSimpleName()));
+      assertTrue(baseName.equals(PathToolsTest.class.getSimpleName()), "Base name not correct.");
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testGetExtension()
    {
       Path pathToThisTest = FileSystems.getDefault().getPath("test/us/ihmc/utilities/io/files/PathToolsTest.java");
@@ -75,10 +73,10 @@ public class PathToolsTest
 
       LogTools.info("Extension name of this test: " + extensionName);
 
-      assertTrue("Extension name not correct.", extensionName.equals("java"));
+      assertTrue(extensionName.equals("java"), "Extension name not correct.");
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFirstPathMatchingGlob()
    {
       String camelCasedClassSimpleName = StringUtils.uncapitalize(PathToolsTest.class.getSimpleName());
@@ -90,15 +88,15 @@ public class PathToolsTest
       if (firstPath == null)
          LogTools.error("Path not found!");
 
-      assertTrue("directoryHasGlob not working.", PathTools.directoryHasGlob(Paths.get("resources"), "**/" + camelCasedClassSimpleName));
+      assertTrue(PathTools.directoryHasGlob(Paths.get("resources"), "**/" + camelCasedClassSimpleName), "directoryHasGlob not working.");
 
       LogTools.info("First path: " + firstPath.toString());
       LogTools.info("First path fileName: " + firstPath.getFileName());
 
-      assertTrue("First path not correct.", firstPath.getFileName().toString().equals(camelCasedClassSimpleName));
+      assertTrue(firstPath.getFileName().toString().equals(camelCasedClassSimpleName), "First path not correct.");
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testTemporaryDirectoryPath()
    {
       String tempPath = PathTools.systemTemporaryDirectory().toString();
@@ -106,7 +104,7 @@ public class PathToolsTest
       assertNotNull("Java temp directory is null.", tempPath);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testWalkTreeFlat()
    {
       PathTools.walkFlat(PARENT_DIRECTORY, new BasicPathVisitor()
@@ -119,16 +117,16 @@ public class PathToolsTest
             LogTools.info(path.toString() + " " + pathType.toString());
             if (path.equals(TEST_DIRECTORIES[0]) || path.equals(TEST_DIRECTORIES[1]))
             {
-               assertTrue("Falsely reported directory", pathType.equals(PathType.DIRECTORY));
+               assertTrue(pathType.equals(PathType.DIRECTORY), "Falsely reported directory");
             }
             else if (path.equals(TEST_FILES[0]) || path.equals(TEST_FILES[1]))
             {
-               assertTrue("Falsely reported file", pathType.equals(PathType.FILE));
+               assertTrue(pathType.equals(PathType.FILE), "Falsely reported file");
             }
 
             resultCount++;
 
-            assertTrue("Parent was included", resultCount <= 4);
+            assertTrue(resultCount <= 4, "Parent was included");
 
             return FileVisitResult.CONTINUE;
          }

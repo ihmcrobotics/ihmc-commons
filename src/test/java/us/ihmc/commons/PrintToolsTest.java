@@ -1,15 +1,18 @@
 package us.ihmc.commons;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
+@Execution(ExecutionMode.SAME_THREAD)
 public class PrintToolsTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testPrintTools() throws Exception
    {
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -26,10 +29,10 @@ public class PrintToolsTest
 
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
 
-      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:21): Test log tools!"));
+      assertTrue(byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:24): Test log tools!"), "PrintTools didn't work.");
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPrintToolsReflection() throws Exception
    {
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -46,10 +49,10 @@ public class PrintToolsTest
 
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
 
-      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:41): Test log tools!"));
+      assertTrue(byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:44): Test log tools!"), "PrintTools didn't work.");
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPrintToolsError() throws Exception
    {
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -66,7 +69,7 @@ public class PrintToolsTest
 
       System.err.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
 
-      assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[ERROR] (PrintToolsTest.java:61): Test log tools!"));
+      assertTrue(byteArrayOutputStream.toString().startsWith("[ERROR] (PrintToolsTest.java:64): Test log tools!"), "PrintTools didn't work.");
    }
 
    public static void main(String[] args)

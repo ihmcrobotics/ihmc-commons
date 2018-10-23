@@ -3,6 +3,9 @@ package us.ihmc.commons.lists;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import us.ihmc.commons.RandomNumbers;
 
 import java.util.ArrayList;
@@ -10,6 +13,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 
+@Execution(ExecutionMode.SAME_THREAD)
 public class RecyclingArrayListTest
 {
    @Test

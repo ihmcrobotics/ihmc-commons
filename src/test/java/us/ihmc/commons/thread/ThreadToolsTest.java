@@ -1,16 +1,16 @@
 package us.ihmc.commons.thread;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ThreadToolsTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testTimeLimitScheduler()
    {
       final int ITERATIONS = 10;
@@ -46,7 +46,7 @@ public class ThreadToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testIterationLimitScheduler()
    {
       TimeUnit timeUnit = TimeUnit.MILLISECONDS;
@@ -76,7 +76,7 @@ public class ThreadToolsTest
       assertEquals(iterations, counter.get());
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testExecuteWithTimeout()
    {
       final StateHolder holder = new StateHolder();
@@ -95,8 +95,8 @@ public class ThreadToolsTest
                holder.state = State.RAN_WITHOUT_TIMING_OUT;
             }
          }, 5, TimeUnit.MILLISECONDS);
-         assertFalse("Didn't run. Should timeout.", holder.state.equals(State.DIDNT_RUN));
-         assertTrue("Did not timeout.", holder.state.equals(State.TIMED_OUT));
+         assertFalse(holder.state.equals(State.DIDNT_RUN), "Didn't run. Should timeout.");
+         assertTrue(holder.state.equals(State.TIMED_OUT), "Did not timeout.");
 
          holder.state = State.DIDNT_RUN;
          ThreadTools.executeWithTimeout("timeoutTest2", new Runnable()
@@ -111,12 +111,12 @@ public class ThreadToolsTest
                holder.state = State.RAN_WITHOUT_TIMING_OUT;
             }
          }, 10, TimeUnit.MILLISECONDS);
-         assertFalse("Didn't run. Shouldn't timeout.", holder.state.equals(State.DIDNT_RUN));
-         assertTrue("Timed out early.", holder.state.equals(State.RAN_WITHOUT_TIMING_OUT));
+         assertFalse(holder.state.equals(State.DIDNT_RUN), "Didn't run. Shouldn't timeout.");
+         assertTrue(holder.state.equals(State.RAN_WITHOUT_TIMING_OUT), "Timed out early.");
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testThreadSleepEvenWhenInterrupted()
    {
       final long ONE_MILLION = 1000000;
@@ -151,11 +151,11 @@ public class ThreadToolsTest
          long timeOverSleptInNanoseconds = timeSleptInNanoseconds - totalNanosecondsToSleep;
 
          // Check to make sure slept at least the amount specified. Method guarantees it sleeps at least or more than requested.
-         assertTrue("timeSlept = " + timeSleptInNanoseconds + ", totalNanosecondsToSleep = " + totalNanosecondsToSleep + " timeOverSleptInNanoseconds = "
-                          + timeOverSleptInNanoseconds, timeOverSleptInNanoseconds > 0);
+         assertTrue(timeOverSleptInNanoseconds > 0, "timeSlept = " + timeSleptInNanoseconds + ", totalNanosecondsToSleep = " + totalNanosecondsToSleep + " timeOverSleptInNanoseconds = "
+                                   + timeOverSleptInNanoseconds);
 
          // Check to make sure didn't over sleep by more than 100 milliseconds, which seems reasonable on most operating systems.
-         assertTrue("timeSlept = " + timeSleptInNanoseconds + ", millisecondsToSleep = " + millisecondsToSleep, timeOverSleptInNanoseconds < 100 * ONE_MILLION);
+         assertTrue(timeOverSleptInNanoseconds < 100 * ONE_MILLION, "timeSlept = " + timeSleptInNanoseconds + ", millisecondsToSleep = " + millisecondsToSleep);
 
          // Now make sure it doesn't get interrupted if we don't interrupt it...
          runnable = new SleepAndVerifyDespiteWakingUpRunnable(millisecondsToSleep, additionalNanosecondsToSleep);

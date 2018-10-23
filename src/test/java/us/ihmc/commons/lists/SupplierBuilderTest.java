@@ -1,15 +1,16 @@
 package us.ihmc.commons.lists;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 public class SupplierBuilderTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testZeroIndexedSupplierBuilder()
    {
       IntFunction<MutableInt> indexFunction = (index) -> new MutableInt(2 * index - 1);
@@ -18,11 +19,11 @@ public class SupplierBuilderTest
       for (int i = 0; i < 10; i++)
       {
          MutableInt mutableInt = intSupplier.get();
-         Assert.assertEquals((long) mutableInt.getValue(), (long) indexFunction.apply(i).getValue());
+         assertEquals((long) mutableInt.getValue(), (long) indexFunction.apply(i).getValue());
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testNonZeroIndexedSupplierBuilder()
    {
       int initialIndex = 10;
@@ -32,17 +33,17 @@ public class SupplierBuilderTest
       for (int i = 0; i < 10; i++)
       {
          MutableInt mutableInt = intSupplier.get();
-         Assert.assertEquals((long) mutableInt.getValue(), (long) indexFunction.apply(i + initialIndex).getValue());
+         assertEquals((long) mutableInt.getValue(), (long) indexFunction.apply(i + initialIndex).getValue());
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMutableIntSupplierFromConstructor()
    {
       Supplier<MutableInt> supplier = SupplierBuilder.createFromEmptyConstructor(MutableInt.class);
       for (int i = 0; i < 10; i++)
       {
-         Assert.assertEquals((long) supplier.get().getValue(), 0);
+         assertEquals((long) supplier.get().getValue(), 0);
       }
    }
 }

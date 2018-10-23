@@ -1,13 +1,12 @@
 package us.ihmc.tools.maps;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CircularLongMapTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testFillingMap()
    {
       CircularLongMap map = new CircularLongMap(100);
@@ -36,7 +35,7 @@ public class CircularLongMapTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMatchNearest()
    {
       CircularLongMap map = new CircularLongMap(100);
@@ -64,7 +63,7 @@ public class CircularLongMapTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testEdgeCases()
    {
       CircularLongMap map = new CircularLongMap(100);

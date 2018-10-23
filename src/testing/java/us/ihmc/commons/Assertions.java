@@ -2,8 +2,7 @@ package us.ihmc.commons;
 
 import java.io.*;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Assertions
 {
@@ -23,13 +22,13 @@ public class Assertions
       }
       catch (Throwable throwable)
       {
-         assertTrue("Exception type mismatch: Expected: " + exceptionType.getName() + " Actual: " + throwable.getClass().getName(),
-                    exceptionType.getName().equals(throwable.getClass().getName()));
+         assertTrue(exceptionType.getName().equals(throwable.getClass().getName()),
+                    "Exception type mismatch: Expected: " + exceptionType.getName() + " Actual: " + throwable.getClass().getName());
 
          thrown = true;
       }
 
-      assertTrue("Exception not thrown", thrown);
+      assertTrue(thrown, "Exception not thrown");
    }
 
    /**
