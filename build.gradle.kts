@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.1"
    id("us.ihmc.log-tools") version "0.2.2"
-   id("us.ihmc.ihmc-ci") version "1.2.0"
+   id("us.ihmc.ihmc-ci") version "2.1"
 }
 
 ihmc {
@@ -17,14 +17,12 @@ ihmc {
 
 categories.create("fast") {
    maxJVMs = 1
-   maxParallelTests = 1
 }
 
 categories.create("allocation") {
    maxJVMs = 1
-   maxParallelTests = 1
    includeTags += "allocation"
-   jvmArguments += getAllocationAgentJVMArg()
+   jvmArguments += "allocationAgent"
 }
 
 dependencies {
