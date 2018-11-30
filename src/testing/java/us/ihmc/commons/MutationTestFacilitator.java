@@ -207,8 +207,10 @@ public class MutationTestFacilitator
          mutatorsList = mutatorsList.substring(0, mutatorsList.lastIndexOf(','));
       }
 
-      String[] args = {"--reportDir", pitReports.toString(), "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs",
-            projectRoot.resolve("src").toString(), "--mutators", mutatorsList};
+      String sourceDirectory = projectRoot.resolve("src").toString();
+      String sourceDirectories = sourceDirectory;
+
+      String[] args = {"--reportDir", pitReports.toString(), "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs", sourceDirectories, "--mutators", mutatorsList};
       LogTools.info("Launching MutationCoverageReport with arguments: ");
       Arrays.stream(args).forEach(s -> System.out.print(s + " "));
       System.out.println();
@@ -232,29 +234,21 @@ public class MutationTestFacilitator
             @Override
             public FileVisitResult visitPath(Path path, PathType pathType)
             {
+               // If the path name is too long, you cannot see all the characters in the browser. 
+               // Therefore, shorten the display name. Note that the actual path name stays the same, just the display changes.
                String longPathName = path.getFileName().toString();
                if (longPathName.length() > 50)
                {
-                  String newPathName = longPathName.substring(0, 20) + "..." + longPathName.substring(longPathName.length() - 20, longPathName.length());
-                  Path newPath = Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName, newPathName);
+                  String displayShortenedNameInIndex = longPathName.substring(0, 20) + "..." + longPathName.substring(longPathName.length() - 20, longPathName.length());
 
                   Path indexPath = pitReports.resolve(lastDirectoryName).resolve("index.html");
                   List<String> lines = FileTools.readAllLines(indexPath, DefaultExceptionHandler.PRINT_STACKTRACE);
                   ArrayList<String> newLines = new ArrayList<>();
                   for (String originalLine : lines)
-                  {
-                     newLines.add(originalLine.replaceAll(longPathName, newPathName));
+                  { 
+                     newLines.add(replaceLast(originalLine, longPathName, displayShortenedNameInIndex));
                   }
                   FileTools.writeAllLines(newLines, indexPath, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
-
-                  try
-                  {
-                     Files.move(path, newPath);
-                  }
-                  catch (IOException e)
-                  {
-                     e.printStackTrace();
-                  }
                }
                return FileVisitResult.CONTINUE;
             }
@@ -281,6 +275,15 @@ public class MutationTestFacilitator
             e.printStackTrace();
          }
       }
+   }
+
+   /**
+    * Replaces the last occurrence of a match in a line with the new string.
+    * From https://stackoverflow.com/questions/2282728/java-replacelast
+    */
+   private static String replaceLast(String text, String regex, String replacement) 
+   {
+      return text.replaceFirst("(?s)"+regex+"(?!.*?"+regex+")", replacement);
    }
 
    /**
