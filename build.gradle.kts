@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.5"
    id("us.ihmc.log-tools") version "0.2.2"
-   id("us.ihmc.ihmc-ci") version "2.3"
+   id("us.ihmc.ihmc-ci") version "3.5"
 }
 
 ihmc {
@@ -13,16 +13,6 @@ ihmc {
 
    configureDependencyResolution()
    configurePublications()
-}
-
-categories.create("fast") {
-   maxJVMs = 1
-}
-
-categories.create("allocation") {
-   maxJVMs = 1
-   includeTags += "allocation"
-   jvmArguments += "allocationAgent"
 }
 
 dependencies {
