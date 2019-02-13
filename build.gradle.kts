@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.5"
-   id("us.ihmc.log-tools") version "0.3.0"
-   id("us.ihmc.ihmc-ci") version "4.2"
+   id("us.ihmc.log-tools") version "0.3.1"
+   id("us.ihmc.ihmc-ci") version "4.8"
 }
 
 ihmc {
@@ -22,7 +22,7 @@ categories.configure("allocation") {
 dependencies {
    compile("org.apache.commons:commons-lang3:3.8.1")
    compile("commons-io:commons-io:2.6")
-   compile("us.ihmc:log-tools:0.3.0")
+   compile("us.ihmc:log-tools:0.3.1")
 }
 
 ihmc.sourceSetProject("testing").dependencies {
