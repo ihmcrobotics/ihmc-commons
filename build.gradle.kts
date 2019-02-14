@@ -6,7 +6,7 @@ plugins {
 
 ihmc {
    group = "us.ihmc"
-   version = "0.25.0"
+   version = "0.25.1"
    vcsUrl = "https://github.com/ihmcrobotics/ihmc-commons"
    openSource = true
    maintainer = "Duncan Calvert"
@@ -27,9 +27,9 @@ dependencies {
 
 ihmc.sourceSetProject("testing").dependencies {
    compile(ihmc.sourceSetProject("main"))
-   compile("org.junit.jupiter:junit-jupiter-api:5.3.1")
-   compile("org.pitest:pitest-command-line:1.4.3")
-   compile("com.google.code.java-allocation-instrumenter:java-allocation-instrumenter:3.1.0") // should be runtimeOnly?
+   compile("org.junit.jupiter:junit-jupiter-api:5.4.0")
+   compile("org.pitest:pitest-command-line:1.4.5")
+   compile("com.google.code.java-allocation-instrumenter:java-allocation-instrumenter:3.2.0") // should be runtimeOnly?
 }
 
 ihmc.sourceSetProject("test").dependencies {
