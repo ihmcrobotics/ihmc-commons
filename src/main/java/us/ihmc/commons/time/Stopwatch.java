@@ -30,15 +30,24 @@ public class Stopwatch
    private double resumedSuspensionTotal;
 
    /**
-    * <p>Construct a new Stopwatch.</p>
+    * <p>Construct a new Stopwatch using {@link System#nanoTime} as a time source.</p>
     *
     * <p>All methods will return NaN until {@link #start()} or {@link #reset()} is called.</p>
     */
    public Stopwatch()
    {
-      nowSupplier = () -> {
-         return Conversions.nanosecondsToSeconds(System.nanoTime());
-      };
+      nowSupplier = () -> Conversions.nanosecondsToSeconds(System.nanoTime());
+      lapStart = Double.NaN;
+   }
+
+   /**
+    * <p>Construct a new Stopwatch using nowSupplier as its source of time.</p>
+    *
+    * <p>All methods will return NaN until {@link #start()} or {@link #reset()} is called.</p>
+    */
+   public Stopwatch(DoubleSupplier nowSupplier)
+   {
+      this.nowSupplier = nowSupplier;
       lapStart = Double.NaN;
    }
 
@@ -195,15 +204,5 @@ public class Stopwatch
    {
       suspended = false;
       resumedSuspensionTotal = 0.0;
-   }
-
-   /**
-    * WARNING: Exclusively for unit testing. Do not use.
-    */
-   /** package-private */
-   Stopwatch(DoubleSupplier nowSupplier)
-   {
-      this.nowSupplier = nowSupplier;
-      lapStart = Double.NaN;
    }
 }

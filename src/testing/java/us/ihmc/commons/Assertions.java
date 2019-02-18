@@ -7,31 +7,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class Assertions
 {
    /**
-    * Assert that an exception is thrown given a runnable that throws.
-    *
-    * @param exceptionType
-    * @param methodToRun
-    */
-   public static void assertExceptionThrown(Class<? extends Throwable> exceptionType, RunnableThatThrows methodToRun)
-   {
-      boolean thrown = false;
-
-      try
-      {
-         methodToRun.run();
-      }
-      catch (Throwable throwable)
-      {
-         assertTrue(exceptionType.getName().equals(throwable.getClass().getName()),
-                    "Exception type mismatch: Expected: " + exceptionType.getName() + " Actual: " + throwable.getClass().getName());
-
-         thrown = true;
-      }
-
-      assertTrue(thrown, "Exception not thrown");
-   }
-
-   /**
     * <p>Assert an object is serializable by actually serializing.</p>
     *
     * <p>Does not assert equal.</p>

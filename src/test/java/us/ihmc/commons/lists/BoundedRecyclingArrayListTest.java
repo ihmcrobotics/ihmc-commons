@@ -28,9 +28,7 @@ public class BoundedRecyclingArrayListTest
          list.add();
       }
 
-      Assertions.assertExceptionThrown(OutOfMemoryError.class, () -> {
-            list.add();
-      });
+      assertThrows(OutOfMemoryError.class, () -> list.add());
 
       BoundedRecyclingArrayList<MutableInt> list2 = new BoundedRecyclingArrayList<>(500, MutableInt::new);
 
@@ -39,9 +37,7 @@ public class BoundedRecyclingArrayListTest
          list2.add();
       }
 
-      Assertions.assertExceptionThrown(OutOfMemoryError.class, () -> {
-            list2.add();
-      });
+      assertThrows(OutOfMemoryError.class, () -> list2.add());
    }
 
    @Test

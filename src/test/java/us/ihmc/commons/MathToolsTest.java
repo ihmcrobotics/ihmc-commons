@@ -43,35 +43,20 @@ public class MathToolsTest
    @Test
    public void testClampWrongBounds()
    {
-      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            double min = 1.0;
-            double max = 0.9;
-            MathTools.clamp(5.0, min, max);
-         }
+      assertThrows(RuntimeException.class, () -> {
+         double min = 1.0;
+         double max = 0.9;
+         MathTools.clamp(5.0, min, max);
       });
-      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            float min = 1.0f;
-            float max = 0.9f;
-            MathTools.clamp(5.0, min, max);
-         }
+      assertThrows(RuntimeException.class, () -> {
+         float min = 1.0f;
+         float max = 0.9f;
+         MathTools.clamp(5.0, min, max);
       });
-      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            int min = 1;
-            int max = -1;
-            MathTools.clamp(5.0, min, max);
-         }
+      assertThrows(RuntimeException.class, () -> {
+         int min = 1;
+         int max = -1;
+         MathTools.clamp(5.0, min, max);
       });
    }
 
@@ -345,14 +330,8 @@ public class MathToolsTest
    @Test
    public void testIsBoundedByMethods()
    {
-      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            MathTools.intervalContains(0.0, 1.0, -1.0, false, false);
-         }
-      });
+      assertThrows(RuntimeException.class, () ->
+            MathTools.intervalContains(0.0, 1.0, -1.0, false, false));
       assertTrue(MathTools.intervalContains(0.0, -1.0, 1.0, false, false));
       assertFalse(MathTools.intervalContains(-1.0, -1.0, 1.0, false, false));
       assertFalse(MathTools.intervalContains(1.0, -1.0, 1.0, false, false));
@@ -564,14 +543,7 @@ public class MathToolsTest
    @Test
    public void testCheckIsEqualNaN()
    {
-      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            MathTools.checkEpsilonEquals(Double.NaN, Double.NaN, 1e-12);
-         }
-      });
+      assertThrows(RuntimeException.class, () -> MathTools.checkEpsilonEquals(Double.NaN, Double.NaN, 1e-12));
    }
 
    @Test
