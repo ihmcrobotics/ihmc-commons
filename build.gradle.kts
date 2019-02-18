@@ -29,6 +29,7 @@ ihmc.sourceSetProject("testing").dependencies {
    compile(ihmc.sourceSetProject("main"))
    compile("org.junit.jupiter:junit-jupiter-api:5.4.0")
    compile("org.pitest:pitest-command-line:1.4.5")
+   compile("org.pitest:pitest-junit5-plugin:0.8")
    compile("com.google.code.java-allocation-instrumenter:java-allocation-instrumenter:3.2.0") // should be runtimeOnly?
 }
 

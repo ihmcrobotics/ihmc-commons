@@ -210,7 +210,7 @@ public class MutationTestFacilitator
       String sourceDirectory = projectRoot.resolve("src").toString();
       String sourceDirectories = sourceDirectory;
 
-      String[] args = {"--reportDir", pitReports.toString(), "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs", sourceDirectories, "--mutators", mutatorsList};
+      String[] args = {"--testPlugin", "junit5", "--reportDir", pitReports.toString(), "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs", sourceDirectories, "--mutators", mutatorsList};
       LogTools.info("Launching MutationCoverageReport with arguments: ");
       Arrays.stream(args).forEach(s -> System.out.print(s + " "));
       System.out.println();
