@@ -210,7 +210,8 @@ public class MutationTestFacilitator
       String sourceDirectory = projectRoot.resolve("src").toString();
       String sourceDirectories = sourceDirectory;
 
-      String[] args = {"--testPlugin", "junit5", "--reportDir", pitReports.toString(), "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs", sourceDirectories, "--mutators", mutatorsList};
+      String[] args = {"--testPlugin", "junit5", "--reportDir", pitReports.toString(), "--targetClasses", targetClasses, "--targetTests", targetTests,
+            "--excludedClasses", "*Test*", "--sourceDirs", sourceDirectories, "--mutators", mutatorsList};
       LogTools.info("Launching MutationCoverageReport with arguments: ");
       Arrays.stream(args).forEach(s -> System.out.print(s + " "));
       System.out.println();
@@ -239,13 +240,14 @@ public class MutationTestFacilitator
                String longPathName = path.getFileName().toString();
                if (longPathName.length() > 50)
                {
-                  String displayShortenedNameInIndex = longPathName.substring(0, 20) + "..." + longPathName.substring(longPathName.length() - 20, longPathName.length());
+                  String displayShortenedNameInIndex = longPathName.substring(0, 20) + "..."
+                        + longPathName.substring(longPathName.length() - 20, longPathName.length());
 
                   Path indexPath = pitReports.resolve(lastDirectoryName).resolve("index.html");
                   List<String> lines = FileTools.readAllLines(indexPath, DefaultExceptionHandler.PRINT_STACKTRACE);
                   ArrayList<String> newLines = new ArrayList<>();
                   for (String originalLine : lines)
-                  { 
+                  {
                      newLines.add(replaceLast(originalLine, longPathName, displayShortenedNameInIndex));
                   }
                   FileTools.writeAllLines(newLines, indexPath, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -281,9 +283,9 @@ public class MutationTestFacilitator
     * Replaces the last occurrence of a match in a line with the new string.
     * From https://stackoverflow.com/questions/2282728/java-replacelast
     */
-   private static String replaceLast(String text, String regex, String replacement) 
+   private static String replaceLast(String text, String regex, String replacement)
    {
-      return text.replaceFirst("(?s)"+regex+"(?!.*?"+regex+")", replacement);
+      return text.replaceFirst("(?s)" + regex + "(?!.*?" + regex + ")", replacement);
    }
 
    /**
@@ -316,4 +318,21 @@ public class MutationTestFacilitator
       mutationTestFacilitator.doMutationTest();
       mutationTestFacilitator.openResultInBrowser();
    }
+
+   /**
+    * Common settings for mutation unit testing. Runs a list of test class and mutates a list of corresponding application classes.
+    * Convenient for a one-liner solution in the main method of your test classes.
+    *
+    * @param applicationClasses application classes to mutate
+    * @param testClasses test classes to run
+    */
+   public static void facilitateMutationTestForClasses(Class<?>[] applicationClasses, Class<?>[] testClasses)
+   {
+      MutationTestFacilitator mutationTestFacilitator = new MutationTestFacilitator();
+      mutationTestFacilitator.addClassesToMutate(applicationClasses);
+      mutationTestFacilitator.addTestClassesToRun(testClasses);
+      mutationTestFacilitator.doMutationTest();
+      mutationTestFacilitator.openResultInBrowser();
+   }
+
 }
