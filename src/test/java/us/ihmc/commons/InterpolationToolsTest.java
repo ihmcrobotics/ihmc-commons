@@ -1,12 +1,12 @@
 package us.ihmc.commons;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class InterpolationToolsTest
 {
@@ -375,5 +375,10 @@ public class InterpolationToolsTest
          double h11ShouldBe = Math.pow(alpha, 3.0) - Math.pow(alpha, 2.0);
          assertEquals(h11, h11ShouldBe, epsilon);
       }
+   }
+   
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(InterpolationTools.class, InterpolationToolsTest.class);
    }
 }

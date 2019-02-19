@@ -1,18 +1,20 @@
 package us.ihmc.commons;
 
-import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
-import us.ihmc.log.LogTools;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+
+import us.ihmc.log.LogTools;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class FormattingToolsTest
@@ -161,5 +163,10 @@ public class FormattingToolsTest
       assertEquals(timeBuilder.toString(), timeSecondsString);
 
       LogTools.debug(FormattingTools.getTimeStringWithSeconds());
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(FormattingTools.class, FormattingToolsTest.class);
    }
 }
