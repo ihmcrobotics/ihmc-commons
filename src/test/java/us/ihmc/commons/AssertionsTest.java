@@ -37,4 +37,10 @@ public class AssertionsTest
          }
       });
    }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(Assertions.class, AssertionsTest.class);
+   }
+
 }

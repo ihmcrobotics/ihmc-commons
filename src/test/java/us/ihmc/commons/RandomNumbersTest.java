@@ -1,10 +1,10 @@
 package us.ihmc.commons;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class RandomNumbersTest
 {
@@ -75,4 +75,10 @@ public class RandomNumbersTest
          assertTrue(((range1 < actualReturn) && (actualReturn < range2)) || ((range2 < actualReturn) && (actualReturn < range1)));
       }
    }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(RandomNumbers.class, RandomNumbersTest.class);
+   }
+
 }
