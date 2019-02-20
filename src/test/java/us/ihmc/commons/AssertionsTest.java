@@ -1,10 +1,11 @@
 package us.ihmc.commons;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 public class AssertionsTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testAssertExceptionThrown()
    {
       Assertions.assertExceptionThrown(Exception.class, new RunnableThatThrows()
@@ -17,10 +18,10 @@ public class AssertionsTest
       });
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testAssertExceptionNotThrown()
    {
-      Assertions.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(AssertionFailedError.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -36,4 +37,10 @@ public class AssertionsTest
          }
       });
    }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(Assertions.class, AssertionsTest.class);
+   }
+
 }

@@ -1,22 +1,26 @@
 package us.ihmc.commons;
 
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
-import org.junit.Test;
-import us.ihmc.log.LogTools;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+import us.ihmc.log.LogTools;
+
+@Execution(ExecutionMode.SAME_THREAD)
 public class FormattingToolsTest
 {
 
-   @Test(timeout = 30000)
+   @Test
    public void testGetFormattedDecimal3D()
    {
       String resultingFormattedString = FormattingTools.getFormattedDecimal3D(1.2345678);
@@ -41,7 +45,7 @@ public class FormattingToolsTest
       assertTrue(resultingFormattedString.equals("-22.023"));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testCapitalizeFirstLetter()
    {
       String resultingString = StringUtils.capitalize("capital");
@@ -62,7 +66,7 @@ public class FormattingToolsTest
       assertTrue(resultingString.equals("robot"));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testUnderScoredToCamelCase()
    {
       String resultingFormattedString;
@@ -76,7 +80,7 @@ public class FormattingToolsTest
       assertTrue(resultingFormattedString.equals("1234@$%Bcdf"));
    }
 
-   @Test(timeout = 3000000)
+   @Test
    public void testFormatToSignificantFigures()
    {
       testFormatToPrecision(123.45, 0.01, 1, "100");
@@ -94,10 +98,10 @@ public class FormattingToolsTest
       System.out.flush();
       System.setOut(systemOut);
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
-      assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", expectedString + System.lineSeparator(), byteArrayOutputStream.toString());
+      assertEquals(expectedString + System.lineSeparator(), byteArrayOutputStream.toString(), "FormattingTools.getFormattedToSignificantFigures didn't work.");
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testGetDateString()
    {
       String dateToolsDateString = FormattingTools.getDateString();
@@ -124,8 +128,8 @@ public class FormattingToolsTest
       LogTools.debug(FormattingTools.getDateString());
    }
 
-   @Ignore // this test seems fairly useless and it's flaky
-   @Test(timeout = 30000)
+   @Disabled // this test seems fairly useless and it's flaky
+   @Test
    public void testGetTimeString()
    {
       StringBuilder timeBuilder = new StringBuilder();
@@ -159,5 +163,10 @@ public class FormattingToolsTest
       assertEquals(timeBuilder.toString(), timeSecondsString);
 
       LogTools.debug(FormattingTools.getTimeStringWithSeconds());
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(FormattingTools.class, FormattingToolsTest.class);
    }
 }

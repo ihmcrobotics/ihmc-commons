@@ -1,14 +1,14 @@
 package us.ihmc.commons;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
 public class RandomNumbersTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testGenerateRandomFloatArray()
    {
       Random random = new Random();
@@ -28,7 +28,7 @@ public class RandomNumbersTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testGenerateRandomIntArray()
    {
       Random random = new Random();
@@ -48,7 +48,7 @@ public class RandomNumbersTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testGenerateRandomDoubleInRange()
    {
       Random random = new Random(1876L);
@@ -62,7 +62,7 @@ public class RandomNumbersTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testGenerateRandomFloatInRange()
    {
       Random random = new Random(1876L);
@@ -75,4 +75,10 @@ public class RandomNumbersTest
          assertTrue(((range1 < actualReturn) && (actualReturn < range2)) || ((range2 < actualReturn) && (actualReturn < range1)));
       }
    }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(RandomNumbers.class, RandomNumbersTest.class);
+   }
+
 }

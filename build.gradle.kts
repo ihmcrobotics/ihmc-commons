@@ -1,11 +1,12 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.1"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.ihmc-build") version "0.15.6"
+   id("us.ihmc.log-tools") version "0.3.1"
+   id("us.ihmc.ihmc-ci") version "4.9"
 }
 
 ihmc {
    group = "us.ihmc"
-   version = "0.24.0"
+   version = "0.25.4"
    vcsUrl = "https://github.com/ihmcrobotics/ihmc-commons"
    openSource = true
    maintainer = "Duncan Calvert"
@@ -14,34 +15,25 @@ ihmc {
    configurePublications()
 }
 
+categories.configure("allocation") {
+   junit5ParallelEnabled = true
+}
+
 dependencies {
    compile("org.apache.commons:commons-lang3:3.8.1")
    compile("commons-io:commons-io:2.6")
-   compile("us.ihmc:log-tools:0.2.2")
+   compile("us.ihmc:log-tools:0.3.1")
 }
 
 ihmc.sourceSetProject("testing").dependencies {
    compile(ihmc.sourceSetProject("main"))
-   compile("junit:junit:4.12")
-   compile("org.pitest:pitest-command-line:1.4.3")
-   compile("com.google.code.java-allocation-instrumenter:java-allocation-instrumenter:3.1.0") // should be runtimeOnly?
+   compile("org.junit.jupiter:junit-jupiter-api:5.4.0")
+   compile("org.pitest:pitest-command-line:1.4.5")
+   compile("org.pitest:pitest-junit5-plugin:0.8")
+   compile("com.google.code.java-allocation-instrumenter:java-allocation-instrumenter:3.2.0") // should be runtimeOnly?
 }
 
 ihmc.sourceSetProject("test").dependencies {
    compile(ihmc.sourceSetProject("main"))
    compile(ihmc.sourceSetProject("testing"))
-}
-
-ihmc.sourceSetProject("test").tasks.withType<Test> {
-   ihmc.sourceSetProject("test").configurations.compile.files.forEach {
-      if (it.name.contains("java-allocation-instrumenter"))
-      {
-         val jvmArg = "-javaagent:" + it.getAbsolutePath()
-         println("[ihmc-commons] Passing JVM arg: " + jvmArg)
-         val tmpArgs = allJvmArgs
-         tmpArgs.add(jvmArg)
-         allJvmArgs = tmpArgs
-
-      }
-   }
 }

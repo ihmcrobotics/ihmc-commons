@@ -1,15 +1,14 @@
 package us.ihmc.commons;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConversionsTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void kibibytesToBytes()
    {
       Random rand = new Random();
@@ -20,7 +19,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void kilobytesToBytes()
    {
       Random rand = new Random();
@@ -31,7 +30,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void megabytesToBytes()
    {
       Random rand = new Random();
@@ -42,7 +41,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void mebibytesToBytes()
    {
       Random rand = new Random();
@@ -53,7 +52,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testToSeconds()
    {
       long timestamp = 1500000000;
@@ -63,7 +62,7 @@ public class ConversionsTest
       assertEquals(-1.5, Conversions.nanosecondsToSeconds(-timestamp), 1e-22);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testToNanoSeconds()
    {
       double time = 1.5;
@@ -72,7 +71,7 @@ public class ConversionsTest
       assertEquals(-1500000000, Conversions.secondsToNanoseconds(-time));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMicroSecondsToNanoseconds()
    {
       long mSecs = 2;
@@ -87,7 +86,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSecondsToMilliseconds()
    {
       long secs = 2;
@@ -102,7 +101,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMillisecondsToSeconds()
    {
       long mSecs = 2;
@@ -117,7 +116,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMillisecondsToMinutes()
    {
       long mSecs = 2;
@@ -132,7 +131,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMillisecondsToNanoSeconds()
    {
       int mSecs = 2;
@@ -147,7 +146,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMicroSecondsToSeconds()
    {
       int mSecs = 2;
@@ -162,7 +161,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMinutesToSeconds()
    {
       int mins = 2;
@@ -177,7 +176,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSecondsToMinutes()
    {
       int secs = 2;
@@ -192,7 +191,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testNanoSecondsToMilliSeconds()
    {
       int nSecs = 2;
@@ -207,7 +206,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testNanoSecondsToMicroSeconds()
    {
       int nSecs = 2;
@@ -222,7 +221,7 @@ public class ConversionsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMagnitudeToDecibels()
    {
       double epsilon = 1e-10;
@@ -242,7 +241,7 @@ public class ConversionsTest
       assertEquals(28.691378080683975, decibels[2], epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testNaN()
    {
       double magnitude = -1.0;
@@ -250,7 +249,7 @@ public class ConversionsTest
       assertTrue(Double.isNaN(decibels));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testNegativeInfinity()
    {
       double magnitude = 0.0;
@@ -258,29 +257,29 @@ public class ConversionsTest
       assertTrue(Double.isInfinite(decibels));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMinutesSecondsConversions()
    {
-      assertEquals("Not equal", 60.0, Conversions.minutesToSeconds(1.0), 1e-7);
-      assertEquals("Not equal", 12000.0, Conversions.minutesToSeconds(200.0), 1e-7);
-      assertEquals("Not equal", 1.0, Conversions.secondsToMinutes(60.0), 1e-7);
-      assertEquals("Not equal", 2.0, Conversions.secondsToMinutes(120.0), 1e-7);
-      assertEquals("Not equal", 1000.0, Conversions.secondsToMilliseconds(1.0), 1e-7);
-      assertEquals("Not equal", 1.0, Conversions.millisecondsToSeconds(1000.0), 1e-7);
-      assertEquals("Not equal", 1.0, Conversions.millisecondsToMinutes(60000.0), 1e-7);
-      assertEquals("Not equal", 1000000.0, Conversions.millisecondsToNanoseconds(1.0), 1e-7);
-      assertEquals("Not equal", 1000000000, Conversions.millisecondsToNanoseconds(1000), 1e-7);
-      assertEquals("Not equal", 1.0, Conversions.microsecondsToSeconds(1000000.0), 1e-7);
-      assertEquals("Not equal", 1000, Conversions.microsecondsToNanoseconds(1), 1e-7);
-      assertEquals("Not equal", 1000.0, Conversions.microsecondsToNanoseconds(1.0), 1e-7);
-      assertEquals("Not equal", 0.000001, Conversions.nanosecondsToMilliseconds(1.0), 1e-7);
-      assertEquals("Not equal", 1.0, Conversions.nanosecondsToMilliseconds(1000000), 1e-7);
-      assertEquals("Not equal", 1000, Conversions.nanosecondsToMicroseconds(1000000), 1e-7);
-      assertEquals("Not equal", 0.001, Conversions.nanosecondsToMicroseconds(1.0), 1e-7);
-      assertEquals("Not equal", 1, Conversions.nanosecondsToMicroseconds(1000), 1e-7);
+      assertEquals(60.0, Conversions.minutesToSeconds(1.0), 1e-7, "Not equal");
+      assertEquals(12000.0, Conversions.minutesToSeconds(200.0), 1e-7, "Not equal");
+      assertEquals(1.0, Conversions.secondsToMinutes(60.0), 1e-7, "Not equal");
+      assertEquals(2.0, Conversions.secondsToMinutes(120.0), 1e-7, "Not equal");
+      assertEquals(1000.0, Conversions.secondsToMilliseconds(1.0), 1e-7, "Not equal");
+      assertEquals(1.0, Conversions.millisecondsToSeconds(1000.0), 1e-7, "Not equal");
+      assertEquals(1.0, Conversions.millisecondsToMinutes(60000.0), 1e-7, "Not equal");
+      assertEquals(1000000.0, Conversions.millisecondsToNanoseconds(1.0), 1e-7, "Not equal");
+      assertEquals(1000000000, Conversions.millisecondsToNanoseconds(1000), 1e-7, "Not equal");
+      assertEquals(1.0, Conversions.microsecondsToSeconds(1000000.0), 1e-7, "Not equal");
+      assertEquals(1000, Conversions.microsecondsToNanoseconds(1), 1e-7, "Not equal");
+      assertEquals(1000.0, Conversions.microsecondsToNanoseconds(1.0), 1e-7, "Not equal");
+      assertEquals(0.000001, Conversions.nanosecondsToMilliseconds(1.0), 1e-7, "Not equal");
+      assertEquals(1.0, Conversions.nanosecondsToMilliseconds(1000000), 1e-7, "Not equal");
+      assertEquals(1000, Conversions.nanosecondsToMicroseconds(1000000), 1e-7, "Not equal");
+      assertEquals(0.001, Conversions.nanosecondsToMicroseconds(1.0), 1e-7, "Not equal");
+      assertEquals(1, Conversions.nanosecondsToMicroseconds(1000), 1e-7, "Not equal");
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRadiansPerSecondToHz()
    {
       double[] freqInRadPerSecond = new double[] {0.0, Math.PI / 4.0, Math.PI, Math.PI * 2.0, Math.PI * 4.0};

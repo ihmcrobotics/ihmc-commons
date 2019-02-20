@@ -1,9 +1,11 @@
 package us.ihmc.commons.nio;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 
@@ -17,8 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+@Execution(ExecutionMode.SAME_THREAD)
 public class FileToolsTest
 {
    private static final Path FILE_TOOLS_TEST_PATH = getResourcesPathForTestClass(FileToolsTest.class);
@@ -43,7 +46,7 @@ public class FileToolsTest
    private static final Path FILE_TOOLS_EXAMPLE_FILE_CAT_TXT_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE_CAT_TXT);
    private static final Path READ_ALL_LINES_PATH = FILE_TOOLS_TEST_PATH.resolve(TEST_READ_ALL_LINES_TXT);
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       FileTools.ensureDirectoryExists(FILE_TOOLS_TEST_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -58,7 +61,7 @@ public class FileToolsTest
       createReadAllLinesFile();
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       FileTools.deleteQuietly(EXAMPLE_JAVA_FILE1_PATH);
@@ -81,7 +84,7 @@ public class FileToolsTest
       return Paths.get("resources", pathNames.toArray(new String[0]));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testReadAllLines()
    {
       List<String> lines = FileTools.readAllLines(READ_ALL_LINES_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -91,7 +94,7 @@ public class FileToolsTest
       assertTrue(lines.get(2).equals("line3"));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testReadAllBytesAndReadLinesFromBytesAndReplaceLine()
    {
       byte[] bytes = FileTools.readAllBytes(READ_ALL_LINES_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -109,7 +112,7 @@ public class FileToolsTest
       assertTrue(lines.get(2).equals("line3"));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testConcatenateFilesTogether()
    {
       Path concatFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH;

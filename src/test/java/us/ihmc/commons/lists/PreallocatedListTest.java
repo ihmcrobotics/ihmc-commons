@@ -1,7 +1,7 @@
 package us.ihmc.commons.lists;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,11 +9,11 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.function.UnaryOperator;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PreallocatedListTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testConstructor()
    {
       PreallocatedList<Object> list = new PreallocatedList<>(Object.class, Object::new, 10);
@@ -22,7 +22,7 @@ public class PreallocatedListTest
       assertTrue(list.getLast() == null);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testAddAndGet()
    {
       PreallocatedList<Object> list = new PreallocatedList<>(Object.class, Object::new, 20);
@@ -95,7 +95,7 @@ public class PreallocatedListTest
       assertTrue(list.getLast() == expectedList.get(finalSize - 1));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemove()
    {
       PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, 10);
@@ -140,7 +140,7 @@ public class PreallocatedListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSwap()
    {
       Random rand = new Random(541964L);
@@ -188,7 +188,7 @@ public class PreallocatedListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSort()
    {
       PreallocatedList<MutableInt> list = new PreallocatedList<>(MutableInt.class, MutableInt::new, 10);
@@ -205,7 +205,7 @@ public class PreallocatedListTest
       assertTrue(list.get(4).getValue() == 50);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemoveIndex()
    {
       int size = 10;
@@ -225,7 +225,7 @@ public class PreallocatedListTest
       assertTrue(list.size() == size - 4);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemoveObject()
    {
       int size = 5;
@@ -249,7 +249,7 @@ public class PreallocatedListTest
       assertTrue(list.get(2).getValue() == 4);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemoveAll()
    {
       int size = 5;
@@ -271,7 +271,7 @@ public class PreallocatedListTest
       assertTrue(list.size() == 3);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRetainAll()
    {
       int size = 5;
@@ -292,7 +292,7 @@ public class PreallocatedListTest
       assertTrue(list.size() == 2);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testIndexOf()
    {
       int size = 10;
@@ -316,7 +316,7 @@ public class PreallocatedListTest
       assertTrue(list.lastIndexOf(new MutableInt(398)) == -1);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testContains()
    {
       int size = 5;
@@ -335,7 +335,7 @@ public class PreallocatedListTest
       assertFalse(list.contains(new MutableInt(0xdeadbeef)));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testContainsAll()
    {
       int size = 5;
@@ -358,7 +358,7 @@ public class PreallocatedListTest
       assertTrue(list.containsAll(elements));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testUnsupportedOperations()
    {
       int size = 5;

@@ -1,13 +1,12 @@
 package us.ihmc.commons;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.commons.InterpolationTools;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class InterpolationToolsTest
 {
@@ -15,18 +14,18 @@ public class InterpolationToolsTest
    private static final int iters = 1000;
    private Random random;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       random = new Random(100L);
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPiecewiseInterpolation()
    {
       for (int i = 0; i < iters; i++)
@@ -75,7 +74,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPiecewiseInterpolationRoundDown()
    {
       for (int i = 0; i < iters; i++)
@@ -124,7 +123,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testLinearInterpolateBounds()
    {
       for (int i = 0; i < iters; i++)
@@ -140,7 +139,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testLinearInterpolate()
    {
       for (int i = 0; i < iters; i++)
@@ -155,7 +154,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testHermite01InterpolateBounds()
    {
       for (int i = 0; i < iters; i++)
@@ -171,7 +170,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testHermite01Interpolate()
    {
       for (int i = 0; i < iters; i++)
@@ -186,7 +185,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testHermiteInterpolateBounds()
    {
       for (int i = 0; i < iters; i++)
@@ -210,7 +209,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testHermiteInterpolate()
    {
       for (int i = 0; i < iters; i++)
@@ -225,7 +224,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testLogisticInterpolateBounds()
    {
       for (int i = 0; i < iters; i++)
@@ -253,7 +252,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testLogisticInterpolate()
    {
       for (int i = 0; i < iters; i++)
@@ -268,7 +267,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testLogisticInterpolateSlopedBounds()
    {
       for (int i = 0; i < iters; i++)
@@ -298,7 +297,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testLogisticInterpolateSloped()
    {
       for (int i = 0; i < iters; i++)
@@ -315,7 +314,7 @@ public class InterpolationToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testHermiteCoefficients()
    {
       // left bound
@@ -376,5 +375,10 @@ public class InterpolationToolsTest
          double h11ShouldBe = Math.pow(alpha, 3.0) - Math.pow(alpha, 2.0);
          assertEquals(h11, h11ShouldBe, epsilon);
       }
+   }
+   
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(InterpolationTools.class, InterpolationToolsTest.class);
    }
 }

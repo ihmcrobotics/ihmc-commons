@@ -1,6 +1,6 @@
 package us.ihmc.commons.lists;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 
 import java.io.IOException;
@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.*;
 
 public class ListWrappingIndexToolsTest
 {
-   @Test(timeout = 10000)
+   @Test
    public void testWrap()
    {
       Random random = new Random(234223L);
@@ -35,7 +35,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testNext()
    {
       Random random = new Random(234223L);
@@ -56,7 +56,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testDecrement()
    {
       Random random = new Random(234223L);
@@ -77,7 +77,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testGetWrap()
    {
       Random random = new Random(234223L);
@@ -98,7 +98,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testGetNextWrap()
    {
       Random random = new Random(234223L);
@@ -119,7 +119,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testGetPreviousWrap()
    {
       Random random = new Random(234223L);
@@ -140,7 +140,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testSubLengthInclusive()
    {
       int listSize = 20;
@@ -167,7 +167,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testSubLengthExclusive()
    {
       int listSize = 20;
@@ -195,7 +195,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testSubListInclusive()
    {
       int listSize = 20;
@@ -233,7 +233,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testSubListExclusive()
    {
       int listSize = 20;
@@ -270,7 +270,7 @@ public class ListWrappingIndexToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testRemoveAllInclusive()
    {
       Random random = new Random(453L);
@@ -310,7 +310,7 @@ public class ListWrappingIndexToolsTest
          assertEquals(listBackup.get(i), list.get(index++));
    }
 
-   @Test(timeout = 10000)
+   @Test
    public void testRemoveAllExclusive()
    {
       Random random = new Random(453L);

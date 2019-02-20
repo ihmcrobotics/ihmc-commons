@@ -1,16 +1,18 @@
 package us.ihmc.commons.lists;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.util.Collections;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
+@Execution(ExecutionMode.SAME_THREAD)
 public class RecyclingArrayDequeTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testConstructors()
    {
       RecyclingArrayDeque<MutableInt> queue = new RecyclingArrayDeque<MutableInt>(MutableInt::new, MutableInt::setValue);
@@ -30,7 +32,7 @@ public class RecyclingArrayDequeTest
       assertTrue(queue.pollLast() == null);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testAddFirst()
    {
       RecyclingArrayDeque<MutableInt> queue = new RecyclingArrayDeque<MutableInt>(4, MutableInt::new, MutableInt::setValue);
@@ -40,7 +42,7 @@ public class RecyclingArrayDequeTest
       queue.addLast().setValue(2);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPollFirst()
    {
       RecyclingArrayDeque<MutableInt> queue = new RecyclingArrayDeque<MutableInt>(4, MutableInt::new, MutableInt::setValue);
@@ -60,7 +62,7 @@ public class RecyclingArrayDequeTest
       assertTrue(queue.size() == 0);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPollLast()
    {
       RecyclingArrayDeque<MutableInt> queue = new RecyclingArrayDeque<MutableInt>(4, MutableInt::new, MutableInt::setValue);
@@ -80,7 +82,7 @@ public class RecyclingArrayDequeTest
       assertTrue(queue.size() == 0);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPeek()
    {
       RecyclingArrayDeque<MutableInt> queue = new RecyclingArrayDeque<MutableInt>(4, MutableInt::new, MutableInt::setValue);
@@ -96,7 +98,7 @@ public class RecyclingArrayDequeTest
       assertTrue(queue.size() == 3);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPeekFirst()
    {
       //functionally identical to peek()
@@ -113,7 +115,7 @@ public class RecyclingArrayDequeTest
       assertTrue(queue.size() == 3);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPeekLast()
    {
       RecyclingArrayDeque<MutableInt> queue = new RecyclingArrayDeque<MutableInt>(4, MutableInt::new, MutableInt::setValue);
@@ -129,7 +131,7 @@ public class RecyclingArrayDequeTest
       assertTrue(queue.size() == 3);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemoveFirst()
    {
       RecyclingArrayDeque<MutableInt> queue = new RecyclingArrayDeque<MutableInt>(4, MutableInt::new, MutableInt::setValue);
@@ -144,7 +146,7 @@ public class RecyclingArrayDequeTest
       assertTrue(queue.removeFirst().getValue() == 4);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemove()
    {
       // identical to remove first
@@ -160,7 +162,7 @@ public class RecyclingArrayDequeTest
       assertTrue(queue.remove().getValue() == 4);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemoveLast()
    {
       RecyclingArrayDeque<MutableInt> queue = new RecyclingArrayDeque<MutableInt>(4, MutableInt::new, MutableInt::setValue);
@@ -175,7 +177,7 @@ public class RecyclingArrayDequeTest
       assertTrue(queue.removeLast().getValue() == 1);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testUnsupportedMethods()
    {
       RecyclingArrayDeque<MutableInt> queue = new RecyclingArrayDeque<MutableInt>(4, MutableInt::new, MutableInt::setValue);

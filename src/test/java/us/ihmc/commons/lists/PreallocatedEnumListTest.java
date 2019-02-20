@@ -1,21 +1,18 @@
 package us.ihmc.commons.lists;
 
-import org.junit.Assert;
-import org.junit.Test;
-import us.ihmc.commons.lists.PreallocatedEnumList;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.apache.logging.log4j.core.util.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-
 public class PreallocatedEnumListTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testConstructor()
    {
       PreallocatedEnumList<TestEnum> list = new PreallocatedEnumList<>(TestEnum.class, TestEnum.values(), 10);
@@ -24,7 +21,7 @@ public class PreallocatedEnumListTest
       assertTrue(list.getLast() == null);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testAddAndGet()
    {
       PreallocatedEnumList<TestEnum> list = new PreallocatedEnumList<>(TestEnum.class, TestEnum.values(), 20);
@@ -39,13 +36,13 @@ public class PreallocatedEnumListTest
       }
 
       assertFalse(list.isEmpty());
-      Assert.assertTrue(list.size() == finalSize);
+      assertTrue(list.size() == finalSize);
       for (int i = 0; i < finalSize; i++)
       {
-         Assert.assertTrue(list.get(i) == expectedList.get(i));
+         assertTrue(list.get(i) == expectedList.get(i));
       }
 
-      Assert.assertTrue(list.getLast() == expectedList.get(finalSize - 1));
+      assertTrue(list.getLast() == expectedList.get(finalSize - 1));
 
       try
       {
@@ -59,7 +56,7 @@ public class PreallocatedEnumListTest
 
       list.clear();
       expectedList.clear();
-      Assert.assertTrue(list.getLast() == null);
+      assertTrue(list.getLast() == null);
 
       finalSize = 8;
       for (int i = 0; i < finalSize; i++)
@@ -69,17 +66,17 @@ public class PreallocatedEnumListTest
       }
 
       assertFalse(list.isEmpty());
-      Assert.assertTrue(list.size() == finalSize);
+      assertTrue(list.size() == finalSize);
       for (int i = 0; i < finalSize; i++)
       {
-         Assert.assertTrue(list.get(i) == expectedList.get(i));
+         assertTrue(list.get(i) == expectedList.get(i));
       }
 
-      Assert.assertTrue(list.getLast() == expectedList.get(finalSize - 1));
+      assertTrue(list.getLast() == expectedList.get(finalSize - 1));
 
       list.clear();
       expectedList.clear();
-      Assert.assertTrue(list.getLast() == null);
+      assertTrue(list.getLast() == null);
 
       finalSize = 20;
       for (int i = 0; i < finalSize; i++)
@@ -89,16 +86,16 @@ public class PreallocatedEnumListTest
       }
 
       assertFalse(list.isEmpty());
-      Assert.assertTrue(list.size() == finalSize);
+      assertTrue(list.size() == finalSize);
       for (int i = 0; i < finalSize; i++)
       {
-         Assert.assertTrue(list.get(i) == expectedList.get(i));
+         assertTrue(list.get(i) == expectedList.get(i));
       }
 
-      Assert.assertTrue(list.getLast() == expectedList.get(finalSize - 1));
+      assertTrue(list.getLast() == expectedList.get(finalSize - 1));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemove()
    {
       int currentSize = 10;
@@ -114,22 +111,22 @@ public class PreallocatedEnumListTest
       list.remove(indexOfRemovedObject);
       expectedList.remove(indexOfRemovedObject);
       currentSize--;
-      Assert.assertTrue(list.size() == currentSize);
+      assertTrue(list.size() == currentSize);
 
       for (int i = 0; i < currentSize; i++)
       {
-         Assert.assertTrue(list.get(i) == expectedList.get(i));
+         assertTrue(list.get(i) == expectedList.get(i));
       }
 
       indexOfRemovedObject = currentSize - 1;
       list.remove(indexOfRemovedObject);
       expectedList.remove(indexOfRemovedObject);
       currentSize--;
-      Assert.assertTrue(list.size() == currentSize);
+      assertTrue(list.size() == currentSize);
 
       for (int i = 0; i < currentSize; i++)
       {
-         Assert.assertTrue(list.get(i) == expectedList.get(i));
+         assertTrue(list.get(i) == expectedList.get(i));
       }
 
       try
@@ -143,7 +140,7 @@ public class PreallocatedEnumListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSwap()
    {
       Random rand = new Random(141456L);
@@ -162,11 +159,11 @@ public class PreallocatedEnumListTest
          int indexB = rand.nextInt(currentSize);
          list.swap(indexA, indexB);
          Collections.swap(expectedList, indexA, indexB);
-         Assert.assertTrue(list.size() == currentSize);
+         assertTrue(list.size() == currentSize);
 
          for (int i = 0; i < currentSize; i++)
          {
-            Assert.assertTrue(list.get(i) == expectedList.get(i));
+            assertTrue(list.get(i) == expectedList.get(i));
          }
       }
 
@@ -191,7 +188,7 @@ public class PreallocatedEnumListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSort()
    {
       PreallocatedEnumList<TestEnum> list = new PreallocatedEnumList<>(TestEnum.class, TestEnum.values(), 4);

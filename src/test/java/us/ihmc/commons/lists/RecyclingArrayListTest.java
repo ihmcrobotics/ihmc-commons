@@ -1,20 +1,22 @@
 package us.ihmc.commons.lists;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.lists.RecyclingArrayList;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 
-import static org.junit.Assert.*;
-
+@Execution(ExecutionMode.SAME_THREAD)
 public class RecyclingArrayListTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testConstructors()
    {
       RecyclingArrayList<Object> list = new RecyclingArrayList<>(Object.class);
@@ -39,7 +41,7 @@ public class RecyclingArrayListTest
       assertTrue(list.getLast() == null);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testAddAndGet()
    {
       RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object::new);
@@ -112,7 +114,7 @@ public class RecyclingArrayListTest
       assertTrue(list.getLast() == expectedList.get(finalSize - 1));
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testGetAndGrowIfNeeded()
    {
       RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object::new);
@@ -167,7 +169,7 @@ public class RecyclingArrayListTest
       assertTrue(list.getLast() == lastObject);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFastRemove()
    {
       int currentSize = 10;
@@ -208,7 +210,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRemove()
    {
       int currentSize = 10;
@@ -254,7 +256,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSwap()
    {
       Random rand = new Random(541964L);
@@ -303,7 +305,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testInsertAtIndex()
    {
       Random rand = new Random(541964L);
@@ -344,7 +346,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testShuffle()
    {
       Random random = new Random(541964L);
@@ -379,7 +381,7 @@ public class RecyclingArrayListTest
       assertEquals(sumBefore, sumAfter);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testIteratorHasNext()
    {
       RecyclingArrayList<Object> list = new RecyclingArrayList<>(0, Object::new);
@@ -401,7 +403,7 @@ public class RecyclingArrayListTest
       assertFalse(iterator.hasNext());
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testIteratorNext()
    {
       int size = 15;
@@ -419,7 +421,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testIteratorRemove()
    {
       int initialSize = 8;
@@ -463,7 +465,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testIteratorForEachRemaining()
    {
       int initialSize = 10;
@@ -497,14 +499,14 @@ public class RecyclingArrayListTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testEmptyConstructor()
    {
       // check constructor doesn't throw exception
       new RecyclingArrayList();
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSort()
    {
       RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(10, MutableInt::new);

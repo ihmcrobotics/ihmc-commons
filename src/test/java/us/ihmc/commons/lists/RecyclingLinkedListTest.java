@@ -1,14 +1,12 @@
 package us.ihmc.commons.lists;
 
-import static org.junit.Assert.fail;
-
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 
 public class RecyclingLinkedListTest
@@ -27,39 +25,39 @@ public class RecyclingLinkedListTest
 
    public void doOperationsAndAsserts(RecyclingLinkedList<MutableInt> linkedList, boolean reverse)
    {
-      Assert.assertEquals(0, linkedList.size());
-      Assert.assertTrue(linkedList.isEmpty());
+      assertEquals(0, linkedList.size());
+      assertTrue(linkedList.isEmpty());
 
       MutableInt element = new MutableInt();
       RecyclingIterator<MutableInt> forwardIterator = linkedList.createForwardIterator();
       RecyclingIterator<MutableInt> backwardIterator = linkedList.createBackwardIterator();
-      Assert.assertFalse(forwardIterator.hasNext());
+      assertFalse(forwardIterator.hasNext());
 
       if (reverse)
       {
          // Add elements such that the result is a list from 5 to 9:
          addElementsToBack(linkedList, forwardIterator, backwardIterator);
-         Assert.assertEquals(5, linkedList.size());
+         assertEquals(5, linkedList.size());
          // Add elements such that the result is a list from 0 to 9:
          addElementsToFront(linkedList, forwardIterator, backwardIterator);
-         Assert.assertEquals(10, linkedList.size());
+         assertEquals(10, linkedList.size());
       }
       else
       {
          // Add elements such that the result is a list from 0 to 9:
          addElementsToFront(linkedList, forwardIterator, backwardIterator);
-         Assert.assertEquals(5, linkedList.size());
+         assertEquals(5, linkedList.size());
          // Add elements such that the result is a list from 5 to 9:
          addElementsToBack(linkedList, forwardIterator, backwardIterator);
-         Assert.assertEquals(10, linkedList.size());
+         assertEquals(10, linkedList.size());
       }
-      Assert.assertFalse(linkedList.isEmpty());
+      assertFalse(linkedList.isEmpty());
 
       // Check the first and last elements:
       linkedList.peekFirst(element);
-      Assert.assertEquals(0, element.intValue());
+      assertEquals(0, element.intValue());
       linkedList.peekLast(element);
-      Assert.assertEquals(9, element.intValue());
+      assertEquals(9, element.intValue());
 
       // Make sure an iterator will see the values 0 to 9 in order:
       int expected = 0;
@@ -72,9 +70,9 @@ public class RecyclingLinkedListTest
          }
 
          forwardIterator.next(element);
-         Assert.assertEquals(expected++, element.intValue());
+         assertEquals(expected++, element.intValue());
       }
-      Assert.assertEquals(expected, 10);
+      assertEquals(expected, 10);
       forwardIterator.reset();
 
       expected = 9;
@@ -87,9 +85,9 @@ public class RecyclingLinkedListTest
          }
 
          backwardIterator.next(element);
-         Assert.assertEquals(expected--, element.intValue());
+         assertEquals(expected--, element.intValue());
       }
-      Assert.assertEquals(expected, -1);
+      assertEquals(expected, -1);
       backwardIterator.reset();
 
       if (reverse)
@@ -118,9 +116,9 @@ public class RecyclingLinkedListTest
          }
 
          forwardIterator.next(element);
-         Assert.assertEquals(expected++, element.intValue());
+         assertEquals(expected++, element.intValue());
       }
-      Assert.assertEquals(expected, 8);
+      assertEquals(expected, 8);
 
       backwardIterator.reset();
       expected = 7;
@@ -132,9 +130,9 @@ public class RecyclingLinkedListTest
          }
 
          backwardIterator.next(element);
-         Assert.assertEquals(expected--, element.intValue());
+         assertEquals(expected--, element.intValue());
       }
-      Assert.assertEquals(expected, 3);
+      assertEquals(expected, 3);
 
       // Make sure the iterator fails after it is at the end:
       try
@@ -186,7 +184,7 @@ public class RecyclingLinkedListTest
          forwardIterator.next();
          expected++;
       }
-      Assert.assertEquals(expected, 21);
+      assertEquals(expected, 21);
 
       backwardIterator.reset();
       expected = 20;
@@ -200,7 +198,7 @@ public class RecyclingLinkedListTest
          backwardIterator.next();
          expected--;
       }
-      Assert.assertEquals(expected, -21);
+      assertEquals(expected, -21);
 
       // Remove elements until the list is empty:
       if (reverse)
@@ -210,7 +208,7 @@ public class RecyclingLinkedListTest
             if (i % 2 == 0)
             {
                linkedList.removeFirst(element);
-               Assert.assertEquals(i, element.intValue());
+               assertEquals(i, element.intValue());
             }
             else
             {
@@ -225,7 +223,7 @@ public class RecyclingLinkedListTest
             if (i % 2 == 0)
             {
                linkedList.removeLast(element);
-               Assert.assertEquals(i, element.intValue());
+               assertEquals(i, element.intValue());
             }
             else
             {
@@ -233,7 +231,7 @@ public class RecyclingLinkedListTest
             }
          }
       }
-      Assert.assertTrue(linkedList.isEmpty());
+      assertTrue(linkedList.isEmpty());
 
       // Make sure there is no more elements:
       try
@@ -274,9 +272,9 @@ public class RecyclingLinkedListTest
                                RecyclingIterator<MutableInt> backwardIterator)
    {
       linkedList.removeLast(element);
-      Assert.assertEquals(9, element.intValue());
+      assertEquals(9, element.intValue());
       linkedList.removeLast(element);
-      Assert.assertEquals(8, element.intValue());
+      assertEquals(8, element.intValue());
 
       // Make sure the iterator fails after a modification:
       try
@@ -305,13 +303,13 @@ public class RecyclingLinkedListTest
                                 RecyclingIterator<MutableInt> backwardIterator)
    {
       linkedList.removeFirst(element);
-      Assert.assertEquals(0, element.intValue());
+      assertEquals(0, element.intValue());
       linkedList.removeFirst(element);
-      Assert.assertEquals(1, element.intValue());
+      assertEquals(1, element.intValue());
       linkedList.removeFirst(element);
-      Assert.assertEquals(2, element.intValue());
+      assertEquals(2, element.intValue());
       linkedList.removeFirst(element);
-      Assert.assertEquals(3, element.intValue());
+      assertEquals(3, element.intValue());
 
       // Make sure the iterator fails after a modification:
       try
