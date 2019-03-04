@@ -3,7 +3,8 @@ package us.ihmc.commons;
 /**
  * Runnable that supports throwables.
  */
+@FunctionalInterface
 public interface RunnableThatThrows
 {
-   public void run() throws Throwable;
+   void run() throws Throwable;
 }
