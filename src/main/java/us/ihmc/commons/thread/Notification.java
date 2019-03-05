@@ -2,13 +2,13 @@ package us.ihmc.commons.thread;
 
 /**
  * <p>Provides a simple interface for setting a bit from one thread
- * and clearing it from another in acknowledgement. Additionally
- * provides one frame of history for convenience.</p><br>
+ * and clearing it from another in acknowledgement. Stores the last
+ * polled state for re-access, since the first poll clears the bit.</p><br>
  *
  * <p>This class exists to provide convenience and prevent a common
  * bug, that is, forgetting to clear the bit after a poll.</p><br>
  *
- * <p>The API difference is illustrated by the following example:</p>
+ * <p>The usefulness is illustrated by the following example:</p>
  *
  * <pre>
  * {@code
@@ -52,7 +52,7 @@ public class Notification
    /**
     * Polls and clears the notification.
     *
-    * @return if notification was present
+    * @return if notification was set
     */
    public boolean poll()
    {
@@ -62,7 +62,12 @@ public class Notification
    }
 
    /**
-    * The initial or polled notification status.
+    * If on the last poll the notification was set. Should be called after {@link #poll}
+    * for convenience, as many times as you like.
+    *
+    * If this notification has never been polled, returns the initial value, false.
+    *
+    * @return if on the last poll the notification was set
     */
    public boolean read()
    {
