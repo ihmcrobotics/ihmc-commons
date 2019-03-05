@@ -27,8 +27,9 @@ In your build.gradle:
 - Minimal Stopwatch with friendly API.
 - Commonly needed conversions. (Data information units, etc.)
 - Epsilons for explicitness and convenience.
-- Functional exception handler with defaults.
+- Functional exception handling including one-liner option.
 - Recycling and preallocated lists, deque.
+- Tools to increase threading safety.
 
 ##### Testing Distribution
 
