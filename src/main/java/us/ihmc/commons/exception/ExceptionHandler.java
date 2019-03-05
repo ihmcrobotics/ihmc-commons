@@ -11,7 +11,7 @@ public interface ExceptionHandler
    /**
     * Handle an exception.
     *
-    * @param e The throwable.
+    * @param e The exception.
     */
-   public void handleException(Throwable e);
+   void handleException(Throwable e);  // TODO change to Exception
 }

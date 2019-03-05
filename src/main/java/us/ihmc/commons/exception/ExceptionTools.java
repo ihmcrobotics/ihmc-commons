@@ -18,7 +18,7 @@ public class ExceptionTools
       {
          runnable.run();
       }
-      catch (Throwable e)
+      catch (Throwable e)   // TODO Change to Exception
       {
          exceptionHandler.handleException(e);
       }
