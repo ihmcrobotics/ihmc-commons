@@ -47,7 +47,6 @@ package us.ihmc.commons.thread;
 public class Notification
 {
    private boolean notification = false;
-   private boolean previousValue = false;
 
    /**
     * Polls and clears the notification.
@@ -56,16 +55,8 @@ public class Notification
     */
    public boolean poll()
    {
-      previousValue = notification;
+      boolean previousValue = notification;
       notification = false;
-      return previousValue;
-   }
-
-   /**
-    * The initial or polled notification status.
-    */
-   public boolean read()
-   {
       return previousValue;
    }
 
