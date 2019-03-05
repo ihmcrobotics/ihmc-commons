@@ -2,6 +2,8 @@ package us.ihmc.commons.exception;
 
 import us.ihmc.commons.RunnableThatThrows;
 
+import java.util.concurrent.Callable;
+
 public class ExceptionTools
 {
    /**
@@ -26,16 +28,16 @@ public class ExceptionTools
     * One-liner exception handling when used with {@link DefaultExceptionHandler}.
     * Also returns a value.
     *
-    * @param genericRunnable
+    * @param callable
     * @param exceptionHandler
     */
-   public static <T> T handle(GenericRunnable<T> genericRunnable, ExceptionHandler exceptionHandler)
+   public static <T> T handle(Callable<T> callable, ExceptionHandler exceptionHandler)
    {
       try
       {
-         return genericRunnable.run();
+         return callable.call();
       }
-      catch (Throwable e)
+      catch (Exception e)
       {
          exceptionHandler.handleException(e);
          return null;
