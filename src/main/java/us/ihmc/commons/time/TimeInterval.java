@@ -1,7 +1,5 @@
 package us.ihmc.commons.time;
 
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
-
 public class TimeInterval implements TimeIntervalBasics
 {
    private double startTime;
@@ -54,6 +52,6 @@ public class TimeInterval implements TimeIntervalBasics
    @Override
    public String toString()
    {
-      return EuclidCoreIOTools.getStringOf("(", " )", ", ", getStartTime(), getEndTime());
+      return "(" + getStartTime() + ", " + getEndTime() + ")";
    }
 }
