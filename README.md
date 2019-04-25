@@ -40,6 +40,8 @@ In your build.gradle:
 
 ### Contributing
 
+This build requires Gradle 5.0+.
+
 This library aims to be small, lightweight, and stable with minimal dependencies. Pull requests will be heavily reviewed.
 
 ### License
