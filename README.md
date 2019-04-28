@@ -30,6 +30,7 @@ In your build.gradle:
 - Functional exception handling including one-liner option.
 - Recycling and preallocated lists, deque.
 - Tools to increase threading safety.
+- Tools for defining time intervals.
 
 ##### Testing Distribution
 
