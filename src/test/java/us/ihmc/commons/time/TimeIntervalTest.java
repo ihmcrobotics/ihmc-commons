@@ -1,9 +1,13 @@
 package us.ihmc.commons.time;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.time.TimeInterval;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TimeIntervalTest
 {
