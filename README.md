@@ -27,8 +27,10 @@ In your build.gradle:
 - Minimal Stopwatch with friendly API.
 - Commonly needed conversions. (Data information units, etc.)
 - Epsilons for explicitness and convenience.
-- Functional exception handler with defaults.
+- Functional exception handling including one-liner option.
 - Recycling and preallocated lists, deque.
+- Tools to increase threading safety.
+- Tools for defining time intervals.
 
 ##### Testing Distribution
 
@@ -38,6 +40,8 @@ In your build.gradle:
 - Tools for allocation testing. (Filtering on top of google/java-allocation-instrumenter)
 
 ### Contributing
+
+This build requires Gradle 5.0+.
 
 This library aims to be small, lightweight, and stable with minimal dependencies. Pull requests will be heavily reviewed.
 
