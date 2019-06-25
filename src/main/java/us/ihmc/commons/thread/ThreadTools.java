@@ -1,5 +1,8 @@
 package us.ihmc.commons.thread;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -265,5 +268,13 @@ public class ThreadTools
       }, 0, timeUnit);
 
       return handleKiller;
+   }
+
+   /**
+    * Join from current thread, printing stack trace if interrupted.
+    */
+   public static void join()
+   {
+      ExceptionTools.handle(() -> Thread.currentThread().join(), DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 }
