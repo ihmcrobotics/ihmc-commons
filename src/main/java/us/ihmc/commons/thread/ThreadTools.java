@@ -98,17 +98,19 @@ public class ThreadTools
       }
    }
 
-   public static void startAThread(Runnable runnable, String threadName)
+   public static Thread startAThread(Runnable runnable, String threadName)
    {
       Thread newThread = new Thread(runnable, threadName);
       newThread.start();
+      return newThread;
    }
 
-   public static void startAsDaemon(Runnable daemonThreadRunnable, String threadName)
+   public static Thread startAsDaemon(Runnable daemonThreadRunnable, String threadName)
    {
       Thread daemonThread = new Thread(daemonThreadRunnable, threadName);
       daemonThread.setDaemon(true);
       daemonThread.start();
+      return daemonThread;
    }
 
    public static void waitUntilNextMultipleOf(long waitMultipleMS) throws InterruptedException
