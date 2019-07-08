@@ -1,5 +1,8 @@
 package us.ihmc.commons.thread;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -95,17 +98,19 @@ public class ThreadTools
       }
    }
 
-   public static void startAThread(Runnable runnable, String threadName)
+   public static Thread startAThread(Runnable runnable, String threadName)
    {
       Thread newThread = new Thread(runnable, threadName);
       newThread.start();
+      return newThread;
    }
 
-   public static void startAsDaemon(Runnable daemonThreadRunnable, String threadName)
+   public static Thread startAsDaemon(Runnable daemonThreadRunnable, String threadName)
    {
       Thread daemonThread = new Thread(daemonThreadRunnable, threadName);
       daemonThread.setDaemon(true);
       daemonThread.start();
+      return daemonThread;
    }
 
    public static void waitUntilNextMultipleOf(long waitMultipleMS) throws InterruptedException
@@ -265,5 +270,39 @@ public class ThreadTools
       }, 0, timeUnit);
 
       return handleKiller;
+   }
+
+   /**
+    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
+    * be terminated and not cause the application to hang when the main thread has been terminated.
+    *
+    * @see Executors#newSingleThreadExecutor(ThreadFactory)
+    * @param name
+    * @return
+    */
+   public static Executor newSingleDaemonThreadExecutor(String name)
+   {
+      return Executors.newSingleThreadExecutor(DaemonThreadFactory.getNamedDaemonThreadFactory(name));
+   }
+
+   /**
+    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
+    * be terminated and not cause the application to hang when the main thread has been terminated.
+    *
+    * @see Executors#newSingleThreadScheduledExecutor(ThreadFactory)
+    * @param name
+    * @return
+    */
+   public static ScheduledExecutorService newSingleDaemonThreadScheduledExecutor(String name)
+   {
+      return Executors.newSingleThreadScheduledExecutor(DaemonThreadFactory.getNamedDaemonThreadFactory(name));
+   }
+
+   /**
+    * Join from current thread, printing stack trace if interrupted.
+    */
+   public static void join()
+   {
+      ExceptionTools.handle(() -> Thread.currentThread().join(), DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 }
