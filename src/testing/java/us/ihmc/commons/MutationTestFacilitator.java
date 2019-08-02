@@ -300,7 +300,10 @@ public class MutationTestFacilitator
       }
       if (sourceDirs.isEmpty())
       {
-         sourceDirs += PathTools.findDirectoryInline("src").toString() + ",";
+         Path bestEffortSrcDirectory = PathTools.findDirectoryInline("src");
+         if (bestEffortSrcDirectory == null)
+            throw new RuntimeException("Could not find src directory near " + Paths.get(".").toAbsolutePath().normalize());
+         sourceDirs += bestEffortSrcDirectory.toString() + ",";
       }
       sourceDirs = sourceDirs.substring(0, sourceDirs.lastIndexOf(','));
 
