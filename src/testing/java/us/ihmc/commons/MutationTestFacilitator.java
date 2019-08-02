@@ -1,5 +1,6 @@
 package us.ihmc.commons;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.pitest.mutationtest.commandline.MutationCoverageReport;
 import org.pitest.util.Glob;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -244,7 +245,8 @@ public class MutationTestFacilitator
       {
          targetClasses += classToMutate.getName() + ",";
       }
-      targetClasses = targetClasses.substring(0, targetClasses.lastIndexOf(','));
+      if (!targetClasses.isEmpty())
+         targetClasses = targetClasses.substring(0, targetClasses.lastIndexOf(','));
 
       String targetTests = "";
       for (Class<?> testClass : testClassesToRun)
@@ -255,7 +257,8 @@ public class MutationTestFacilitator
       {
          targetTests += testName + ",";
       }
-      targetTests = targetTests.substring(0, targetTests.lastIndexOf(','));
+      if (!targetTests.isEmpty())
+         targetTests = targetTests.substring(0, targetTests.lastIndexOf(','));
 
       Set<String> methodsToExclude = new TreeSet<>();
       for (String methodGlobToMutate : methodsToMutate)
@@ -277,7 +280,8 @@ public class MutationTestFacilitator
       {
          excludedMethods += methodToExclude + ",";
       }
-      excludedMethods = excludedMethods.substring(0, excludedMethods.lastIndexOf(','));
+      if (!excludedMethods.isEmpty())
+         excludedMethods = excludedMethods.substring(0, excludedMethods.lastIndexOf(','));
 
       String mutatorsList = "";
       if (mutators.isEmpty())
@@ -305,21 +309,34 @@ public class MutationTestFacilitator
             throw new RuntimeException("Could not find src directory near " + Paths.get(".").toAbsolutePath().normalize());
          sourceDirs += bestEffortSrcDirectory.toString() + ",";
       }
-      sourceDirs = sourceDirs.substring(0, sourceDirs.lastIndexOf(','));
+      if (!sourceDirs.isEmpty())
+         sourceDirs = sourceDirs.substring(0, sourceDirs.lastIndexOf(','));
 
-      String[] args = {
-            "--testPlugin", "junit5",
-            "--reportDir", pitReportsPath.toString(),
-            "--targetClasses", targetClasses,
-            "--targetTests", targetTests,
-            "--excludedClasses", "*Test*",
-            "--excludedMethods", excludedMethods,
-            "--sourceDirs", sourceDirs,
-            "--mutators", mutatorsList};
+      ArrayList<Pair<String, String>> argPairs = new ArrayList<>();
+      argPairs.add(Pair.of("--testPlugin", "junit5"));
+      argPairs.add(Pair.of("--reportDir", pitReportsPath.toString()));
+      argPairs.add(Pair.of("--excludedClasses", "*Test*"));
+      if (!targetClasses.isEmpty())
+         argPairs.add(Pair.of("--targetClasses", targetClasses));
+      if (!targetTests.isEmpty())
+         argPairs.add(Pair.of("--targetTests", targetTests));
+      if (!excludedMethods.isEmpty())
+         argPairs.add(Pair.of("--excludedMethods", excludedMethods));
+      if (!sourceDirs.isEmpty())
+         argPairs.add(Pair.of("--sourceDirs", sourceDirs));
+      if (!mutatorsList.isEmpty())
+         argPairs.add(Pair.of("--mutators", mutatorsList));
+
       LogTools.info("Launching MutationCoverageReport with arguments: ");
-      Arrays.stream(args).forEach(s -> System.out.print(s + " "));
-      System.out.println();
-      MutationCoverageReport.main(args);
+      ArrayList<String> argList = new ArrayList<>();
+      for (Pair<String, String> argPair : argPairs)
+      {
+         System.out.println(argPair.getLeft() + " " + argPair.getRight());
+         argList.add(argPair.getLeft());
+         argList.add(argPair.getRight());
+      }
+
+      MutationCoverageReport.main(argList.toArray(new String[0]));
    }
 
    /**
