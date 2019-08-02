@@ -1,6 +1,7 @@
 package us.ihmc.commons;
 
 import org.pitest.mutationtest.commandline.MutationCoverageReport;
+import org.pitest.util.Glob;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
@@ -11,6 +12,7 @@ import us.ihmc.log.LogTools;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileVisitResult;
@@ -41,11 +43,14 @@ public class MutationTestFacilitator
    private static final int NUMBER_OF_HOURS_BEFORE_EXPIRATION = 3;
    private static final String REPORT_DIRECTORY_NAME = "pit-reports";
 
-   private Path projectRoot = Paths.get(".").toAbsolutePath().normalize();
-   private Path pitReports = projectRoot.resolve(REPORT_DIRECTORY_NAME);
+   private Path pitReportsPath;
    private Set<Class<?>> testClassesToRun = new HashSet<>();
    private Set<String> classPathsToMutate = new TreeSet<>();
+   private List<Class<?>> classesToMutate = new ArrayList<>();
    private Set<Mutator> mutators = new TreeSet<>();
+   private Set<String> testNamesToRun = new TreeSet<>();
+   private Set<String> methodsToMutate = new TreeSet<>();
+   private List<Path> sourceDirectories = new ArrayList<>();
 
    /**
     * <p>A mutator as defined in Pitest.</p>
@@ -124,8 +129,58 @@ public class MutationTestFacilitator
    {
       for (int i = 0; i < classesToMutate.length; i++)
       {
-         this.classPathsToMutate.add(classesToMutate[i].getName());
+         this.classesToMutate.add(classesToMutate[i]);
       }
+   }
+
+   /**
+    * Add test names to run. Only these tests will be run. If no tests are added, all tests will be run.
+    *
+    * @param testNamesToRun
+    */
+   public void addTestsToRun(String... testNamesToRun)
+   {
+      for (String testName : testNamesToRun)
+      {
+         this.testNamesToRun.add(testName);
+      }
+   }
+
+   /**
+    * Add method names to mutate. Only methods of that name will be mutated. Useful for large "tools" classes of static methods.
+    * If no method names are specified, all methods will be mutated.
+    *
+    * @param methodNamesToMutate
+    */
+   public void addMethodsToMutate(String... methodNamesToMutate)
+   {
+      for (String methodName : methodNamesToMutate)
+      {
+         this.methodsToMutate.add(methodName);
+      }
+   }
+
+   /**
+    * Source directories to look at. If none, specified, will try to find a nearby "src" folder.
+    *
+    * @param sourceDirectories
+    */
+   public void addSourceDirectories(Path... sourceDirectories)
+   {
+      for (Path sourceDir : sourceDirectories)
+      {
+         this.sourceDirectories.add(sourceDir);
+      }
+   }
+
+   /**
+    * Path to contain the "pit-reports" folder.
+    *
+    * @param reportDirectory
+    */
+   public void setReportDirectory(Path reportDirectory)
+   {
+      pitReportsPath = reportDirectory;
    }
 
    /**
@@ -135,16 +190,17 @@ public class MutationTestFacilitator
     */
    public void doMutationTest()
    {
-      // Handle running from src/test, other source set projects
-      if (projectRoot.resolve("..").toAbsolutePath().normalize().getFileName().toString().equals("src"))
+      if (pitReportsPath == null)
       {
-         projectRoot = Paths.get("..").resolve("..").toAbsolutePath().normalize();
-         pitReports = projectRoot.resolve(REPORT_DIRECTORY_NAME);
+         // Handle running from src/test, other source set projects
+         pitReportsPath = PathTools.findPathInline(".", "src", "..", Paths.get("."));
       }
-      LogTools.info("Using reports directory: " + pitReports);
+      pitReportsPath = pitReportsPath.toAbsolutePath().normalize().resolve(REPORT_DIRECTORY_NAME);
+
+      LogTools.info("Using reports directory: " + pitReportsPath);
 
       // Delete all entries older than three hours
-      PathTools.walkFlat(pitReports, new BasicPathVisitor()
+      PathTools.walkFlat(pitReportsPath, new BasicPathVisitor()
       {
          @Override
          public FileVisitResult visitPath(Path path, PathType pathType)
@@ -176,13 +232,17 @@ public class MutationTestFacilitator
 
       if (testClassesToRun.isEmpty())
          throw new RuntimeException("No test classes to run!");
-      if (classPathsToMutate.isEmpty())
+      if (classPathsToMutate.isEmpty() && classesToMutate.isEmpty())
          throw new RuntimeException("No class paths to mutate!");
 
       String targetClasses = "";
       for (String classPath : classPathsToMutate)
       {
          targetClasses += classPath + ",";
+      }
+      for (Class<?> classToMutate : classesToMutate)
+      {
+         targetClasses += classToMutate.getName() + ",";
       }
       targetClasses = targetClasses.substring(0, targetClasses.lastIndexOf(','));
 
@@ -191,7 +251,33 @@ public class MutationTestFacilitator
       {
          targetTests += testClass.getName() + ",";
       }
+      for (String testName : testNamesToRun)
+      {
+         targetTests += testName + ",";
+      }
       targetTests = targetTests.substring(0, targetTests.lastIndexOf(','));
+
+      Set<String> methodsToExclude = new TreeSet<>();
+      for (String methodGlobToMutate : methodsToMutate)
+      {
+         Glob methodGlob = new Glob(methodGlobToMutate);
+         for (Class<?> classToMutate : classesToMutate)
+         {
+            for (Method method : classToMutate.getDeclaredMethods())
+            {
+               if (!methodGlob.matches(method.getName()))
+               {
+                  methodsToExclude.add("*" + method.getName() + "*");
+               }
+            }
+         }
+      }
+      String excludedMethods = "";
+      for (String methodToExclude : methodsToExclude)
+      {
+         excludedMethods += methodToExclude + ",";
+      }
+      excludedMethods = excludedMethods.substring(0, excludedMethods.lastIndexOf(','));
 
       String mutatorsList = "";
       if (mutators.isEmpty())
@@ -207,11 +293,26 @@ public class MutationTestFacilitator
          mutatorsList = mutatorsList.substring(0, mutatorsList.lastIndexOf(','));
       }
 
-      String sourceDirectory = projectRoot.resolve("src").toString();
-      String sourceDirectories = sourceDirectory;
+      String sourceDirs = "";
+      for (Path sourceDirectory : sourceDirectories)
+      {
+         sourceDirs += sourceDirectory.toAbsolutePath().toString() + ",";
+      }
+      if (sourceDirs.isEmpty())
+      {
+         sourceDirs += PathTools.findDirectoryInline("src").toString() + ",";
+      }
+      sourceDirs = sourceDirs.substring(0, sourceDirs.lastIndexOf(','));
 
-      String[] args = {"--testPlugin", "junit5", "--reportDir", pitReports.toString(), "--targetClasses", targetClasses, "--targetTests", targetTests,
-            "--excludedClasses", "*Test*", "--sourceDirs", sourceDirectories, "--mutators", mutatorsList};
+      String[] args = {
+            "--testPlugin", "junit5",
+            "--reportDir", pitReportsPath.toString(),
+            "--targetClasses", targetClasses,
+            "--targetTests", targetTests,
+            "--excludedClasses", "*Test*",
+            "--excludedMethods", excludedMethods,
+            "--sourceDirs", sourceDirs,
+            "--mutators", mutatorsList};
       LogTools.info("Launching MutationCoverageReport with arguments: ");
       Arrays.stream(args).forEach(s -> System.out.print(s + " "));
       System.out.println();
@@ -223,14 +324,21 @@ public class MutationTestFacilitator
     */
    public void openResultInBrowser()
    {
-      if (Files.exists(pitReports) && Files.isDirectory(pitReports))
+      if (Files.exists(pitReportsPath) && Files.isDirectory(pitReportsPath))
       {
-         String[] list = pitReports.toFile().list();
-         final String lastDirectoryName = list[list.length - 1];
-
+         File[] list = pitReportsPath.toFile().listFiles(); // no guarantees on order
+         TreeSet<String> sortedNumberOnlyNames = new TreeSet<>(); // sort alphabetically
+         for (File file : list)
+         {
+            if (file.getName().matches("^[0-9]+$")); // filter out any directories that aren't only numbers
+            {
+               sortedNumberOnlyNames.add(file.getName());
+            }
+         }
+         final String lastDirectoryName = sortedNumberOnlyNames.last();
          System.out.println("Found last directory " + lastDirectoryName);
 
-         PathTools.walkFlat(pitReports.resolve(lastDirectoryName), new BasicPathVisitor()
+         PathTools.walkFlat(pitReportsPath.resolve(lastDirectoryName), new BasicPathVisitor()
          {
             @Override
             public FileVisitResult visitPath(Path path, PathType pathType)
@@ -243,7 +351,7 @@ public class MutationTestFacilitator
                   String displayShortenedNameInIndex = longPathName.substring(0, 20) + "..."
                         + longPathName.substring(longPathName.length() - 20, longPathName.length());
 
-                  Path indexPath = pitReports.resolve(lastDirectoryName).resolve("index.html");
+                  Path indexPath = pitReportsPath.resolve(lastDirectoryName).resolve("index.html");
                   List<String> lines = FileTools.readAllLines(indexPath, DefaultExceptionHandler.PRINT_STACKTRACE);
                   ArrayList<String> newLines = new ArrayList<>();
                   for (String originalLine : lines)
@@ -256,7 +364,7 @@ public class MutationTestFacilitator
             }
          });
 
-         File reportFile = pitReports.resolve(lastDirectoryName).resolve("index.html").toFile();
+         File reportFile = pitReportsPath.resolve(lastDirectoryName).resolve("index.html").toFile();
          String absolutePath;
          try
          {
