@@ -219,4 +219,110 @@ public class PathTools
    {
       walkDepth(directory, 1, basicFileVisitor);
    }
+
+   /**
+    * Searches for a directory without leaving the current tree branch.
+    * In other words, search for the directory as a child or as part of the starting path.
+    *
+    * @param startingDirectory path string to the directory to start
+    * @param directoryNameToFind name of the directory to find
+    * @param fallback If directoryNameToFind not found, return this
+    * @return absolute normalized path to directoryToFind or fallback
+    */
+   public static Path findDirectoryInline(String startingDirectory, String directoryNameToFind, Path fallback)
+   {
+      Path currentDirectoryPath = Paths.get(startingDirectory).toAbsolutePath().normalize();
+
+      if (startingDirectory.equals(directoryNameToFind))
+      {
+         return currentDirectoryPath;
+      }
+
+      if (Files.exists(currentDirectoryPath.resolve(directoryNameToFind)))
+      {
+         return currentDirectoryPath.resolve(directoryNameToFind);
+      }
+
+      Path root = Paths.get("/").toAbsolutePath().normalize();
+
+      while (!currentDirectoryPath.equals(root))
+      {
+         currentDirectoryPath = currentDirectoryPath.resolve("..").normalize();
+
+         if (currentDirectoryPath.getFileName().toString().equals(directoryNameToFind))
+         {
+            return currentDirectoryPath;
+         }
+      }
+
+      if (fallback != null)
+      {
+         fallback = fallback.toAbsolutePath().normalize();
+      }
+
+      return fallback;
+   }
+
+   /**
+    * Searches for a directory without leaving the current tree branch.
+    * In other words, search for the directory as a child or as part of the current working directory.
+    *
+    * @param directoryNameToFind name of the directory to find
+    * @return absolute normalized path to directoryToFind or null
+    */
+   public static Path findDirectoryInline(String directoryNameToFind)
+   {
+      return findDirectoryInline(".", directoryNameToFind, null);
+   }
+
+   /**
+    * Searches for a directory without leaving the current tree branch.
+    * In other words, search for the directory as a child or as part of the starting path.
+    *
+    * @param startingDirectory path string to the directory to start
+    * @param directoryNameToFind name of the directory to find
+    * @param fallback If directoryNameToFind not found, return this
+    * @param subsequentPathToResolve attempt to resolve this path at the end
+    * @return absolute normalized path to directoryToFind or fallback, plus the subsequent path to resolve
+    */
+   public static Path findPathInline(String startingDirectory, String directoryNameToFind, String subsequentPathToResolve, Path fallback)
+   {
+      Path directoryInline = findDirectoryInline(startingDirectory, directoryNameToFind, fallback);
+
+      if (directoryInline.equals(fallback.toAbsolutePath().normalize())) // subsequent not applied in case of fallback
+      {
+         return directoryInline;
+      }
+
+      Path subsequentPath = directoryInline.resolve(subsequentPathToResolve).normalize();
+
+      if (!Files.exists(subsequentPath))
+         throw new RuntimeException("Subsequent path does not exist");
+
+      return subsequentPath;
+   }
+
+   /**
+    * Searches for a directory without leaving the current tree branch.
+    * In other words, search for the directory as a child or as part of the starting path.
+    *
+    * @param startingDirectory path string to the directory to start
+    * @param directoryNameToFind name of the directory to find
+    * @param subsequentPathToResolve attempt to resolve this path at the end
+    * @return absolute normalized path to directoryToFind or fallback, plus the subsequent path to resolve
+    */
+   public static Path findPathInline(String startingDirectory, String directoryNameToFind, String subsequentPathToResolve)
+   {
+      Path directoryInline = findDirectoryInline(startingDirectory, directoryNameToFind, null);
+
+      if (directoryInline == null) // subsequent not applied in case of fallback
+         throw new RuntimeException("Could not find directory " + directoryNameToFind + " in " + Paths.get(startingDirectory).toAbsolutePath().normalize());
+
+      Path subsequentPath = directoryInline.resolve(subsequentPathToResolve).normalize();
+
+      if (!Files.exists(subsequentPath))
+         throw new RuntimeException("Subsequent path does not exist");
+
+      return subsequentPath;
+   }
 }
