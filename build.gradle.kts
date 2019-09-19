@@ -21,7 +21,7 @@ categories.configure("allocation") {
 }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
+   api("org.apache.commons:commons-lang3:3.9")
    api("commons-io:commons-io:2.6")
    api("us.ihmc:log-tools:0.3.1")
 }
