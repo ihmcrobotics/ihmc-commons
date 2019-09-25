@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.log-tools") version "0.3.1"
-   id("us.ihmc.ihmc-ci") version "5.0"
+   id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "0.2"
 }
 
@@ -28,7 +28,7 @@ mainDependencies {
 
 testingDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("org.junit.jupiter:junit-jupiter-api:5.5.1")
+   api("org.junit.jupiter:junit-jupiter-api:${junitVersion.jupiter}")
    api("org.pitest:pitest-command-line:1.4.10")
    api("org.pitest:pitest-junit5-plugin:0.9")
    api("com.google.code.java-allocation-instrumenter:java-allocation-instrumenter:3.2.0") // should be runtimeOnly?
