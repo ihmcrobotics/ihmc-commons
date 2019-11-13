@@ -172,6 +172,32 @@ public class MathToolsTest
    }
 
    @Test
+   public void testClampLong()
+   {
+      long limit = 1000000;
+      for (int i = 0; i < 10; i++)
+      {
+         long min = Math.abs(random.nextLong() % 1000000);
+         long max = min + Math.abs(random.nextLong() % 1000000);
+         long val = random.nextLong() % 3000000;
+         long result = MathTools.clamp(val, min, max);
+
+         boolean tooSmall = result < min;
+         boolean tooBig = result > max;
+         if (tooSmall || tooBig)
+         {
+            fail();
+         }
+
+         boolean withinBounds = (val > min) && (val < max);
+         if (withinBounds)
+         {
+            assertEquals(val, result, 1e-10);
+         }
+      }
+   }
+
+   @Test
    public void squareTest()
    {
       double[] randomValues = RandomNumbers.nextDoubleArray(random, 25, 10.0);

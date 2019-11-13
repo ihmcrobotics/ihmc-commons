@@ -243,6 +243,40 @@ public class MathTools
    }
 
    /**
+    * Clamps value to the given range, defined by {@code -minMax} and {@code minMax}, inclusive.
+    *
+    * @param value value
+    * @param minMax inclusive absolute boundary
+    * @return <li>{@code -minMax} if {@code value} is less than {@code -minMax}</li>
+    * <li>{@code minMax} if {@code value} is greater than {@code minMax}</li>
+    * <li>{@code value} if {@code value} is between or equal to {@code -minMax} and {@code minMax}</li>
+    */
+   public static long clamp(long value, long minMax)
+   {
+      return clamp(value, -minMax, minMax);
+   }
+
+   /**
+    * Clamps value to the given range, inclusive.
+    *
+    * @param value value
+    * @param min inclusive boundary start
+    * @param max inclusive boundary end
+    * @return <li>{@code min} if {@code value} is less than {@code min}</li>
+    * <li>{@code max} if {@code value} is greater than {@code max}</li>
+    * <li>{@code value} if {@code value} is between or equal to {@code min} and {@code max}</li>
+    */
+   public static long clamp(long value, long min, long max)
+   {
+      if (min > max)
+      {
+         throw new RuntimeException(MathTools.class.getSimpleName() + ".clamp(long, long, long): min > max (" + min + " > " + max + ")");
+      }
+
+      return (Math.min(max, Math.max(value, min)));
+   }
+
+   /**
     * Cubes value.
     *
     * @param value value to be cubed
