@@ -15,7 +15,7 @@ import us.ihmc.commons.exception.ExceptionTools;
  *
  * <pre>
  * {@code
- * private final NotificationReference callbackHappened = new NotificationReference();
+ * private final Notification callbackHappened = new Notification();
  *
  * public void handle(long now)
  * {
