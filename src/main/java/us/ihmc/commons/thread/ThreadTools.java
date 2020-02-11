@@ -98,6 +98,10 @@ public class ThreadTools
       }
    }
 
+   /**
+    * Starts a user thread.
+    * To start a daemon thread, see {@linkplain #startAsDaemon startAsDaemon}
+    */
    public static Thread startAThread(Runnable runnable, String threadName)
    {
       Thread newThread = new Thread(runnable, threadName);
@@ -105,6 +109,10 @@ public class ThreadTools
       return newThread;
    }
 
+   /**
+    * Starts a daemon thread.
+    * The Java Virtual Machine exits when the only threads running are all daemon threads.
+    */
    public static Thread startAsDaemon(Runnable daemonThreadRunnable, String threadName)
    {
       Thread daemonThread = new Thread(daemonThreadRunnable, threadName);
