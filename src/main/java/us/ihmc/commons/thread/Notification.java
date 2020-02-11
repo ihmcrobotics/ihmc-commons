@@ -1,5 +1,8 @@
 package us.ihmc.commons.thread;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+
 /**
  * <p>Provides a simple interface for setting a bit from one thread
  * and clearing it from another in acknowledgement. Stores the last
@@ -12,7 +15,7 @@ package us.ihmc.commons.thread;
  *
  * <pre>
  * {@code
- * private final NotificationReference callbackHappened = new NotificationReference();
+ * private final Notification callbackHappened = new Notification();
  *
  * public void handle(long now)
  * {
@@ -54,11 +57,22 @@ public class Notification
     *
     * @return if notification was set
     */
-   public boolean poll()
+   public synchronized boolean poll()
    {
       previousValue = notification;
       notification = false;
       return previousValue;
+   }
+
+   /**
+    * Block and wait to be notified.
+    *
+    * @return notification
+    */
+   public synchronized boolean blockingPoll()
+   {
+      ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      return poll();
    }
 
    /**
@@ -74,11 +88,15 @@ public class Notification
       return previousValue;
    }
 
+   /** THREAD 2 ACCESS BELOW THIS POINT TODO: Make this safe somehow? Store thread names? */
+
    /**
     * Sets the notification.
     */
-   public void set()
+   public synchronized void set()
    {
       notification = true;
+
+      this.notifyAll(); // if wait has been called, notify it
    }
 }
