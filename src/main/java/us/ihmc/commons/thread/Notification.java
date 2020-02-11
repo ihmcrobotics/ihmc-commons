@@ -69,10 +69,10 @@ public class Notification
     *
     * @return notification
     */
-   public synchronized void blockingPoll()
+   public synchronized boolean blockingPoll()
    {
       ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-      poll();
+      return poll();
    }
 
    /**
