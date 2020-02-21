@@ -121,7 +121,10 @@ public class ClassLoaderTools
     * http://baptiste-wicht.com/posts/2010/05/tip-add-resources-dynamically-to-a-classloader.html
     *
     * Original source is licensed CC BY 4.0
+    * 
+    * @deprecated This method cannot be used with Java 9+.
     */
+   @Deprecated
    public static void addURLToSystemClassLoader(URL url) throws IOException
    {
       URLClassLoader systemClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
