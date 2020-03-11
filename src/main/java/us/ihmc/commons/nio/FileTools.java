@@ -31,7 +31,7 @@ public class FileTools
    private static final byte NEWLINE = '\n';
 
    /**
-    * Delete a file or directory quietly. A bridge from Java's NIO.2 to Apache Commons IO.
+    * Delete a file or directory recursively and quietly. A bridge from Java's NIO.2 to Apache Commons IO.
     *
     * @param path file or directory to be deleted
     * @see {@link FileUtils#deleteQuietly(File)}
@@ -380,7 +380,7 @@ public class FileTools
     * <p>Ensure file exists. Performs the following:</p>
     *
     * <li>Recursively perform this on parents.</li>
-    * <li>If <code>path</code> is a directory, delete and create new file.</li>
+    * <li>If <code>path</code> is a directory and empty, delete and create new file.</li>
     * <li>If <code>path</code> does not exist, create file.</li>
     *
     * @param path path of file to ensure existence of
@@ -409,7 +409,7 @@ public class FileTools
     * <p>Ensure file exists. Performs the following:</p>
     *
     * <li>Recursively perform this on parents.</li>
-    * <li>If <code>path</code> is a directory, delete and create new file.</li>
+    * <li>If <code>path</code> is a directory and empty, delete and create new file.</li>
     * <li>If <code>path</code> does not exist, create file.</li>
     *
     * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
