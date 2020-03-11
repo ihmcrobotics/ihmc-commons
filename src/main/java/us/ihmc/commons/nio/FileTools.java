@@ -395,7 +395,7 @@ public class FileTools
 
       if (Files.exists(path) && Files.isDirectory(path))
       {
-         FileTools.deleteQuietly(path);
+         Files.delete(path); // delete the directory only if it's empty
          Files.createFile(path);
       }
 
