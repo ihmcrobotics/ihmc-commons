@@ -12,6 +12,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +29,7 @@ public class FileToolsTest
    private static final Path TEXT_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleTextFiles");
    private static final Path JAVA_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleJavaFiles");
    private static final Path EMPTY_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleEmptyFiles");
+   private static final Path TEMP_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleTempFiles");
 
    private static final String EXAMPLE_FILE_1_TEXT_LINE_1 = "This is example File 1 !!&&#))(";
    private static final String EXAMPLE_FILE_2_TEXT_LINE_1 = "This is example File 2 *@&&%*@";
@@ -139,6 +141,29 @@ public class FileToolsTest
          e.printStackTrace();
          fail();
       }
+   }
+
+   @Test
+   public void testEnsureFileExists()
+   {
+      assertThrows(DirectoryNotEmptyException.class, () ->
+      {
+         FileTools.ensureFileExists(JAVA_DIRECTORY_PATH);
+      });
+
+      assertTrue(Files.isDirectory(JAVA_DIRECTORY_PATH));
+
+      assertDoesNotThrow(() -> FileTools.ensureDirectoryExists(TEMP_DIRECTORY_PATH));
+      assertTrue(Files.isDirectory(TEMP_DIRECTORY_PATH));
+      assertDoesNotThrow(() -> FileTools.ensureFileExists(TEMP_DIRECTORY_PATH));
+      assertTrue(Files.exists(TEMP_DIRECTORY_PATH));
+
+      assertDoesNotThrow(() -> FileTools.ensureDirectoryExists(TEMP_DIRECTORY_PATH));
+      assertTrue(Files.isDirectory(TEMP_DIRECTORY_PATH));
+      FileTools.deleteQuietly(TEMP_DIRECTORY_PATH);
+      assertFalse(Files.exists(TEMP_DIRECTORY_PATH));
+      assertDoesNotThrow(() -> FileTools.ensureFileExists(TEMP_DIRECTORY_PATH));
+      assertTrue(Files.exists(TEMP_DIRECTORY_PATH));
    }
 
    private static void createTestFile1()
