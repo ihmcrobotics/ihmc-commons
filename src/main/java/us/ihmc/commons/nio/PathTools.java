@@ -63,20 +63,16 @@ public class PathTools
    public static List<Path> findAllPathsRecursivelyThatMatchRegex(Path directory, String regex)
    {
       final PathMatcher matcher = FileSystems.getDefault().getPathMatcher(REGEX_SYNTAX_PREFIX + regex);
-      final List<Path> matchingPaths = new ArrayList<Path>();
+      final List<Path> matchingPaths = new ArrayList<>();
 
-      walkRecursively(directory, new BasicPathVisitor()
+      walkRecursively(directory, (path, pathType) ->
       {
-         @Override
-         public FileVisitResult visitPath(Path path, PathType pathType)
+         if (matcher.matches(path))
          {
-            if (matcher.matches(path))
-            {
-               matchingPaths.add(path);
-            }
-
-            return FileVisitResult.CONTINUE;
+            matchingPaths.add(path);
          }
+
+         return FileVisitResult.CONTINUE;
       });
 
       return matchingPaths;
@@ -136,7 +132,7 @@ public class PathTools
     * @param directory directory to walk
     * @param basicFileVisitor callback to take action on visits
     */
-   public static void walkRecursively(Path directory, final BasicPathVisitor basicFileVisitor)
+   public static void walkRecursively(Path directory, final PathVisitor basicFileVisitor)
    {
       try
       {
@@ -169,7 +165,7 @@ public class PathTools
     * @param directory directory to walk
     * @param basicFileVisitor callback to take action on visits
     */
-   public static void walkDepth(final Path directory, int maxDepth, final BasicPathVisitor basicFileVisitor)
+   public static void walkDepth(final Path directory, int maxDepth, final PathVisitor basicFileVisitor)
    {
       try
       {
@@ -215,7 +211,7 @@ public class PathTools
     * @param directory directory to walk
     * @param basicFileVisitor callback to take action on visits
     */
-   public static void walkFlat(final Path directory, final BasicPathVisitor basicFileVisitor)
+   public static void walkFlat(final Path directory, final PathVisitor basicFileVisitor)
    {
       walkDepth(directory, 1, basicFileVisitor);
    }
