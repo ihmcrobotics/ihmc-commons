@@ -2,6 +2,7 @@ package us.ihmc.commons.thread;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
@@ -12,6 +13,11 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This class provides convenience features on top of
+ * {@link Executors java.util.concurrent.Executors},
+ * {@link Thread java.lang.Thread}
+ */
 public class ThreadTools
 {
    private static final AtomicInteger poolNumber = new AtomicInteger(1);
@@ -95,6 +101,8 @@ public class ThreadTools
 
    /**
     * Causes this Thread to continuously sleep, ignoring any interruptions.
+    *
+    * It is recommended to use {@link #join} instead.
     */
    public static void sleepForever()
    {
@@ -102,6 +110,31 @@ public class ThreadTools
       {
          ThreadTools.sleep(1000);
       }
+   }
+
+   public Object newGuardedBlock()
+   {
+      return new Object();
+   }
+
+   public void wait(Object monitor)
+   {
+      wait(monitor, 0, 0, DefaultExceptionHandler.PRINT_STACKTRACE);
+   }
+
+   public void wait(Object monitor, ExceptionHandler exceptionHandler)
+   {
+      wait(monitor, 0, 0, exceptionHandler);
+   }
+
+   public void wait(Object monitor, long timeout, ExceptionHandler exceptionHandler)
+   {
+      ExceptionTools.handle(() -> monitor.wait(timeout), exceptionHandler);
+   }
+
+   public void wait(Object monitor, long timeout, int nanos, ExceptionHandler exceptionHandler)
+   {
+      ExceptionTools.handle(() -> monitor.wait(timeout, nanos), exceptionHandler);
    }
 
    /**
