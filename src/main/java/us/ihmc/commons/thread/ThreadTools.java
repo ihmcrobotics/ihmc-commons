@@ -112,31 +112,6 @@ public class ThreadTools
       }
    }
 
-   public Object newGuardedBlock()
-   {
-      return new Object();
-   }
-
-   public void wait(Object monitor)
-   {
-      wait(monitor, 0, 0, DefaultExceptionHandler.PRINT_STACKTRACE);
-   }
-
-   public void wait(Object monitor, ExceptionHandler exceptionHandler)
-   {
-      wait(monitor, 0, 0, exceptionHandler);
-   }
-
-   public void wait(Object monitor, long timeout, ExceptionHandler exceptionHandler)
-   {
-      ExceptionTools.handle(() -> monitor.wait(timeout), exceptionHandler);
-   }
-
-   public void wait(Object monitor, long timeout, int nanos, ExceptionHandler exceptionHandler)
-   {
-      ExceptionTools.handle(() -> monitor.wait(timeout, nanos), exceptionHandler);
-   }
-
    /**
     * Starts a user thread.
     * To start a daemon thread, see {@linkplain #startAsDaemon startAsDaemon}
