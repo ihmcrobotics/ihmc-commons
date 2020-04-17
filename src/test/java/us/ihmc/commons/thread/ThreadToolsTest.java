@@ -1,6 +1,9 @@
 package us.ihmc.commons.thread;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -21,22 +24,17 @@ public class ThreadToolsTest
       long delay = 3;
       long timeLimit = 300;
 
-      final Runnable runnable = new Runnable()
-
+      final Runnable runnable = () ->
       {
-         @Override
-         public void run()
-         {
-            //Do some calculation
-            Math.sqrt(Math.PI);
-         }
+         //Do some calculation
+         Math.sqrt(Math.PI);
       };
 
       for (int i = 0; i < ITERATIONS; i++)
       {
          long startTime = System.currentTimeMillis();
          ScheduledFuture<?> future = ThreadTools
-               .scheduleWithFixeDelayAndTimeLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, timeLimit);
+               .scheduleWithFixeDelayAndTimeLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, timeLimit, true);
          while (!future.isDone())
          {
             // do nothing
@@ -44,6 +42,71 @@ public class ThreadToolsTest
          long endTime = System.currentTimeMillis();
          assertEquals(timeLimit, endTime - startTime, EPSILON);
       }
+   }
+
+   @Test
+   public void testTimeLimitSchedulerInterrupt()
+   {
+      TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+      long initialDelay = 0;
+      long delay = 3;
+      long timeLimit = 400;
+      final AtomicInteger counter = new AtomicInteger();
+
+
+      final Runnable runnable = () ->
+      {
+            counter.incrementAndGet();
+            Stopwatch stopwatch1 = new Stopwatch().start();
+
+            while (stopwatch1.lapElapsed() < 0.3)
+            {
+
+            }
+      };
+
+      Stopwatch stopwatch2 = new Stopwatch().start();
+      ScheduledFuture<?> future = ThreadTools.scheduleWithFixeDelayAndTimeLimit(getClass().getSimpleName(),
+                                                                                runnable,
+                                                                                initialDelay,
+                                                                                delay,
+                                                                                timeUnit,
+                                                                                timeLimit,
+                                                                                true);
+      while (!future.isDone())
+      {
+         // do nothing
+      }
+
+      double elapsedMilliseconds = Conversions.secondsToMilliseconds(stopwatch2.totalElapsed());
+      LogTools.info("elapsedMilliseconds = " + elapsedMilliseconds);
+      assertEquals(300, elapsedMilliseconds, 10);
+      assertEquals(2, counter.get());
+   }
+
+   @Test
+   public void testSingleExecution()
+   {
+      TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+      long delay = 100;
+
+      final AtomicInteger counter = new AtomicInteger();
+
+      final Runnable runnable = () -> counter.incrementAndGet();
+
+      ScheduledFuture<?> future = ThreadTools.scheduleSingleExecution(getClass().getSimpleName(), runnable, delay, timeUnit);
+
+      Stopwatch stopwatch = new Stopwatch().start();
+      while (!future.isDone())
+      {
+         // do nothing
+      }
+
+      double elapsedMilliseconds = Conversions.secondsToMilliseconds(stopwatch.totalElapsed());
+      LogTools.info("elapsedMilliseconds = " + elapsedMilliseconds);
+
+      assertEquals(100, elapsedMilliseconds, 10);
+      assertEquals(1, counter.get());
    }
 
    @Test
@@ -56,14 +119,7 @@ public class ThreadToolsTest
 
       final AtomicInteger counter = new AtomicInteger();
 
-      final Runnable runnable = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            counter.incrementAndGet();
-         }
-      };
+      final Runnable runnable = () -> counter.incrementAndGet();
 
       ScheduledFuture<?> future = ThreadTools
             .scheduleWithFixedDelayAndIterationLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, iterations);

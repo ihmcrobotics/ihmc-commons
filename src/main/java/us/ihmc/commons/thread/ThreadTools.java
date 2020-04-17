@@ -1,12 +1,16 @@
 package us.ihmc.commons.thread;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ThreadTools
 {
@@ -144,23 +148,60 @@ public class ThreadTools
       }
    }
 
-   public static ThreadFactory getNamedThreadFactory(final String name)
+   /**
+    * @deprecated Use {@link #createNamedThreadFactory} instead
+    */
+   public static ThreadFactory getNamedThreadFactory(String name)
+   {
+      return createNamedThreadFactory(name);
+   }
+
+   /**
+    * Thread factory that creates non-daemon threads with normal priority
+    * with the naming scheme "name-thread-1", "name-thread-2", ...
+    *
+    * @param name
+    * @return thread factory
+    */
+   public static ThreadFactory createNamedThreadFactory(String name)
+   {
+      return createNamedThreadFactory(name + "-thread-", false, Thread.NORM_PRIORITY);
+   }
+
+   /**
+    * Thread factory that creates daemon threads with normal priority
+    * with the naming scheme "name-thread-1", "name-thread-2", ...
+    *
+    * @param name
+    * @return thread factory
+    */
+   public static ThreadFactory createNamedDaemonThreadFactory(String name)
+   {
+      return createNamedThreadFactory(name + "-thread-", true, Thread.NORM_PRIORITY);
+   }
+
+   /**
+    * Thread factory that creates threads
+    * with the naming scheme "prefix-1", "prefix-2", ...
+    *
+    * @param prefix to use in naming
+    * @param daemon set threads to daemon
+    * @param priority set priority of new threads
+    * @return thread factory
+    */
+   public static ThreadFactory createNamedThreadFactory(String prefix, boolean daemon, int priority)
    {
       return new ThreadFactory()
       {
          private final AtomicInteger threadNumber = new AtomicInteger(1);
 
          @Override
-         public Thread newThread(Runnable r)
+         public Thread newThread(Runnable runnable)
          {
-            Thread t = new Thread(r, name + "-thread-" + threadNumber.getAndIncrement());
-
-            if (t.isDaemon())
-               t.setDaemon(false);
-            if (t.getPriority() != Thread.NORM_PRIORITY)
-               t.setPriority(Thread.NORM_PRIORITY);
-
-            return t;
+            Thread newThread = new Thread(runnable, prefix + threadNumber.getAndIncrement());
+            newThread.setDaemon(daemon);
+            newThread.setPriority(priority);
+            return newThread;
          }
       };
    }
@@ -229,55 +270,126 @@ public class ThreadTools
       return executor;
    }
 
-   public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName, final Runnable runnable, long initialDelay, long delay,
-                                                                      TimeUnit timeUnit, final long timeLimit)
+   @Deprecated // Does not specify hardness of time limit
+   public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName,
+                                                                      final Runnable runnable,
+                                                                      long initialDelay,
+                                                                      long delay,
+                                                                      TimeUnit timeUnit,
+                                                                      final long timeLimit)
    {
-      ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(getNamedThreadFactory(threadName));
-      final ScheduledFuture<?> handle = scheduler.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
-      ScheduledFuture<?> handleKiller = scheduler.schedule(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            handle.cancel(true);
-         }
-      }, timeLimit, timeUnit);
-
-      return handleKiller;
+      return scheduleWithFixeDelayAndTimeLimit(threadName, runnable, initialDelay, delay, timeUnit, timeLimit, true);
    }
 
-   public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName, final Runnable runnable, long initialDelay, final long delay,
-                                                                            final TimeUnit timeUnit, final int iterations)
+   /**
+    * @param interruptAtTimeLimit whether to interrupt the runnable at the time limit, if false, waits to run to complete then cancels
+    *                             setting to true will require an extra thread
+    */
+   public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName,
+                                                                      final Runnable runnable,
+                                                                      long initialDelay,
+                                                                      long delay,
+                                                                      TimeUnit timeUnit,
+                                                                      final long timeLimit,
+                                                                      boolean interruptAtTimeLimit)
    {
-      final AtomicInteger counter = new AtomicInteger();
-      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2, getNamedThreadFactory(threadName));
-      final ScheduledFuture<?> handle = scheduler.scheduleWithFixedDelay(new Runnable()
+      ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(getNamedThreadFactory(threadName));
+
+      ScheduledFuture<?> futureToReturn;
+
+      if (interruptAtTimeLimit)
       {
-         @Override
-         public void run()
+         futureToReturn = scheduler.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
+         scheduler.schedule(() ->
+                            {
+                               boolean cancel = futureToReturn.cancel(true);
+                               LogTools.info("Cancel: {}", cancel);
+                               return cancel;
+                            }, timeLimit, timeUnit);
+      }
+      else
+      {
+         AtomicReference<ScheduledFuture<?>> handleHolder = new AtomicReference<>();
+         double timeLimitSeconds = Conversions.nanosecondsToSeconds(timeUnit.toNanos(timeLimit));
+         Stopwatch stopwatch = new Stopwatch().start();
+         handleHolder.set(scheduler.scheduleWithFixedDelay(() ->
          {
-            if (counter.get() < iterations)
+            if (stopwatch.lapElapsed() < timeLimitSeconds)
             {
                runnable.run();
-               counter.incrementAndGet();
             }
-         }
-      }, initialDelay, delay, timeUnit);
 
-      ScheduledFuture<?> handleKiller = scheduler.schedule(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            while (counter.get() < iterations)
+            // runnable might take some time. avoid waiting another delay to cancel
+            if (stopwatch.lapElapsed() >= timeLimitSeconds)
             {
-               sleep(TimeUnit.MILLISECONDS.convert(delay, timeUnit));
+               ScheduledFuture<?> scheduledFuture = handleHolder.get();
+               if (scheduledFuture != null)
+               {
+                  scheduledFuture.cancel(true);
+               }
             }
-            handle.cancel(true);
-         }
-      }, 0, timeUnit);
+         }, initialDelay, delay, timeUnit));
+         futureToReturn = handleHolder.get();
+      }
 
-      return handleKiller;
+      return futureToReturn;
+   }
+
+   public static ScheduledFuture<?> scheduleSingleExecution(String threadName, Runnable runnable, double delay)
+   {
+      return scheduleSingleExecution(threadName, runnable, Conversions.secondsToNanoseconds(delay), TimeUnit.NANOSECONDS);
+//      return scheduleSingleExecution(threadName, runnable, Conversions.secondsToNanoseconds(delay), TimeUnit.NANOSECONDS);
+   }
+
+   public static ScheduledFuture<?> scheduleSingleExecution(String threadName, Runnable runnable, long delay, TimeUnit timeUnit)
+   {
+      int willBeIgnored = 100;
+      return scheduleWithFixedDelayAndIterationLimit(threadName, runnable, delay, willBeIgnored, timeUnit, 1);
+   }
+
+   public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName,
+                                                                            Runnable runnable,
+                                                                            double initialDelay,
+                                                                            double delay,
+                                                                            int iterations)
+   {
+      long initialDelayNanos = Conversions.secondsToNanoseconds(initialDelay);
+      long delayNanos = Conversions.secondsToNanoseconds(delay);
+      return scheduleWithFixedDelayAndIterationLimit(threadName, runnable, initialDelayNanos, delayNanos, TimeUnit.NANOSECONDS, iterations);
+   }
+
+   public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName,
+                                                                            Runnable runnable,
+                                                                            long initialDelay,
+                                                                            long delay,
+                                                                            TimeUnit timeUnit,
+                                                                            int iterations)
+   {
+      AtomicInteger counter = new AtomicInteger(0);
+      AtomicReference<ScheduledFuture<?>> handleHolder = new AtomicReference<>();
+
+      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2, getNamedThreadFactory(threadName));
+
+      handleHolder.set(scheduler.scheduleWithFixedDelay(() ->
+      {
+         if (counter.get() < iterations)
+         {
+            runnable.run();
+         }
+
+         counter.incrementAndGet();
+
+         if (counter.get() >= iterations)
+         {
+            ScheduledFuture<?> scheduledFuture = handleHolder.get();
+            if (scheduledFuture != null)
+            {
+               scheduledFuture.cancel(true);
+            }
+         }
+      }, initialDelay, delay, timeUnit));
+
+      return handleHolder.get();
    }
 
    /**
