@@ -50,19 +50,22 @@ public class ThreadToolsTest
       TimeUnit timeUnit = TimeUnit.MILLISECONDS;
       long initialDelay = 0;
       long delay = 3;
-      long timeLimit = 400;
+      long timeLimit = 300;
       final AtomicInteger counter = new AtomicInteger();
 
 
       final Runnable runnable = () ->
       {
-            counter.incrementAndGet();
-            Stopwatch stopwatch1 = new Stopwatch().start();
+         counter.incrementAndGet();
 
-            while (stopwatch1.lapElapsed() < 0.3)
-            {
-
-            }
+         try
+         {
+            Thread.sleep(200);
+         }
+         catch (InterruptedException e)
+         {
+            LogTools.info("Interrupted!");
+         }
       };
 
       Stopwatch stopwatch2 = new Stopwatch().start();
@@ -80,7 +83,50 @@ public class ThreadToolsTest
 
       double elapsedMilliseconds = Conversions.secondsToMilliseconds(stopwatch2.totalElapsed());
       LogTools.info("elapsedMilliseconds = " + elapsedMilliseconds);
-      assertEquals(300, elapsedMilliseconds, 10);
+      assertEquals(300, elapsedMilliseconds, 30);
+      assertEquals(2, counter.get());
+   }
+
+   @Test
+   public void testTimeLimitSchedulerGraceful()
+   {
+      TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+      long initialDelay = 0;
+      long delay = 3;
+      long timeLimit = 300;
+      final AtomicInteger counter = new AtomicInteger();
+
+
+      final Runnable runnable = () ->
+      {
+         counter.incrementAndGet();
+
+         try
+         {
+            Thread.sleep(200);
+         }
+         catch (InterruptedException e)
+         {
+            LogTools.info("Interrupted!");
+         }
+      };
+
+      Stopwatch stopwatch2 = new Stopwatch().start();
+      ScheduledFuture<?> future = ThreadTools.scheduleWithFixeDelayAndTimeLimit(getClass().getSimpleName(),
+                                                                                runnable,
+                                                                                initialDelay,
+                                                                                delay,
+                                                                                timeUnit,
+                                                                                timeLimit,
+                                                                                false);
+      while (!future.isDone())
+      {
+         // do nothing
+      }
+
+      double elapsedMilliseconds = Conversions.secondsToMilliseconds(stopwatch2.totalElapsed());
+      LogTools.info("elapsedMilliseconds = " + elapsedMilliseconds);
+      assertEquals(400, elapsedMilliseconds, 30);
       assertEquals(2, counter.get());
    }
 

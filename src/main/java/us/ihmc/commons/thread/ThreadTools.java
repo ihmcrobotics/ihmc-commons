@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ThreadTools
 {
+   private static final AtomicInteger poolNumber = new AtomicInteger(1);
+
    public static final int REASONABLE_WAITING_SLEEP_DURATION_MS = 10;
 
    private static final long ONE_MILLION = 1000000;
@@ -160,45 +162,71 @@ public class ThreadTools
     * Thread factory that creates non-daemon threads with normal priority
     * with the naming scheme "name-thread-1", "name-thread-2", ...
     *
-    * @param name
+    * @param prefix useful name
     * @return thread factory
     */
-   public static ThreadFactory createNamedThreadFactory(String name)
+   public static ThreadFactory createNamedThreadFactory(String prefix)
    {
-      return createNamedThreadFactory(name + "-thread-", false, Thread.NORM_PRIORITY);
+      boolean includePoolInName = true;
+      boolean includeThreadNumberInName = true;
+      boolean daemon = false;
+      return createNamedThreadFactory(prefix, includePoolInName, includeThreadNumberInName, daemon, Thread.NORM_PRIORITY);
    }
 
    /**
     * Thread factory that creates daemon threads with normal priority
     * with the naming scheme "name-thread-1", "name-thread-2", ...
     *
-    * @param name
+    * @param prefix useful name
     * @return thread factory
     */
-   public static ThreadFactory createNamedDaemonThreadFactory(String name)
+   public static ThreadFactory createNamedDaemonThreadFactory(String prefix)
    {
-      return createNamedThreadFactory(name + "-thread-", true, Thread.NORM_PRIORITY);
+      boolean includePoolInName = true;
+      boolean includeThreadNumberInName = true;
+      boolean daemon = true;
+      return createNamedThreadFactory(prefix, includePoolInName, includeThreadNumberInName, daemon, Thread.NORM_PRIORITY);
    }
 
    /**
-    * Thread factory that creates threads
-    * with the naming scheme "prefix-1", "prefix-2", ...
+    * Thread factory that creates threads identical to {@link java.util.concurrent.Executors}.DefaultThreadFactory
+    * except that a useful name is prepended.
     *
-    * @param prefix to use in naming
+    * @param prefix useful name to identify the purpose of threads
     * @param daemon set threads to daemon
     * @param priority set priority of new threads
     * @return thread factory
     */
-   public static ThreadFactory createNamedThreadFactory(String prefix, boolean daemon, int priority)
+   public static ThreadFactory createNamedThreadFactory(final String prefix,
+                                                        boolean includePoolInName,
+                                                        boolean includeThreadNumberInName,
+                                                        boolean daemon,
+                                                        int priority)
    {
       return new ThreadFactory()
       {
          private final AtomicInteger threadNumber = new AtomicInteger(1);
+         private final ThreadGroup group;
+         {
+            SecurityManager s = System.getSecurityManager();
+            group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            poolNumber.getAndIncrement();
+         }
 
          @Override
          public Thread newThread(Runnable runnable)
          {
-            Thread newThread = new Thread(runnable, prefix + threadNumber.getAndIncrement());
+            threadNumber.getAndIncrement();
+            String threadName = prefix;
+            if (includePoolInName)
+            {
+               threadName += "-pool-" + poolNumber.get();
+            }
+            if (includeThreadNumberInName)
+            {
+               threadName += "-thread-" + threadNumber.get();
+            }
+            Thread newThread = new Thread(group, runnable, threadName);
             newThread.setDaemon(daemon);
             newThread.setPriority(priority);
             return newThread;
@@ -255,7 +283,7 @@ public class ThreadTools
 
    public static ExecutorService executeWithTimeout(String threadName, Runnable runnable, long timeout, TimeUnit timeUnit)
    {
-      ExecutorService executor = Executors.newSingleThreadExecutor(getNamedThreadFactory(threadName));
+      ExecutorService executor = Executors.newSingleThreadExecutor(createNamedThreadFactory(threadName));
       executor.execute(runnable);
       executor.shutdown();
       try
@@ -293,22 +321,23 @@ public class ThreadTools
                                                                       final long timeLimit,
                                                                       boolean interruptAtTimeLimit)
    {
-      ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(getNamedThreadFactory(threadName));
 
       ScheduledFuture<?> futureToReturn;
 
       if (interruptAtTimeLimit)
       {
+         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2, getNamedThreadFactory(threadName));
          futureToReturn = scheduler.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
          scheduler.schedule(() ->
-                            {
-                               boolean cancel = futureToReturn.cancel(true);
-                               LogTools.info("Cancel: {}", cancel);
-                               return cancel;
-                            }, timeLimit, timeUnit);
+         {
+            boolean cancel = futureToReturn.cancel(true);
+            LogTools.info("Cancel: {}", cancel);
+            return cancel;
+         }, timeLimit, timeUnit);
       }
       else
       {
+         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(createNamedThreadFactory(threadName));
          AtomicReference<ScheduledFuture<?>> handleHolder = new AtomicReference<>();
          double timeLimitSeconds = Conversions.nanosecondsToSeconds(timeUnit.toNanos(timeLimit));
          Stopwatch stopwatch = new Stopwatch().start();
@@ -338,13 +367,12 @@ public class ThreadTools
    public static ScheduledFuture<?> scheduleSingleExecution(String threadName, Runnable runnable, double delay)
    {
       return scheduleSingleExecution(threadName, runnable, Conversions.secondsToNanoseconds(delay), TimeUnit.NANOSECONDS);
-//      return scheduleSingleExecution(threadName, runnable, Conversions.secondsToNanoseconds(delay), TimeUnit.NANOSECONDS);
    }
 
    public static ScheduledFuture<?> scheduleSingleExecution(String threadName, Runnable runnable, long delay, TimeUnit timeUnit)
    {
-      int willBeIgnored = 100;
-      return scheduleWithFixedDelayAndIterationLimit(threadName, runnable, delay, willBeIgnored, timeUnit, 1);
+      ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(createNamedThreadFactory(threadName));
+      return executor.schedule(runnable, delay, timeUnit);
    }
 
    public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName,
@@ -368,7 +396,7 @@ public class ThreadTools
       AtomicInteger counter = new AtomicInteger(0);
       AtomicReference<ScheduledFuture<?>> handleHolder = new AtomicReference<>();
 
-      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2, getNamedThreadFactory(threadName));
+      ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(createNamedThreadFactory(threadName));
 
       handleHolder.set(scheduler.scheduleWithFixedDelay(() ->
       {
@@ -402,7 +430,7 @@ public class ThreadTools
     */
    public static Executor newSingleDaemonThreadExecutor(String name)
    {
-      return Executors.newSingleThreadExecutor(DaemonThreadFactory.getNamedDaemonThreadFactory(name));
+      return Executors.newSingleThreadExecutor(createNamedDaemonThreadFactory(name));
    }
 
    /**
@@ -415,7 +443,7 @@ public class ThreadTools
     */
    public static ScheduledExecutorService newSingleDaemonThreadScheduledExecutor(String name)
    {
-      return Executors.newSingleThreadScheduledExecutor(DaemonThreadFactory.getNamedDaemonThreadFactory(name));
+      return Executors.newSingleThreadScheduledExecutor(createNamedDaemonThreadFactory(name));
    }
 
    /**
