@@ -2,7 +2,6 @@ package us.ihmc.commons.thread;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
@@ -14,9 +13,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
+ * <p>
  * This class provides convenience features on top of
  * {@link Executors java.util.concurrent.Executors},
  * {@link Thread java.lang.Thread}
+ * </p>
+ *
+ * <p>
+ * It focueses on these main objectives:
+ * <ul>
+ *    <li>Advocating and enforcing that threads have useful names</li>
+ *    <li>Providing API that accepts seconds as a double instead of using TimeUnit</li>
+ *    <li>Providing a sleep method that ensures a minimum bound on duration</li>
+ *    <li>Exception handling for convenience or accepting ExceptionHandler to avoid try catch blocks everywhere</li>
+ *    <li>Advanced task scheduling with iteration and time limits</li>
+ * </ul>
+ * </p>
  */
 public class ThreadTools
 {
