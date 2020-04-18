@@ -274,16 +274,40 @@ public class ThreadTools
    }
 
    /**
+    * Create a single thread executor with non-daemon threads and normal priority.
+    *
+    * @see Executors#newSingleThreadExecutor(ThreadFactory)
+    * @param prefix
+    * @return
+    */
+   public static Executor newSingleThreadExecutor(String prefix)
+   {
+      return Executors.newSingleThreadExecutor(createNamedThreadFactory(prefix));
+   }
+
+   /**
+    * Create a single thread executor with non-daemon threads and normal priority.
+    *
+    * @see Executors#newSingleThreadExecutor(ThreadFactory)
+    * @param prefix
+    * @return
+    */
+   public static ScheduledExecutorService newSingleThreadScheduledExecutor(String prefix)
+   {
+      return Executors.newSingleThreadScheduledExecutor(createNamedThreadFactory(prefix));
+   }
+
+   /**
     * Create a single thread executor in which all created threads are daemon thread, meaning that they will
     * be terminated and not cause the application to hang when the main thread has been terminated.
     *
     * @see Executors#newSingleThreadExecutor(ThreadFactory)
-    * @param name
+    * @param prefix
     * @return
     */
-   public static Executor newSingleDaemonThreadExecutor(String name)
+   public static Executor newSingleDaemonThreadExecutor(String prefix)
    {
-      return Executors.newSingleThreadExecutor(createNamedDaemonThreadFactory(name));
+      return Executors.newSingleThreadExecutor(createNamedDaemonThreadFactory(prefix));
    }
 
    /**
@@ -291,12 +315,12 @@ public class ThreadTools
     * be terminated and not cause the application to hang when the main thread has been terminated.
     *
     * @see Executors#newSingleThreadScheduledExecutor(ThreadFactory)
-    * @param name
+    * @param prefix
     * @return
     */
-   public static ScheduledExecutorService newSingleDaemonThreadScheduledExecutor(String name)
+   public static ScheduledExecutorService newSingleDaemonThreadScheduledExecutor(String prefix)
    {
-      return Executors.newSingleThreadScheduledExecutor(createNamedDaemonThreadFactory(name));
+      return Executors.newSingleThreadScheduledExecutor(createNamedDaemonThreadFactory(prefix));
    }
 
    public static String getBaseClassName()
