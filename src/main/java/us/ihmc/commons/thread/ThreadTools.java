@@ -125,6 +125,14 @@ public class ThreadTools
    }
 
    /**
+    * Join from current thread, printing stack trace if interrupted.
+    */
+   public static void join()
+   {
+      ExceptionTools.handle(() -> Thread.currentThread().join(), DefaultExceptionHandler.PRINT_STACKTRACE);
+   }
+
+   /**
     * Starts a user thread.
     * To start a daemon thread, see {@linkplain #startAsDaemon startAsDaemon}
     */
@@ -254,6 +262,32 @@ public class ThreadTools
             return newThread;
          }
       };
+   }
+
+   /**
+    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
+    * be terminated and not cause the application to hang when the main thread has been terminated.
+    *
+    * @see Executors#newSingleThreadExecutor(ThreadFactory)
+    * @param name
+    * @return
+    */
+   public static Executor newSingleDaemonThreadExecutor(String name)
+   {
+      return Executors.newSingleThreadExecutor(createNamedDaemonThreadFactory(name));
+   }
+
+   /**
+    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
+    * be terminated and not cause the application to hang when the main thread has been terminated.
+    *
+    * @see Executors#newSingleThreadScheduledExecutor(ThreadFactory)
+    * @param name
+    * @return
+    */
+   public static ScheduledExecutorService newSingleDaemonThreadScheduledExecutor(String name)
+   {
+      return Executors.newSingleThreadScheduledExecutor(createNamedDaemonThreadFactory(name));
    }
 
    public static String getBaseClassName()
@@ -491,39 +525,5 @@ public class ThreadTools
       }, initialDelay, delay, timeUnit));
 
       return handleHolder.get();
-   }
-
-   /**
-    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
-    * be terminated and not cause the application to hang when the main thread has been terminated.
-    *
-    * @see Executors#newSingleThreadExecutor(ThreadFactory)
-    * @param name
-    * @return
-    */
-   public static Executor newSingleDaemonThreadExecutor(String name)
-   {
-      return Executors.newSingleThreadExecutor(createNamedDaemonThreadFactory(name));
-   }
-
-   /**
-    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
-    * be terminated and not cause the application to hang when the main thread has been terminated.
-    *
-    * @see Executors#newSingleThreadScheduledExecutor(ThreadFactory)
-    * @param name
-    * @return
-    */
-   public static ScheduledExecutorService newSingleDaemonThreadScheduledExecutor(String name)
-   {
-      return Executors.newSingleThreadScheduledExecutor(createNamedDaemonThreadFactory(name));
-   }
-
-   /**
-    * Join from current thread, printing stack trace if interrupted.
-    */
-   public static void join()
-   {
-      ExceptionTools.handle(() -> Thread.currentThread().join(), DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 }
