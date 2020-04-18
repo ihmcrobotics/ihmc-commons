@@ -168,7 +168,7 @@ public class ThreadTools
 
    /**
     * Thread factory that creates non-daemon threads with normal priority
-    * with the naming scheme "name-thread-1", "name-thread-2", ...
+    * with the naming scheme "name-pool-1-thread-1", "name-pool-1-thread-2", ...
     *
     * @param prefix useful name
     * @return thread factory
@@ -183,7 +183,7 @@ public class ThreadTools
 
    /**
     * Thread factory that creates daemon threads with normal priority
-    * with the naming scheme "name-thread-1", "name-thread-2", ...
+    * with the naming scheme "name-pool-1-thread-1", "name-pool-1-thread-2", ...
     *
     * @param prefix useful name
     * @return thread factory
@@ -201,6 +201,8 @@ public class ThreadTools
     * except that a useful name is prepended.
     *
     * @param prefix useful name to identify the purpose of threads
+    * @param includePoolInName include "-pool-N" in the thread name
+    * @param includeThreadNumberInName include "-thread-M" in the thread name
     * @param daemon set threads to daemon
     * @param priority set priority of new threads
     * @return thread factory
@@ -289,14 +291,24 @@ public class ThreadTools
       }
    }
 
-   public static ExecutorService executeWithTimeout(String threadName, Runnable runnable, long timeout, TimeUnit timeUnit)
+   /**
+    * This method executes a single tasks an blocks until completion with time limit.
+    * If the thread runs past the time limit, it is interrupted and the method returns.
+    *
+    * @param threadName useful name
+    * @param runnable
+    * @param timeLimit time before interruption
+    * @param timeUnit time limit units
+    * @return the executor object that was created to execute the task
+    */
+   public static ExecutorService executeWithTimeout(String threadName, Runnable runnable, long timeLimit, TimeUnit timeUnit)
    {
       ExecutorService executor = Executors.newSingleThreadExecutor(createNamedThreadFactory(threadName));
       executor.execute(runnable);
       executor.shutdown();
       try
       {
-         executor.awaitTermination(timeout, timeUnit);
+         executor.awaitTermination(timeLimit, timeUnit);
       }
       catch (InterruptedException e)
       {
@@ -306,7 +318,9 @@ public class ThreadTools
       return executor;
    }
 
-   @Deprecated // Does not specify hardness of time limit
+   /**
+    * @deprecated Use {@link #scheduleWithFixeDelayAndTimeLimit} instead. This method has an ambiguous end criteria.
+    */
    public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName,
                                                                       final Runnable runnable,
                                                                       long initialDelay,
@@ -318,6 +332,16 @@ public class ThreadTools
    }
 
    /**
+    * Schedules a periodic task with {@link ScheduledExecutorService#scheduleWithFixedDelay} but adds a time limit.
+    * The user may choose whether to interrupt when the time expires or wait for the last run to complete (if currently
+    * executing when the time expires)
+    *
+    * @param threadName useful name
+    * @param runnable task
+    * @param initialDelay
+    * @param delay
+    * @param timeUnit
+    * @param timeLimit
     * @param interruptAtTimeLimit whether to interrupt the runnable at the time limit, if false, waits to run to complete then cancels
     *                             setting to true will require an extra thread
     */
@@ -372,11 +396,28 @@ public class ThreadTools
       return futureToReturn;
    }
 
+   /**
+    * Schedule a single task to start after delay.
+    * 
+    * @param threadName useful name
+    * @param runnable task
+    * @param delay in seconds
+    * @return executor that the task is scheduled with
+    */
    public static ScheduledFuture<?> scheduleSingleExecution(String threadName, Runnable runnable, double delay)
    {
       return scheduleSingleExecution(threadName, runnable, Conversions.secondsToNanoseconds(delay), TimeUnit.NANOSECONDS);
    }
 
+   /**
+    * Schedule a single task to start after a delay.
+    * 
+    * @param threadName useful name
+    * @param runnable 
+    * @param delay
+    * @param timeUnit
+    * @return future that the task is scheduled with
+    */
    public static ScheduledFuture<?> scheduleSingleExecution(String threadName, Runnable runnable, long delay, TimeUnit timeUnit)
    {
       ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(createNamedThreadFactory(threadName));
@@ -394,6 +435,18 @@ public class ThreadTools
       return scheduleWithFixedDelayAndIterationLimit(threadName, runnable, initialDelayNanos, delayNanos, TimeUnit.NANOSECONDS, iterations);
    }
 
+   /**
+    * Schedule a periodic task with {@link ScheduledExecutorService#scheduleWithFixedDelay} but with an added iteration limit
+    * that when reached, cancels further execution.
+    * 
+    * @param threadName
+    * @param runnable
+    * @param initialDelay
+    * @param delay
+    * @param timeUnit
+    * @param iterations
+    * @return
+    */
    public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName,
                                                                             Runnable runnable,
                                                                             long initialDelay,
