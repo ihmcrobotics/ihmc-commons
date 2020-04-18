@@ -2,6 +2,7 @@ package us.ihmc.commons.thread;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
@@ -129,7 +130,15 @@ public class ThreadTools
     */
    public static void join()
    {
-      ExceptionTools.handle(() -> Thread.currentThread().join(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      join(DefaultExceptionHandler.PRINT_STACKTRACE);
+   }
+
+   /**
+    * Joins from the current thread, handling exception. {@link Thread#currentThread() Thread.currentThread().join()}
+    */
+   public static void join(ExceptionHandler exceptionHandler)
+   {
+      ExceptionTools.handle(() -> Thread.currentThread().join(), exceptionHandler);
    }
 
    /**
