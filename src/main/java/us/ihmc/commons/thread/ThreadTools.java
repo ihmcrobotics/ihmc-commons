@@ -1,15 +1,40 @@
 package us.ihmc.commons.thread;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * <p>
+ * This class provides convenience features on top of
+ * {@link Executors java.util.concurrent.Executors},
+ * {@link Thread java.lang.Thread}
+ * </p>
+ *
+ * <p>
+ * It focueses on these main objectives:
+ * <ul>
+ *    <li>Advocating and enforcing that threads have useful names</li>
+ *    <li>Providing API that accepts seconds as a double instead of using TimeUnit</li>
+ *    <li>Providing a sleep method that ensures a minimum bound on duration</li>
+ *    <li>Exception handling for convenience or accepting ExceptionHandler to avoid try catch blocks everywhere</li>
+ *    <li>Advanced task scheduling with iteration and time limits</li>
+ * </ul>
+ * </p>
+ */
 public class ThreadTools
 {
+   private static final AtomicInteger poolNumber = new AtomicInteger(1);
+
    public static final int REASONABLE_WAITING_SLEEP_DURATION_MS = 10;
 
    private static final long ONE_MILLION = 1000000;
@@ -89,6 +114,8 @@ public class ThreadTools
 
    /**
     * Causes this Thread to continuously sleep, ignoring any interruptions.
+    *
+    * It is recommended to use {@link #join} instead.
     */
    public static void sleepForever()
    {
@@ -96,6 +123,22 @@ public class ThreadTools
       {
          ThreadTools.sleep(1000);
       }
+   }
+
+   /**
+    * Join from current thread, printing stack trace if interrupted.
+    */
+   public static void join()
+   {
+      join(DefaultExceptionHandler.PRINT_STACKTRACE);
+   }
+
+   /**
+    * Joins from the current thread, handling exception. {@link Thread#currentThread() Thread.currentThread().join()}
+    */
+   public static void join(ExceptionHandler exceptionHandler)
+   {
+      ExceptionTools.handle(() -> Thread.currentThread().join(), exceptionHandler);
    }
 
    /**
@@ -144,25 +187,140 @@ public class ThreadTools
       }
    }
 
-   public static ThreadFactory getNamedThreadFactory(final String name)
+   /**
+    * @deprecated Use {@link #createNamedThreadFactory} instead
+    */
+   public static ThreadFactory getNamedThreadFactory(String name)
+   {
+      return createNamedThreadFactory(name);
+   }
+
+   /**
+    * Thread factory that creates non-daemon threads with normal priority
+    * with the naming scheme "name-pool-1-thread-1", "name-pool-1-thread-2", ...
+    *
+    * @param prefix useful name
+    * @return thread factory
+    */
+   public static ThreadFactory createNamedThreadFactory(String prefix)
+   {
+      boolean includePoolInName = true;
+      boolean includeThreadNumberInName = true;
+      boolean daemon = false;
+      return createNamedThreadFactory(prefix, includePoolInName, includeThreadNumberInName, daemon, Thread.NORM_PRIORITY);
+   }
+
+   /**
+    * Thread factory that creates daemon threads with normal priority
+    * with the naming scheme "name-pool-1-thread-1", "name-pool-1-thread-2", ...
+    *
+    * @param prefix useful name
+    * @return thread factory
+    */
+   public static ThreadFactory createNamedDaemonThreadFactory(String prefix)
+   {
+      boolean includePoolInName = true;
+      boolean includeThreadNumberInName = true;
+      boolean daemon = true;
+      return createNamedThreadFactory(prefix, includePoolInName, includeThreadNumberInName, daemon, Thread.NORM_PRIORITY);
+   }
+
+   /**
+    * Thread factory that creates threads identical to {@link java.util.concurrent.Executors}.DefaultThreadFactory
+    * except that a useful name is prepended.
+    *
+    * @param prefix useful name to identify the purpose of threads
+    * @param includePoolInName include "-pool-N" in the thread name
+    * @param includeThreadNumberInName include "-thread-M" in the thread name
+    * @param daemon set threads to daemon
+    * @param priority set priority of new threads
+    * @return thread factory
+    */
+   public static ThreadFactory createNamedThreadFactory(final String prefix,
+                                                        boolean includePoolInName,
+                                                        boolean includeThreadNumberInName,
+                                                        boolean daemon,
+                                                        int priority)
    {
       return new ThreadFactory()
       {
          private final AtomicInteger threadNumber = new AtomicInteger(1);
+         private final ThreadGroup group;
+         {
+            SecurityManager s = System.getSecurityManager();
+            group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            poolNumber.getAndIncrement();
+         }
 
          @Override
-         public Thread newThread(Runnable r)
+         public Thread newThread(Runnable runnable)
          {
-            Thread t = new Thread(r, name + "-thread-" + threadNumber.getAndIncrement());
-
-            if (t.isDaemon())
-               t.setDaemon(false);
-            if (t.getPriority() != Thread.NORM_PRIORITY)
-               t.setPriority(Thread.NORM_PRIORITY);
-
-            return t;
+            threadNumber.getAndIncrement();
+            String threadName = prefix;
+            if (includePoolInName)
+            {
+               threadName += "-pool-" + poolNumber.get();
+            }
+            if (includeThreadNumberInName)
+            {
+               threadName += "-thread-" + threadNumber.get();
+            }
+            Thread newThread = new Thread(group, runnable, threadName);
+            newThread.setDaemon(daemon);
+            newThread.setPriority(priority);
+            return newThread;
          }
       };
+   }
+
+   /**
+    * Create a single thread executor with non-daemon threads and normal priority.
+    *
+    * @see Executors#newSingleThreadExecutor(ThreadFactory)
+    * @param prefix
+    * @return
+    */
+   public static Executor newSingleThreadExecutor(String prefix)
+   {
+      return Executors.newSingleThreadExecutor(createNamedThreadFactory(prefix));
+   }
+
+   /**
+    * Create a single thread executor with non-daemon threads and normal priority.
+    *
+    * @see Executors#newSingleThreadExecutor(ThreadFactory)
+    * @param prefix
+    * @return
+    */
+   public static ScheduledExecutorService newSingleThreadScheduledExecutor(String prefix)
+   {
+      return Executors.newSingleThreadScheduledExecutor(createNamedThreadFactory(prefix));
+   }
+
+   /**
+    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
+    * be terminated and not cause the application to hang when the main thread has been terminated.
+    *
+    * @see Executors#newSingleThreadExecutor(ThreadFactory)
+    * @param prefix
+    * @return
+    */
+   public static Executor newSingleDaemonThreadExecutor(String prefix)
+   {
+      return Executors.newSingleThreadExecutor(createNamedDaemonThreadFactory(prefix));
+   }
+
+   /**
+    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
+    * be terminated and not cause the application to hang when the main thread has been terminated.
+    *
+    * @see Executors#newSingleThreadScheduledExecutor(ThreadFactory)
+    * @param prefix
+    * @return
+    */
+   public static ScheduledExecutorService newSingleDaemonThreadScheduledExecutor(String prefix)
+   {
+      return Executors.newSingleThreadScheduledExecutor(createNamedDaemonThreadFactory(prefix));
    }
 
    public static String getBaseClassName()
@@ -212,14 +370,24 @@ public class ThreadTools
       }
    }
 
-   public static ExecutorService executeWithTimeout(String threadName, Runnable runnable, long timeout, TimeUnit timeUnit)
+   /**
+    * This method executes a single tasks an blocks until completion with time limit.
+    * If the thread runs past the time limit, it is interrupted and the method returns.
+    *
+    * @param threadName useful name
+    * @param runnable
+    * @param timeLimit time before interruption
+    * @param timeUnit time limit units
+    * @return the executor object that was created to execute the task
+    */
+   public static ExecutorService executeWithTimeout(String threadName, Runnable runnable, long timeLimit, TimeUnit timeUnit)
    {
-      ExecutorService executor = Executors.newSingleThreadExecutor(getNamedThreadFactory(threadName));
+      ExecutorService executor = Executors.newSingleThreadExecutor(createNamedThreadFactory(threadName));
       executor.execute(runnable);
       executor.shutdown();
       try
       {
-         executor.awaitTermination(timeout, timeUnit);
+         executor.awaitTermination(timeLimit, timeUnit);
       }
       catch (InterruptedException e)
       {
@@ -229,88 +397,166 @@ public class ThreadTools
       return executor;
    }
 
-   public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName, final Runnable runnable, long initialDelay, long delay,
-                                                                      TimeUnit timeUnit, final long timeLimit)
+   /**
+    * @deprecated Use {@link #scheduleWithFixeDelayAndTimeLimit} instead. This method has an ambiguous end criteria.
+    */
+   public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName,
+                                                                      final Runnable runnable,
+                                                                      long initialDelay,
+                                                                      long delay,
+                                                                      TimeUnit timeUnit,
+                                                                      final long timeLimit)
    {
-      ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(getNamedThreadFactory(threadName));
-      final ScheduledFuture<?> handle = scheduler.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
-      ScheduledFuture<?> handleKiller = scheduler.schedule(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            handle.cancel(true);
-         }
-      }, timeLimit, timeUnit);
-
-      return handleKiller;
+      return scheduleWithFixeDelayAndTimeLimit(threadName, runnable, initialDelay, delay, timeUnit, timeLimit, true);
    }
 
-   public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName, final Runnable runnable, long initialDelay, final long delay,
-                                                                            final TimeUnit timeUnit, final int iterations)
+   /**
+    * Schedules a periodic task with {@link ScheduledExecutorService#scheduleWithFixedDelay} but adds a time limit.
+    * The user may choose whether to interrupt when the time expires or wait for the last run to complete (if currently
+    * executing when the time expires)
+    *
+    * @param threadName useful name
+    * @param runnable task
+    * @param initialDelay
+    * @param delay
+    * @param timeUnit
+    * @param timeLimit
+    * @param interruptAtTimeLimit whether to interrupt the runnable at the time limit, if false, waits to run to complete then cancels
+    *                             setting to true will require an extra thread
+    */
+   public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName,
+                                                                      final Runnable runnable,
+                                                                      long initialDelay,
+                                                                      long delay,
+                                                                      TimeUnit timeUnit,
+                                                                      final long timeLimit,
+                                                                      boolean interruptAtTimeLimit)
    {
-      final AtomicInteger counter = new AtomicInteger();
-      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2, getNamedThreadFactory(threadName));
-      final ScheduledFuture<?> handle = scheduler.scheduleWithFixedDelay(new Runnable()
+
+      ScheduledFuture<?> futureToReturn;
+
+      if (interruptAtTimeLimit)
       {
-         @Override
-         public void run()
+         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2, getNamedThreadFactory(threadName));
+         futureToReturn = scheduler.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
+         scheduler.schedule(() ->
          {
-            if (counter.get() < iterations)
+            boolean cancel = futureToReturn.cancel(true);
+            LogTools.info("Cancel: {}", cancel);
+            return cancel;
+         }, timeLimit, timeUnit);
+      }
+      else
+      {
+         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(createNamedThreadFactory(threadName));
+         AtomicReference<ScheduledFuture<?>> handleHolder = new AtomicReference<>();
+         double timeLimitSeconds = Conversions.nanosecondsToSeconds(timeUnit.toNanos(timeLimit));
+         Stopwatch stopwatch = new Stopwatch().start();
+         handleHolder.set(scheduler.scheduleWithFixedDelay(() ->
+         {
+            if (stopwatch.lapElapsed() < timeLimitSeconds)
             {
                runnable.run();
-               counter.incrementAndGet();
             }
-         }
-      }, initialDelay, delay, timeUnit);
 
-      ScheduledFuture<?> handleKiller = scheduler.schedule(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            while (counter.get() < iterations)
+            // runnable might take some time. avoid waiting another delay to cancel
+            if (stopwatch.lapElapsed() >= timeLimitSeconds)
             {
-               sleep(TimeUnit.MILLISECONDS.convert(delay, timeUnit));
+               ScheduledFuture<?> scheduledFuture = handleHolder.get();
+               if (scheduledFuture != null)
+               {
+                  scheduledFuture.cancel(true);
+               }
             }
-            handle.cancel(true);
+         }, initialDelay, delay, timeUnit));
+         futureToReturn = handleHolder.get();
+      }
+
+      return futureToReturn;
+   }
+
+   /**
+    * Schedule a single task to start after delay.
+    * 
+    * @param threadName useful name
+    * @param runnable task
+    * @param delay in seconds
+    * @return executor that the task is scheduled with
+    */
+   public static ScheduledFuture<?> scheduleSingleExecution(String threadName, Runnable runnable, double delay)
+   {
+      return scheduleSingleExecution(threadName, runnable, Conversions.secondsToNanoseconds(delay), TimeUnit.NANOSECONDS);
+   }
+
+   /**
+    * Schedule a single task to start after a delay.
+    * 
+    * @param threadName useful name
+    * @param runnable 
+    * @param delay
+    * @param timeUnit
+    * @return future that the task is scheduled with
+    */
+   public static ScheduledFuture<?> scheduleSingleExecution(String threadName, Runnable runnable, long delay, TimeUnit timeUnit)
+   {
+      ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(createNamedThreadFactory(threadName));
+      return executor.schedule(runnable, delay, timeUnit);
+   }
+
+   public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName,
+                                                                            Runnable runnable,
+                                                                            double initialDelay,
+                                                                            double delay,
+                                                                            int iterations)
+   {
+      long initialDelayNanos = Conversions.secondsToNanoseconds(initialDelay);
+      long delayNanos = Conversions.secondsToNanoseconds(delay);
+      return scheduleWithFixedDelayAndIterationLimit(threadName, runnable, initialDelayNanos, delayNanos, TimeUnit.NANOSECONDS, iterations);
+   }
+
+   /**
+    * Schedule a periodic task with {@link ScheduledExecutorService#scheduleWithFixedDelay} but with an added iteration limit
+    * that when reached, cancels further execution.
+    * 
+    * @param threadName
+    * @param runnable
+    * @param initialDelay
+    * @param delay
+    * @param timeUnit
+    * @param iterations
+    * @return
+    */
+   public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName,
+                                                                            Runnable runnable,
+                                                                            long initialDelay,
+                                                                            long delay,
+                                                                            TimeUnit timeUnit,
+                                                                            int iterations)
+   {
+      AtomicInteger counter = new AtomicInteger(0);
+      AtomicReference<ScheduledFuture<?>> handleHolder = new AtomicReference<>();
+
+      ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(createNamedThreadFactory(threadName));
+
+      handleHolder.set(scheduler.scheduleWithFixedDelay(() ->
+      {
+         if (counter.get() < iterations)
+         {
+            runnable.run();
          }
-      }, 0, timeUnit);
 
-      return handleKiller;
-   }
+         counter.incrementAndGet();
 
-   /**
-    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
-    * be terminated and not cause the application to hang when the main thread has been terminated.
-    *
-    * @see Executors#newSingleThreadExecutor(ThreadFactory)
-    * @param name
-    * @return
-    */
-   public static Executor newSingleDaemonThreadExecutor(String name)
-   {
-      return Executors.newSingleThreadExecutor(DaemonThreadFactory.getNamedDaemonThreadFactory(name));
-   }
+         if (counter.get() >= iterations)
+         {
+            ScheduledFuture<?> scheduledFuture = handleHolder.get();
+            if (scheduledFuture != null)
+            {
+               scheduledFuture.cancel(true);
+            }
+         }
+      }, initialDelay, delay, timeUnit));
 
-   /**
-    * Create a single thread executor in which all created threads are daemon thread, meaning that they will
-    * be terminated and not cause the application to hang when the main thread has been terminated.
-    *
-    * @see Executors#newSingleThreadScheduledExecutor(ThreadFactory)
-    * @param name
-    * @return
-    */
-   public static ScheduledExecutorService newSingleDaemonThreadScheduledExecutor(String name)
-   {
-      return Executors.newSingleThreadScheduledExecutor(DaemonThreadFactory.getNamedDaemonThreadFactory(name));
-   }
-
-   /**
-    * Join from current thread, printing stack trace if interrupted.
-    */
-   public static void join()
-   {
-      ExceptionTools.handle(() -> Thread.currentThread().join(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      return handleHolder.get();
    }
 }

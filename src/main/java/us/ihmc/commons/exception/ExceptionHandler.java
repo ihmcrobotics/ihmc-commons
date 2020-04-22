@@ -13,5 +13,5 @@ public interface ExceptionHandler
     *
     * @param e The exception.
     */
-   void handleException(Throwable e);  // TODO change to Exception
+   void handleException(Throwable e);  // TODO change to Exception, or add type parameterization
 }
