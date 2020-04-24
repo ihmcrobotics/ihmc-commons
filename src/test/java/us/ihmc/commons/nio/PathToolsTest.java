@@ -133,6 +133,35 @@ public class PathToolsTest
       });
    }
 
+   @Test
+   public void testWalkBreadthFirst()
+   {
+      PathTools.walkBreadthFirst(PARENT_DIRECTORY, 5, new BasicPathVisitor()
+      {
+         int resultCount = 0;
+
+         @Override
+         public FileVisitResult visitPath(Path path, PathType pathType)
+         {
+            LogTools.info(path.toString() + " " + pathType.toString());
+            if (path.equals(TEST_DIRECTORIES[0]) || path.equals(TEST_DIRECTORIES[1]))
+            {
+               assertTrue(pathType.equals(PathType.DIRECTORY), "Falsely reported directory");
+            }
+            else if (path.equals(TEST_FILES[0]) || path.equals(TEST_FILES[1]))
+            {
+               assertTrue(pathType.equals(PathType.FILE), "Falsely reported file");
+            }
+
+            resultCount++;
+
+            assertTrue(resultCount <= 4, "Parent was included");
+
+            return FileVisitResult.CONTINUE;
+         }
+      });
+   }
+
    private static final Path createFakeJavaPath()
    {
       String[] split = PathToolsTest.class.getPackage().getName().split("\\.");

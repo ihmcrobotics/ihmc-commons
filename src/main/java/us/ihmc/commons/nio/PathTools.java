@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 /**
@@ -217,31 +218,30 @@ public class PathTools
 
       queue.add(directory);
 
-      while (!queue.isEmpty())
+      AtomicBoolean terminate = new AtomicBoolean(false);
+      while (!queue.isEmpty() && !terminate.get())
       {
          Path currentPath = queue.poll();
 
-         walkFlat(currentPath, (path, pathType) -> {
-
-         });
-         try (Stream<Path> list = Files.list(currentPath))
-         {
-            list.forEach(child ->
+         walkFlat(currentPath, (child, pathType) -> {
+            FileVisitResult result;
+            if (pathType == PathType.DIRECTORY && (child.getNameCount() - directory.getNameCount() < maxDepth))
             {
-               if (Files.isDirectory(child) && (child.getNameCount() - directory.getNameCount() < maxDepth))
-               {
-                  queue.add(child);
-                  basicFileVisitor.visitPath(child, PathType.DIRECTORY);
-               }
-               else if (Files.isRegularFile(child))
-               {
-                  basicFileVisitor.visitPath(child, PathType.FILE);
-               }
-            });
-         }
-         catch (IOException e)
-         {
-         }
+               queue.add(child);
+               result = basicFileVisitor.visitPath(child, PathType.DIRECTORY);
+            }
+            else // (pathType == PathType.FILE)
+            {
+               result = basicFileVisitor.visitPath(child, PathType.FILE);
+            }
+
+            if (result == FileVisitResult.TERMINATE)
+            {
+               terminate.set(true);
+            }
+
+            return result;
+         });
       }
    }
 
