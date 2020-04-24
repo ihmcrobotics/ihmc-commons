@@ -7,9 +7,8 @@ import us.ihmc.commons.nio.BasicPathVisitor.PathType;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * <p>A collection of tools to extend Java's NIO.2 API and
@@ -198,6 +197,51 @@ public class PathTools
       }
       catch (IOException e)
       {
+      }
+   }
+
+   /**
+    * <p>Walk through a directory to a max depth using breadth-first iteration. The other methods in this class do a depth-first traversal.</p>
+    *
+    * A max depth of 1 only iterates over the immediate children and a value of 0 means no paths will be visited.
+    *
+    * @param directory directory to walk
+    * @param basicFileVisitor callback to take action on visits
+    */
+   public static void walkBreadthFirst(final Path directory, int maxDepth, final PathVisitor basicFileVisitor)
+   {
+      if (maxDepth == 0)
+         return;
+
+      Queue<Path> queue = new LinkedList<>();
+
+      queue.add(directory);
+
+      while (!queue.isEmpty())
+      {
+         Path currentPath = queue.poll();
+
+         walkFlat(currentPath, (path, pathType) -> {
+
+         });
+         try (Stream<Path> list = Files.list(currentPath))
+         {
+            list.forEach(child ->
+            {
+               if (Files.isDirectory(child) && (child.getNameCount() - directory.getNameCount() < maxDepth))
+               {
+                  queue.add(child);
+                  basicFileVisitor.visitPath(child, PathType.DIRECTORY);
+               }
+               else if (Files.isRegularFile(child))
+               {
+                  basicFileVisitor.visitPath(child, PathType.FILE);
+               }
+            });
+         }
+         catch (IOException e)
+         {
+         }
       }
    }
 
