@@ -1,6 +1,7 @@
 package us.ihmc.commons.thread;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -38,6 +39,90 @@ public class ThreadTools
    public static final int REASONABLE_WAITING_SLEEP_DURATION_MS = 10;
 
    private static final long ONE_MILLION = 1000000;
+
+   private static final ThreadLocal<Object> threadLocalSyncObject = ThreadLocal.withInitial(Object::new);
+
+   public static void waitUntil(long endTime) throws InterruptedException
+   {
+      while (true)
+      {
+         if (endTime <= System.currentTimeMillis())
+            break;
+         Thread.sleep(REASONABLE_WAITING_SLEEP_DURATION_MS);
+      }
+   }
+
+   //   public static void wait(Object lockObject, double duration, ExceptionHandler exceptionHandler)
+   //   {
+   //      Conversions.secondsToNanoseconds(seconds);
+   //      ExceptionTools.handle(() -> lockObject.wait(millis, nanos), exceptionHandler);
+   //   }
+
+   public static void wait(Object lockObject, long duration, TimeUnit timeUnit, ExceptionHandler exceptionHandler)
+   {
+      ExceptionTools.handle(() -> lockObject.wait(timeUnit.toMillis(duration)), exceptionHandler);
+   }
+
+   public static void wait(Object lockObject, long millis, int nanos, ExceptionHandler exceptionHandler)
+   {
+
+   }
+
+
+   public static void wait(double secondsToWait)
+   {
+      wait(threadLocalSyncObject.get(), Conversions.secondsToNanoseconds(secondsToWait), DefaultExceptionHandler.PROCEED_SILENTLY);
+   }
+
+   public static void wait(Object lockObject, long nanos, ExceptionHandler exceptionHandler)
+   {
+      long startNanos = System.nanoTime();
+      long nanosLeft = nanos;
+      long millis;
+      int overflowNanos;
+      synchronized (lockObject)
+      {
+         while (nanosLeft > 0)
+         {
+            try
+            {
+               overflowNanos = (int) (nanosLeft % 1000000L);
+               millis = Conversions.nanosecondsToMilliseconds(nanosLeft - overflowNanos);
+               lockObject.wait(millis, overflowNanos);
+            }
+            catch (InterruptedException e)
+            {
+               exceptionHandler.handleException(e);
+            }
+            finally
+            {
+               nanosLeft = nanos - (System.nanoTime() - startNanos);
+            }
+         }
+      }
+
+//      ExceptionTools.handle(() ->
+//                            {
+//                               synchronized (lockObject)
+//                               {
+//                                  while
+//                                  lockObject.wait(millis, nanos);
+//                               }
+//                            }, exceptionHandler);
+   }
+
+   public static void waitUntilNextMultipleOf(long waitMultipleMS) throws InterruptedException
+   {
+      waitUntilNextMultipleOf(waitMultipleMS, 0);
+   }
+
+   public static void waitUntilNextMultipleOf(long waitMultipleMS, long moduloOffset) throws InterruptedException
+   {
+      long startTime = System.currentTimeMillis();
+      long numberOfMultiplesThusFar = (startTime - moduloOffset) / waitMultipleMS;
+      long endTime = (numberOfMultiplesThusFar + 1) * waitMultipleMS + moduloOffset;
+      waitUntil(endTime);
+   }
 
    /**
     * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of seconds,
@@ -162,29 +247,6 @@ public class ThreadTools
       daemonThread.setDaemon(true);
       daemonThread.start();
       return daemonThread;
-   }
-
-   public static void waitUntilNextMultipleOf(long waitMultipleMS) throws InterruptedException
-   {
-      waitUntilNextMultipleOf(waitMultipleMS, 0);
-   }
-
-   public static void waitUntilNextMultipleOf(long waitMultipleMS, long moduloOffset) throws InterruptedException
-   {
-      long startTime = System.currentTimeMillis();
-      long numberOfMultiplesThusFar = (startTime - moduloOffset) / waitMultipleMS;
-      long endTime = (numberOfMultiplesThusFar + 1) * waitMultipleMS + moduloOffset;
-      waitUntil(endTime);
-   }
-
-   public static void waitUntil(long endTime) throws InterruptedException
-   {
-      while (true)
-      {
-         if (endTime <= System.currentTimeMillis())
-            break;
-         Thread.sleep(REASONABLE_WAITING_SLEEP_DURATION_MS);
-      }
    }
 
    /**

@@ -14,6 +14,31 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ThreadToolsTest
 {
    @Test
+   public void testTimer()
+   {
+      Stopwatch stopwatch = new Stopwatch().start();
+      System.out.println("Before");
+      ThreadTools.wait(0.1);
+      System.out.println("After: " + stopwatch.lapElapsed());
+
+      Object object = new Object();
+      System.out.println("Before");
+      try
+      {
+         synchronized (object)
+         {
+            object.wait(100);
+         }
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
+
+      System.out.println("After: " + stopwatch.lapElapsed());
+   }
+
+   @Test
    public void testTimeLimitScheduler()
    {
       final int ITERATIONS = 10;
