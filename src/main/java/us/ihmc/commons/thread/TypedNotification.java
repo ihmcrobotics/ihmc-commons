@@ -10,6 +10,9 @@ import us.ihmc.commons.exception.ExceptionTools;
  * much as desired with #read.
  * <p/>
  * The Notification classes are to pass data to another thread. Sort of like a size 1 concurrent buffer.
+ *
+ * TODO: Implement peek.
+ *
  */
 public class TypedNotification<T>
 {
@@ -41,25 +44,13 @@ public class TypedNotification<T>
    }
 
    /**
-    * If the initial or polled value was not null.
-    * <p/>
-    * Must have called {@link #poll()} first!
-    *
-    * @return polled value was not null
-    */
-   public boolean hasNext()
-   {
-      return previousValue != null;
-   }
-
-   /**
     * The initial or polled value.
     * <p/>
     * Must have called {@link #poll()} first!
     *
     * @return polled value
     */
-   public T peek()
+   public T read()
    {
       return previousValue;
    }
@@ -67,11 +58,11 @@ public class TypedNotification<T>
    /** THREAD 2 ACCESS BELOW THIS POINT TODO: Make this safe somehow? Store thread names? */
 
    /**
-    * Submits a value to the queue.
+    * Sets the notification and triggers notifyAll().
     *
     * @param value
     */
-   public synchronized void add(T value)
+   public synchronized void set(T value)
    {
       notification = value;
 
