@@ -43,6 +43,11 @@ public class TypedNotification<T>
       return previousValue;
    }
 
+   public boolean hasValue()
+   {
+      return previousValue != null;
+   }
+
    /**
     * The initial or polled value.
     * <p/>
