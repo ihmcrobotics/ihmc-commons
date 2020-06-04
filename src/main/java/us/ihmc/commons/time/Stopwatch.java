@@ -92,7 +92,7 @@ public class Stopwatch
     * <p>NOTE: Will omit the sum of all suspend durations and
     * automatically resume measurement for the next lap.</p>
     *
-    * @return Lap time.
+    * @return Lap time or NaN if the stopwatch has not been started.
     */
    public double lap()
    {
@@ -112,7 +112,7 @@ public class Stopwatch
    /**
     * Get the average lap duration.
     *
-    * @return Average lap duration.
+    * @return Average lap duration or NaN if the stopwatch has not been started.
     */
    public double averageLap()
    {
@@ -122,7 +122,7 @@ public class Stopwatch
    /**
     * Get the total elapsed time. Since the last reset or start.
     *
-    * @return Total elapsed time.
+    * @return Total elapsed time or NaN if the stopwatch has not been started.
     */
    public double totalElapsed()
    {
@@ -132,7 +132,7 @@ public class Stopwatch
    /**
     * Get the elapsed time in the current lap. Shortest time since last lap, reset, or start.
     *
-    * @return Lap elapsed time.
+    * @return Lap elapsed time or NaN if the stopwatch has not been started.
     */
    public double lapElapsed()
    {
