@@ -24,6 +24,20 @@ public class NotificationTest
    }
 
    @Test
+   public void testNotifiedBeforeBlockingPollCalled()
+   {
+      Notification notification = new Notification();
+
+      notification.set();
+      assertTimeoutPreemptively(Duration.ofSeconds(1), () ->
+      {
+         notification.blockingPoll();
+      });
+
+      assertTrue(notification.read());
+   }
+
+   @Test
    public void testNotificationFromThread()
    {
       assertTimeoutPreemptively(Duration.ofSeconds(1), () ->
@@ -40,7 +54,7 @@ public class NotificationTest
             notification.set();
          }, "SetterThread");
 
-         assertTrue(notification.blockingPoll());
+         notification.blockingPoll();
 
          long after = System.nanoTime();
 

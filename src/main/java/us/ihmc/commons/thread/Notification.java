@@ -65,14 +65,15 @@ public class Notification
    }
 
    /**
-    * Block and wait to be notified.
-    *
-    * @return notification
+    * If notification not already set, block and wait to be notified.
     */
-   public synchronized boolean blockingPoll()
+   public synchronized void blockingPoll()
    {
-      ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-      return poll();
+      if (!poll())
+      {
+         ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         poll();
+      }
    }
 
    /**

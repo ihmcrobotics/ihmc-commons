@@ -24,6 +24,20 @@ public class TypedNotificationTest
    }
 
    @Test
+   public void testNotifiedBeforeBlockingPollCalled()
+   {
+      TypedNotification<Object> notification = new TypedNotification<>();
+
+      notification.set(new Object());
+      assertTimeoutPreemptively(Duration.ofSeconds(1), () ->
+      {
+         notification.blockingPoll();
+      });
+
+      assertNotNull(notification.read());
+   }
+
+   @Test
    public void testNotificationFromThread()
    {
       assertTimeoutPreemptively(Duration.ofSeconds(1), () ->

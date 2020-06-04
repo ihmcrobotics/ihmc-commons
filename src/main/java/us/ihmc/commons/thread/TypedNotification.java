@@ -32,14 +32,17 @@ public class TypedNotification<T>
    }
 
    /**
-    * Block and wait to be notified.
+    * If value not immediately available, block and wait to be notified.
     *
     * @return notification
     */
    public synchronized T blockingPoll()
    {
-      ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-      poll();
+      if (!poll())
+      {
+         ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         poll();
+      }
       return previousValue;
    }
 
