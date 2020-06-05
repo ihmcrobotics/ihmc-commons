@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.ArrayList;
 
 public class FormattingTools
 {
@@ -90,6 +91,113 @@ public class FormattingTools
          }
       }
       return new String(charArray, 0, outIndex);
+   }
+
+   // TODO: Methods to clean up strings
+
+   public static String titleToKebabCase(String titleCased)
+   {
+      String kebabCased = titleCased.trim().toLowerCase().replaceAll("\\W+", "-");
+      if (kebabCased.startsWith("-"))
+         kebabCased = kebabCased.substring(1);
+      if (kebabCased.endsWith("-"))
+         kebabCased = kebabCased.substring(0, kebabCased.lastIndexOf("-"));
+      return kebabCased;
+   }
+
+   public static String titleToPascalCase(String titleCased)
+   {
+      String pascalCased = titleCased.trim().replaceAll("\\W+", "");
+      if (pascalCased.startsWith("-"))
+         pascalCased = pascalCased.substring(1);
+      if (pascalCased.endsWith("-"))
+         pascalCased = pascalCased.substring(0, pascalCased.lastIndexOf("-"));
+      return pascalCased;
+   }
+
+   public static String kebabToPascalCase(String kebabCased)
+   {
+      final String[] split = kebabCased.trim().split("-");
+      StringBuilder pascalCased = new StringBuilder();
+      for (String section : split)
+      {
+         pascalCased.append(StringUtils.capitalize(section));
+      }
+      return pascalCased.toString();
+   }
+
+   public static String kebabToCamelCase(String kebabCased)
+   {
+      final String[] split = kebabCased.trim().split("-");
+      StringBuilder camelCased = new StringBuilder();
+      int j = 0;
+      while (j < split.length && split[j].isEmpty())
+      {
+         j++;
+      }
+      if (split.length > 0)
+      {
+         camelCased.append(StringUtils.uncapitalize(split[j]));
+      }
+      for (int i = j + 1; i < split.length; i++)
+      {
+         camelCased.append(StringUtils.capitalize(split[i]));
+      }
+      return camelCased.toString();
+   }
+
+   public static String toKebabCased(String anyCased)
+   {
+      String kebabCased = toPreKababWithBookendHandles(anyCased.trim());
+
+      kebabCased = kebabCased.substring(1, kebabCased.length() - 1);
+      if (kebabCased.startsWith("-"))
+         kebabCased = kebabCased.substring(1);
+      if (kebabCased.endsWith("-"))
+         kebabCased = kebabCased.substring(0, kebabCased.lastIndexOf("-"));
+
+      return kebabCased;
+   }
+
+   public static String toPreKababWithBookendHandles(String anyCased)
+   {
+      final ArrayList<String> parts = new ArrayList<>();
+      StringBuilder part = new StringBuilder();
+
+      for (int i = 0; i < anyCased.length(); i++)
+      {
+         String character = String.valueOf(anyCased.charAt(i));
+         if (StringUtils.isAllUpperCase(character) || StringUtils.isNumeric(character))
+         {
+            if (part.length() > 0)
+            {
+               parts.add(part.toString().toLowerCase());
+            }
+            part = new StringBuilder(character);
+         }
+         else
+         {
+            part.append(character);
+         }
+      }
+      if (part.length() > 0)
+      {
+         parts.add(part.toString().toLowerCase());
+      }
+
+      StringBuilder kebab = new StringBuilder();
+      for (int i = 0; i < parts.size(); i++)
+      {
+         String s = parts.get(i);
+         if(i == 0 || !parts.get(i - 1).endsWith("-"))
+         {
+            kebab.append('-');
+         }
+         kebab.append(s);
+      }
+      kebab.append('-');
+
+      return kebab.toString();
    }
 
    public static String toHumanReadable(double bits)

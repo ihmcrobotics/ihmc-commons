@@ -1,8 +1,5 @@
 package us.ihmc.commons;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.time.LocalDate;
@@ -14,12 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import us.ihmc.log.LogTools;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class FormattingToolsTest
 {
-
    @Test
    public void testGetFormattedDecimal3D()
    {
@@ -69,15 +67,72 @@ public class FormattingToolsTest
    @Test
    public void testUnderScoredToCamelCase()
    {
-      String resultingFormattedString;
-      resultingFormattedString = FormattingTools.underscoredToCamelCase("TEST_ABCD_DEFG", true);
-      assertTrue(resultingFormattedString.equals("TestAbcdDefg"));
+      assertEquals("TestAbcdDefg", FormattingTools.underscoredToCamelCase("TEST_ABCD_DEFG", true));
+      assertEquals("testAbcdDefg", FormattingTools.underscoredToCamelCase("TEST_ABCD_DEFG", false));
+      assertEquals("1234@$%Bcdf", FormattingTools.underscoredToCamelCase("1234_@$%_BCDF", true));
+   }
 
-      resultingFormattedString = FormattingTools.underscoredToCamelCase("TEST_ABCD_DEFG", false);
-      assertTrue(resultingFormattedString.equals("testAbcdDefg"));
+   @Test
+   public void testTitleToKebabCase()
+   {
+      assertEquals("hello", FormattingTools.titleToKebabCase("Hello"));
+      assertEquals("hello123", FormattingTools.titleToKebabCase("Hello123 "));
+      assertEquals("hello-123", FormattingTools.titleToKebabCase("Hello 123"));
+      assertEquals("hello-123-multi", FormattingTools.titleToKebabCase("Hello 123 Multi"));
+      assertEquals("hello-123-multi", FormattingTools.titleToKebabCase(" -Hello 123 Multi"));
+      assertEquals("hello-123-multi", FormattingTools.titleToKebabCase("Hello 123 Multi-"));
+      assertEquals("123hello", FormattingTools.titleToKebabCase("123Hello"));
+   }
 
-      resultingFormattedString = FormattingTools.underscoredToCamelCase("1234_@$%_BCDF", true);
-      assertTrue(resultingFormattedString.equals("1234@$%Bcdf"));
+   @Test
+   public void testTitleToPascalCase()
+   {
+      assertEquals("Hello", FormattingTools.titleToPascalCase("Hello"));
+      assertEquals("Hello123", FormattingTools.titleToPascalCase("Hello123"));
+      assertEquals("Hello123", FormattingTools.titleToPascalCase("Hello 123"));
+      assertEquals("Hello123Multi", FormattingTools.titleToPascalCase("Hello 123 Multi "));
+      assertEquals("Hello123Multi", FormattingTools.titleToPascalCase("-Hello 123 Multi"));
+      assertEquals("Hello123Multi", FormattingTools.titleToPascalCase("Hello 123 Multi- "));
+      assertEquals("123Hello", FormattingTools.titleToPascalCase("123Hello"));
+      assertEquals("HiThere", FormattingTools.titleToPascalCase("Hi There"));
+   }
+
+   @Test
+   public void testKebabToPascalCase()
+   {
+      assertEquals("Hello", FormattingTools.kebabToPascalCase("hello "));
+      assertEquals("HelloThere", FormattingTools.kebabToPascalCase(" hello-there"));
+      assertEquals("HelloThere123", FormattingTools.kebabToPascalCase("  -hello-there-123-"));
+      assertEquals("HelloThere123", FormattingTools.kebabToPascalCase("-hello-there-123"));
+      assertEquals("HelloThere123", FormattingTools.kebabToPascalCase("hello-there-123- "));
+   }
+
+   @Test
+   public void testKebabToCamelCase()
+   {
+      assertEquals("hello", FormattingTools.kebabToCamelCase("hello "));
+      assertEquals("helloThere", FormattingTools.kebabToCamelCase(" hello-there"));
+      assertEquals("helloThere123", FormattingTools.kebabToCamelCase("  -hello-there-123-"));
+      assertEquals("helloThere123", FormattingTools.kebabToCamelCase("-hello-there-123"));
+      assertEquals("helloThere123", FormattingTools.kebabToCamelCase("hello-there-123- "));
+   }
+
+   @Test
+   public void testToKebabCased()
+   {
+      assertEquals("hello", FormattingTools.toKebabCased("hello "));
+      assertEquals("hello-there", FormattingTools.toKebabCased(" hello-there"));
+      assertEquals("hello-there-1-2-3", FormattingTools.toKebabCased("  -hello-there-123-"));
+      assertEquals("hello-there-1-2-3", FormattingTools.toKebabCased("-hello-there-123"));
+      assertEquals("hello-there-1-2-3", FormattingTools.toKebabCased("hello-there-123- "));
+      assertEquals("hello", FormattingTools.toKebabCased("Hello"));
+      assertEquals("hello-1-2-3", FormattingTools.toKebabCased("Hello123"));
+//      assertEquals("hello-1-2-3", FormattingTools.toKebabCased("Hello 123"));
+//      assertEquals("hello-1-2-3-multi", FormattingTools.toKebabCased("Hello 123 Multi "));
+//      assertEquals("hello-1-2-3-multi", FormattingTools.toKebabCased("-Hello 123 Multi"));
+//      assertEquals("hello-1-2-3-multi", FormattingTools.toKebabCased("Hello 123 Multi- "));
+//      assertEquals("1-2-3-hello", FormattingTools.toKebabCased("123Hello"));
+//      assertEquals("hi-there", FormattingTools.toKebabCased("Hi There"));
    }
 
    @Test
