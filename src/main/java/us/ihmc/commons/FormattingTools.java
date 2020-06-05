@@ -107,12 +107,17 @@ public class FormattingTools
 
    public static String titleToPascalCase(String titleCased)
    {
-      String pascalCased = titleCased.trim().replaceAll("\\W+", "");
-      if (pascalCased.startsWith("-"))
-         pascalCased = pascalCased.substring(1);
-      if (pascalCased.endsWith("-"))
-         pascalCased = pascalCased.substring(0, pascalCased.lastIndexOf("-"));
-      return pascalCased;
+      String[] split = titleCased.trim().split("\\W+");
+      StringBuilder pascalCased = new StringBuilder();
+      for (int i = 0; i < split.length; i++)
+      {
+         split[i] = StringUtils.capitalize(split[i]);
+         if (!split[i].equals("-"))
+         {
+            pascalCased.append(split[i]);
+         }
+      }
+      return pascalCased.toString();
    }
 
    public static String kebabToPascalCase(String kebabCased)

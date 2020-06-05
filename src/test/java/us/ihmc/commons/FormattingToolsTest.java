@@ -95,6 +95,7 @@ public class FormattingToolsTest
       assertEquals("Hello123Multi", FormattingTools.titleToPascalCase("Hello 123 Multi- "));
       assertEquals("123Hello", FormattingTools.titleToPascalCase("123Hello"));
       assertEquals("HiThere", FormattingTools.titleToPascalCase("Hi There"));
+      assertEquals("HiThere", FormattingTools.titleToPascalCase("Hi there"));
    }
 
    @Test
