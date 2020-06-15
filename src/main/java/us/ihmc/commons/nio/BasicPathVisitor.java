@@ -6,7 +6,7 @@ import java.nio.file.Path;
 /**
  * A more convenient interface for walking file trees. Sits on top of Java's NIO.2.
  */
-public abstract class BasicPathVisitor
+public interface BasicPathVisitor
 {
    /**
     * A file or a directory.
@@ -23,7 +23,7 @@ public abstract class BasicPathVisitor
     * @param pathType the type of Path being visited (file or directory)
     * @return fileVisitResult CONTINUE, SKIP_SIBLINGS, SKIP_SUBTREE, or TERMINATE
     */
-   public FileVisitResult visitPath(Path path, PathType pathType)
+   default FileVisitResult visitPath(Path path, PathType pathType)
    {
       return FileVisitResult.CONTINUE;
    }
