@@ -280,7 +280,7 @@ public class ThreadTools
     * @param prefix
     * @return
     */
-   public static Executor newSingleThreadExecutor(String prefix)
+   public static ExecutorService newSingleThreadExecutor(String prefix)
    {
       return Executors.newSingleThreadExecutor(createNamedThreadFactory(prefix));
    }
@@ -305,7 +305,7 @@ public class ThreadTools
     * @param prefix
     * @return
     */
-   public static Executor newSingleDaemonThreadExecutor(String prefix)
+   public static ExecutorService newSingleDaemonThreadExecutor(String prefix)
    {
       return Executors.newSingleThreadExecutor(createNamedDaemonThreadFactory(prefix));
    }
