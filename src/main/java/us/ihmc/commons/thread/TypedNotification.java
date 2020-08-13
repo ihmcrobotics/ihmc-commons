@@ -1,6 +1,8 @@
 package us.ihmc.commons.thread;
 
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
 /**
@@ -34,13 +36,26 @@ public class TypedNotification<T>
    /**
     * If value not immediately available, block and wait to be notified.
     *
+    * If interrupted, throw RuntimeException.
+    *
     * @return notification
     */
-   public synchronized T blockingPoll()
+   public T blockingPoll()
+   {
+      return blockingPoll(DefaultExceptionHandler.RUNTIME_EXCEPTION);
+   }
+
+   /**
+    * If value not immediately available, block and wait to be notified.
+    *
+    * @param exceptionHandler Handle interrupted exception
+    * @return notification
+    */
+   public synchronized T blockingPoll(ExceptionHandler exceptionHandler)
    {
       if (!poll())
       {
-         ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         ExceptionTools.handle((RunnableThatThrows) this::wait, exceptionHandler);
          poll();
       }
       return previousValue;
