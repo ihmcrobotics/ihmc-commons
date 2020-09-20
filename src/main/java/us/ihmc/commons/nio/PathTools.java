@@ -3,6 +3,7 @@ package us.ihmc.commons.nio;
 import org.apache.commons.io.FilenameUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.BasicPathVisitor.PathType;
+import us.ihmc.log.LogTools;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -227,7 +228,8 @@ public class PathTools
     */
    public static Path findDirectoryInline(String startingDirectory, String directoryNameToFind, Path fallback)
    {
-      Path currentDirectoryPath = Paths.get(startingDirectory).toAbsolutePath().normalize();
+      Path startingDirectoryPath = Paths.get(startingDirectory).toAbsolutePath().normalize();
+      Path currentDirectoryPath = startingDirectoryPath;
 
       if (startingDirectory.equals(directoryNameToFind))
       {
@@ -241,22 +243,27 @@ public class PathTools
 
       Path root = Paths.get("/").toAbsolutePath().normalize();
 
-      while (!currentDirectoryPath.equals(root))
+      currentDirectoryPath = currentDirectoryPath.resolve("..").normalize();
+      do
       {
-         currentDirectoryPath = currentDirectoryPath.resolve("..").normalize();
-
          if (currentDirectoryPath.getFileName().toString().equals(directoryNameToFind))
          {
             return currentDirectoryPath;
          }
-      }
 
-      if (fallback != null)
+         currentDirectoryPath = currentDirectoryPath.resolve("..").normalize();
+      }
+      while (!currentDirectoryPath.equals(root));
+
+      if (fallback == null)
       {
-         fallback = fallback.toAbsolutePath().normalize();
+         LogTools.warn("{} directory could not be found. Starting directory: {}", directoryNameToFind, startingDirectoryPath);
+         return null;
       }
-
-      return fallback;
+      else
+      {
+         return fallback.toAbsolutePath().normalize();
+      }
    }
 
    /**
