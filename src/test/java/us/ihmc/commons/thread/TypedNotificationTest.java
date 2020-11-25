@@ -45,23 +45,26 @@ public class TypedNotificationTest
    {
       assertTimeoutPreemptively(Duration.ofSeconds(1), () ->
       {
-         TypedNotification<Integer> notification = new TypedNotification();
+         TypedNotification<Integer> notification = new TypedNotification<>();
 
          assertFalse(notification.poll());
-         assertEquals(null, notification.read());
+         assertNull(notification.read());
 
-         long before = System.nanoTime();
+         double secondsToSleep = 0.2;
+
+         Stopwatch stopwatch = new Stopwatch().start();
          ThreadTools.startAThread(() ->
                                   {
-                                     ThreadTools.sleep(200);
+                                     ThreadTools.sleepSeconds(secondsToSleep);
                                      notification.set(8);
                                   }, "SetterThread");
 
          assertEquals(8, notification.blockingPoll());
 
-         long after = System.nanoTime();
+         double elapsed = stopwatch.totalElapsed();
 
-         assertTrue(Conversions.nanosecondsToMilliseconds(after - before) > 200);
+         LogTools.info("Elapsed: {}", elapsed);
+         assertEquals(secondsToSleep, elapsed, 0.1);
 
          assertEquals(8, notification.read());
       });
