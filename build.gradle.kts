@@ -18,6 +18,7 @@ ihmc {
 
 categories.configure("allocation") {
    junit5ParallelEnabled = true
+   jvmArguments += "allocationAgent"
 }
 
 mainDependencies {
