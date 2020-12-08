@@ -24,6 +24,26 @@ public class NotificationTest
    }
 
    @Test
+   public void testClear()
+   {
+      Notification notification = new Notification();
+
+      assertFalse(notification.poll());
+      assertFalse(notification.read());
+
+      notification.set();
+
+      assertTrue(notification.poll());
+      assertTrue(notification.read());
+
+      notification.set();
+
+      notification.clear();
+      assertFalse(notification.poll());
+      assertFalse(notification.read());
+   }
+
+   @Test
    public void testNotifiedBeforeBlockingPollCalled()
    {
       Notification notification = new Notification();

@@ -65,6 +65,15 @@ public class Notification
    }
 
    /**
+    * Clears the notification.
+    */
+   public synchronized void clear()
+   {
+      previousValue = notification;
+      notification = false;
+   }
+
+   /**
     * If notification not already set, block and wait to be notified.
     */
    public synchronized void blockingPoll()
