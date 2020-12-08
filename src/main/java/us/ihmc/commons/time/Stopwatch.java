@@ -36,9 +36,7 @@ public class Stopwatch
     */
    public Stopwatch()
    {
-      nowSupplier = () -> {
-         return Conversions.nanosecondsToSeconds(System.nanoTime());
-      };
+      nowSupplier = () -> Conversions.nanosecondsToSeconds(System.nanoTime());
       lapStart = Double.NaN;
    }
 
