@@ -144,7 +144,7 @@ public class Stopwatch
     *
     * <p>Use with {@link #resume()} to omit durations of time from the measurement of a lap.</p>
     *
-    * <p>WARNING: {@link #lap()}, {@link #reset()}, {@link #lapReset()}, and {@link #start()}
+    * <p>WARNING: {@link #lap()}, {@link #reset()}, {@link #resetLap()}, and {@link #start()}
     * will reset any suspensions of measurement from previous calls to {@link #suspend()} and
     * {@link #resume()}.</p>
     */
@@ -162,7 +162,7 @@ public class Stopwatch
     *
     * <p>Use with {@link #suspend()} to omit durations of time from the measurement of a lap.</p>
     *
-    * <p>WARNING: {@link #lap()}, {@link #reset()}, {@link #lapReset()}, and {@link #start()}
+    * <p>WARNING: {@link #lap()}, {@link #reset()}, {@link #resetLap()}, and {@link #start()}
     * will reset any suspensions of measurement from previous calls to {@link #suspend()} and
     * {@link #resume()}.</p>
     */
