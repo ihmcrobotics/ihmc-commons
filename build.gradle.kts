@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.log-tools-plugin") version "0.5.0"
+   id("us.ihmc.log-tools-plugin") version "0.6.1"
    id("us.ihmc.ihmc-ci") version "7.4"
    id("us.ihmc.ihmc-cd") version "1.17"
 }
@@ -24,7 +24,7 @@ categories.configure("allocation") {
 mainDependencies {
    api("org.apache.commons:commons-lang3:3.11")
    api("commons-io:commons-io:2.8.0")
-   api("us.ihmc:log-tools:0.5.0")
+   api("us.ihmc:log-tools:0.6.1")
 }
 
 testingDependencies {
