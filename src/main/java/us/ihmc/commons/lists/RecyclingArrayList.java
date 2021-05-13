@@ -357,6 +357,11 @@ public class RecyclingArrayList<T> implements List<T>
       Arrays.sort(values, 0, size(), comparator);
    }
 
+   public int getCurrentCapacity()
+   {
+      return values.length;
+   }
+
    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
    protected void ensureCapacity(int minCapacity)
