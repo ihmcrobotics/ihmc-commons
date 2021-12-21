@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.5] - 2021-12-20
+
+- Upgrade dependencies and remove log4j vulnerabilities.
+
+### Features
+
+- Add `DaemonThreadFactory` class
+- Return Thread handle from `ThreadTools#startAThread` and `TheadTools#startAsDaemon`
+- Add `ThreadTools#join`
+- Add `ThreadTools` executor creator methods
+- Upgrade to use Gradle Java Library plugin via the new ihmc-build plugin release
+
 ## [0.26.6] - 2019-07-15
 
 ### Features
@@ -156,7 +168,8 @@ DefaultExceptionHandler no longer returns `null` as an Object. Please return nul
 
 - Add new Stopwatch class with friendly API
 
-[Unreleased]: https://github.com/ihmcrobotics/ihmc-commons/compare/0.26.6...HEAD
+[Unreleased]: https://github.com/ihmcrobotics/ihmc-commons/compare/0.30.5...HEAD
+[0.30.5]: https://github.com/ihmcrobotics/ihmc-commons/compare/0.26.6...0.30.5
 [0.26.6]: https://github.com/ihmcrobotics/ihmc-commons/compare/0.26.3...0.26.6
 [0.26.3]: https://github.com/ihmcrobotics/ihmc-commons/compare/0.26.2...0.26.3
 [0.26.2]: https://github.com/ihmcrobotics/ihmc-commons/compare/0.25.4...0.26.2
