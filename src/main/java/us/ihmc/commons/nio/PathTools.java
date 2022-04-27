@@ -246,7 +246,8 @@ public class PathTools
       currentDirectoryPath = currentDirectoryPath.resolve("..").normalize();
       do
       {
-         if (currentDirectoryPath.getFileName().toString().equals(directoryNameToFind))
+         Path fileName = currentDirectoryPath.getFileName();
+         if (fileName != null && fileName.toString().equals(directoryNameToFind))
          {
             return currentDirectoryPath;
          }
