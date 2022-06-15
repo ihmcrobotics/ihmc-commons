@@ -228,7 +228,7 @@ public class ClassLoaderTools
          {
             try
             {
-               fs = FileSystems.newFileSystem(classPath, null);
+               fs = FileSystems.newFileSystem(classPath);
             }
             catch (Exception e)
             {
