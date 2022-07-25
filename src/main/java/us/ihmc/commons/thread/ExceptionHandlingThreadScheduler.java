@@ -1,6 +1,7 @@
 package us.ihmc.commons.thread;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
@@ -23,10 +24,10 @@ public class ExceptionHandlingThreadScheduler
       LogTools.error("{} is terminating due to an exception.", Thread.currentThread().getName());
    };
 
-   private volatile ScheduledExecutorService executorService;
+   private final ScheduledExecutorService executorService;
    private final ExceptionHandler exceptionHandler;
-   private final long crashesBeforeGivingUp;
-   private long crashCount = 0;
+   private final long permissableNumberOfExceptions;
+   private long numberOfExceptionsThrown = 0;
    private Runnable runnable;
    private ScheduledFuture<?> scheduledFuture;
    private volatile boolean isRunningTask = false;
@@ -38,10 +39,8 @@ public class ExceptionHandlingThreadScheduler
     */
    public ExceptionHandlingThreadScheduler(String name)
    {
-      this(name, DEFAULT_HANDLER, 0);
+      this(name, null, 0);
    }
-
-   /** TODO: Add constructor with Exception handler that print only the message N-1 times and print the stack trace when it finally crashes */
 
    /**
     * Handle the exceptions yourself and recover. Always resume running.
@@ -51,7 +50,7 @@ public class ExceptionHandlingThreadScheduler
     */
    public ExceptionHandlingThreadScheduler(String name, ExceptionHandler exceptionHandler)
    {
-      this(name, exceptionHandler, 0);
+      this(name, exceptionHandler, -1);
    }
 
    /**
@@ -59,19 +58,25 @@ public class ExceptionHandlingThreadScheduler
     *
     * @param prefix thread name prefix
     * @param exceptionHandler
-    * @param crashesBeforeGivingUp
+    * @param permissableNumberOfExceptions allow this many exceptions, then terminate on the next one. Pass -1 to never terminate.
     */
-   public ExceptionHandlingThreadScheduler(String prefix, ExceptionHandler exceptionHandler, long crashesBeforeGivingUp)
+   public ExceptionHandlingThreadScheduler(String prefix, ExceptionHandler exceptionHandler, long permissableNumberOfExceptions)
    {
-      this(prefix,exceptionHandler, crashesBeforeGivingUp, false);
+      this(prefix, exceptionHandler, permissableNumberOfExceptions, false);
    }
 
-   public ExceptionHandlingThreadScheduler(String prefix, ExceptionHandler exceptionHandler, long crashesBeforeGivingUp, boolean runAsDaemon)
+   /**
+    * Try to handle the exception but give up after N tries. Also allows to run the thread as a daemon.
+    *
+    * @param prefix thread name prefix
+    * @param exceptionHandler
+    * @param permissableNumberOfExceptions allow this many exceptions, then terminate on the next one. Pass 0 to never terminate.
+    */
+   public ExceptionHandlingThreadScheduler(String prefix, ExceptionHandler exceptionHandler, long permissableNumberOfExceptions, boolean runAsDaemon)
    {
-      executorService = runAsDaemon ?
-            ThreadTools.newSingleDaemonThreadScheduledExecutor(prefix) : ThreadTools.newSingleThreadScheduledExecutor(prefix);
+      executorService = runAsDaemon ? ThreadTools.newSingleDaemonThreadScheduledExecutor(prefix) : ThreadTools.newSingleThreadScheduledExecutor(prefix);
       this.exceptionHandler = exceptionHandler;
-      this.crashesBeforeGivingUp = crashesBeforeGivingUp;
+      this.permissableNumberOfExceptions = permissableNumberOfExceptions;
    }
 
    public ScheduledFuture<?> schedule(Runnable runnable, double period)
@@ -106,13 +111,34 @@ public class ExceptionHandlingThreadScheduler
       }
       catch (Exception e)
       {
-         exceptionHandler.handleException(e);
-
-         ++crashCount;
-         if (crashesBeforeGivingUp > 0 // if do not always continue
-               && crashCount > crashesBeforeGivingUp) // crash count has now surpassed allowable amount, so give up
+         if (permissableNumberOfExceptions > -1)
          {
-            throw e;
+            ++numberOfExceptionsThrown;
+            if (hasSurpassedPermissableExceptions())
+            {
+               if (exceptionHandler == null)
+               {
+                  LogTools.error("{} is terminating due to reaching {} exceptions.", Thread.currentThread().getName(), numberOfExceptionsThrown);
+
+                  // We need to throw a RuntimeException because regular exceptions happen silently.
+                  throw new RuntimeException(e);
+               }
+               else
+               {
+                  exceptionHandler.handleException(e);
+               }
+            }
+         }
+         else
+         {
+            if (exceptionHandler == null)
+            {
+               DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
+            }
+            else
+            {
+               exceptionHandler.handleException(e);
+            }
          }
       }
       finally
@@ -134,5 +160,10 @@ public class ExceptionHandlingThreadScheduler
    public boolean isRunningTask()
    {
       return isRunningTask;
+   }
+
+   public boolean hasSurpassedPermissableExceptions()
+   {
+      return numberOfExceptionsThrown > permissableNumberOfExceptions;
    }
 }
