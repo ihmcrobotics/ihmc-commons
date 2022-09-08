@@ -8,10 +8,10 @@ Useful tools and utilities that extend Java, Apache Commons Lang, and Apache Com
 In your build.gradle:
 
 `compile group: "us.ihmc", name: "ihmc-commons", version: `
-[ ![ihmc-commons](https://api.bintray.com/packages/ihmcrobotics/maven-release/ihmc-commons/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/ihmc-commons/_latestVersion)
+[ ![ihmc-commons](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons)
 
 `testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: `
-[ ![ihmc-commons](https://api.bintray.com/packages/ihmcrobotics/maven-release/ihmc-commons/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/ihmc-commons/_latestVersion)
+[ ![ihmc-commons-testing](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons-testing/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons-testing)
 
 ### What's Included
 
