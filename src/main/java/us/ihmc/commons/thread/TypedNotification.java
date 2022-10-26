@@ -12,14 +12,32 @@ import us.ihmc.commons.exception.ExceptionTools;
  * much as desired with #read.
  * <p/>
  * The Notification classes are to pass data to another thread. Sort of like a size 1 concurrent buffer.
- *
- * TODO: Implement peek.
- *
  */
 public class TypedNotification<T>
 {
    private volatile T notification = null;
    private T previousValue = null;
+
+   /**
+    * Peeks at the value of the notification without clearing it to see
+    * if this notification has been set.
+    *
+    * @return if the notification has been set
+    */
+   public boolean peekHasValue()
+   {
+      return notification != null;
+   }
+
+   /**
+    * Peeks at the value of the notification without clearing it.
+    *
+    * @return if the notification has been set
+    */
+   public T peek()
+   {
+      return notification;
+   }
 
    /**
     * Get the atomic value, store it for a later call to read, and return if new value was present.
@@ -61,6 +79,14 @@ public class TypedNotification<T>
       return previousValue;
    }
 
+   /**
+    * If on the last poll the notification was set. Should be called after {@link #poll}
+    * for convenience, as many times as you like.
+    *
+    * If this notification has never been polled, returns the initial value, false.
+    *
+    * @return if on the last poll the notification was set
+    */
    public boolean hasValue()
    {
       return previousValue != null;

@@ -1,7 +1,6 @@
 package us.ihmc.commons.thread;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
@@ -17,12 +16,18 @@ public class TypedNotificationTest
    {
       TypedNotification<Integer> notification = new TypedNotification<>();
 
+      assertTrue(notification.peek() == null);
+      assertFalse(notification.peekHasValue());
       assertFalse(notification.poll());
+      assertFalse(notification.hasValue());
       assertNull(notification.read());
 
       notification.set(6);
 
+      assertTrue(notification.peekHasValue());
+      assertEquals(6, notification.peek());
       assertTrue(notification.poll());
+      assertTrue(notification.hasValue());
       assertEquals(6, notification.read());
    }
 
@@ -54,10 +59,10 @@ public class TypedNotificationTest
 
          Stopwatch stopwatch = new Stopwatch().start();
          ThreadTools.startAThread(() ->
-                                  {
-                                     ThreadTools.sleepSeconds(secondsToSleep);
-                                     notification.set(8);
-                                  }, "SetterThread");
+         {
+            ThreadTools.sleepSeconds(secondsToSleep);
+            notification.set(8);
+         }, "SetterThread");
 
          assertEquals(8, notification.blockingPoll());
 
