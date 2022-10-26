@@ -6,12 +6,17 @@ import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
 /**
- * A thread barrier over an object. An external thread notifies the holder with an Object.
- * The holder polls for notifications, with the option to block with #blockingPoll. Upon
+ * <p>TypedNotification is used to pass data between threads. It is like a concurrent buffer of size 1.
+ * An external thread notifies the holder with an Object using {@link TypedNotification#set}.
+ * The holder polls for notifications, with the option to block with {@link TypedNotification#blockingPoll}. Upon
  * polling a notification, it is cleared. After a poll, the value may be read later as
- * much as desired with #read.
- * <p/>
- * The Notification classes are to pass data to another thread. Sort of like a size 1 concurrent buffer.
+ * much as desired with {@link TypedNotification#read}.</p>
+ *
+ * <p>This class also provides the corresponding {@link TypedNotification#peek} methods, which can be used
+ * to check the value of the notification without clearing it.</p>
+ *
+ * <p>Note that null is used to determine whether the notification is set. Setting the Notification
+ * to null will not have an effect. Similarly, the hasValue methods are just a null check.</p>
  */
 public class TypedNotification<T>
 {
@@ -32,7 +37,7 @@ public class TypedNotification<T>
    /**
     * Peeks at the value of the notification without clearing it.
     *
-    * @return if the notification has been set
+    * @return value of the notification or null if it is not set
     */
    public T peek()
    {
@@ -40,9 +45,38 @@ public class TypedNotification<T>
    }
 
    /**
+    * If value not immediately available, block and wait to be notified.
+    * Does not clear this notification.
+    *
+    * If interrupted, throw RuntimeException.
+    *
+    * @return value of the notification or null if it is not set
+    */
+   public synchronized T blockingPeek()
+   {
+      return blockingPeek(DefaultExceptionHandler.RUNTIME_EXCEPTION);
+   }
+
+   /**
+    * If value not immediately available, block and wait to be notified.
+    * Does not clear this notification.
+    *
+    * @param exceptionHandler Handle interrupted exception
+    * @return value of the notification or null if it is not set
+    */
+   public synchronized T blockingPeek(ExceptionHandler exceptionHandler)
+   {
+      if (!peekHasValue())
+      {
+         ExceptionTools.handle((RunnableThatThrows) this::wait, exceptionHandler);
+      }
+      return notification;
+   }
+
+   /**
     * Get the atomic value, store it for a later call to read, and return if new value was present.
     *
-    * @return value available
+    * @return if notification was set and a value is available
     */
    public synchronized boolean poll()
    {
@@ -53,10 +87,11 @@ public class TypedNotification<T>
 
    /**
     * If value not immediately available, block and wait to be notified.
+    * Clears this notification.
     *
     * If interrupted, throw RuntimeException.
     *
-    * @return notification
+    * @return polled value or null if the notification was not set
     */
    public T blockingPoll()
    {
@@ -65,17 +100,15 @@ public class TypedNotification<T>
 
    /**
     * If value not immediately available, block and wait to be notified.
+    * Clears this notification.
     *
     * @param exceptionHandler Handle interrupted exception
-    * @return notification
+    * @return polled value or null if the notification was not set
     */
    public synchronized T blockingPoll(ExceptionHandler exceptionHandler)
    {
-      if (!poll())
-      {
-         ExceptionTools.handle((RunnableThatThrows) this::wait, exceptionHandler);
-         poll();
-      }
+      blockingPeek(exceptionHandler);
+      poll();
       return previousValue;
    }
 
@@ -97,7 +130,7 @@ public class TypedNotification<T>
     * <p/>
     * Must have called {@link #poll()} first!
     *
-    * @return polled value
+    * @return polled value or null if the notification was not set
     */
    public T read()
    {

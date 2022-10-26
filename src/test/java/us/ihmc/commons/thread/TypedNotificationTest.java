@@ -73,6 +73,33 @@ public class TypedNotificationTest
 
          assertEquals(8, notification.read());
       });
+
+      assertTimeoutPreemptively(Duration.ofSeconds(1), () ->
+      {
+         TypedNotification<Integer> notification = new TypedNotification<>();
+
+         assertFalse(notification.poll());
+         assertNull(notification.read());
+
+         double secondsToSleep = 0.2;
+
+         Stopwatch stopwatch = new Stopwatch().start();
+         ThreadTools.startAThread(() ->
+         {
+            ThreadTools.sleepSeconds(secondsToSleep);
+            notification.set(8);
+         }, "SetterThread");
+
+         assertEquals(8, notification.blockingPeek());
+
+         double elapsed = stopwatch.totalElapsed();
+
+         LogTools.info("Elapsed: {}", elapsed);
+         assertEquals(secondsToSleep, elapsed, 0.1);
+
+         assertEquals(8, notification.peek());
+         assertNull(notification.read());
+      });
    }
 
    @Test
