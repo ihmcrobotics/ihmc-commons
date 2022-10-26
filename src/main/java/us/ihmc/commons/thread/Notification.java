@@ -71,7 +71,6 @@ public class Notification
       if (!peek())
       {
          ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-         peek();
       }
    }
 
