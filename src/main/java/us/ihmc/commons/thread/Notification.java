@@ -53,6 +53,28 @@ public class Notification
    private boolean previousValue = false;
 
    /**
+    * Peeks at the value of the notification without clearing it.
+    *
+    * @return if the notification has been set
+    */
+   public boolean peek()
+   {
+      return notification;
+   }
+
+   /**
+    * If notification not already set, block and wait to be notified.
+    * Does not clear this notification.
+    */
+   public synchronized void blockingPeek()
+   {
+      if (!peek())
+      {
+         ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      }
+   }
+
+   /**
     * Polls and clears the notification.
     *
     * @return if notification was set
@@ -75,14 +97,12 @@ public class Notification
 
    /**
     * If notification not already set, block and wait to be notified.
+    * Clears this notification.
     */
    public synchronized void blockingPoll()
    {
-      if (!poll())
-      {
-         ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-         poll();
-      }
+      blockingPeek();
+      poll();
    }
 
    /**

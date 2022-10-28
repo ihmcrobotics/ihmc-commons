@@ -1,7 +1,6 @@
 package us.ihmc.commons.thread;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
@@ -17,12 +16,18 @@ public class TypedNotificationTest
    {
       TypedNotification<Integer> notification = new TypedNotification<>();
 
+      assertTrue(notification.peek() == null);
+      assertFalse(notification.peekHasValue());
       assertFalse(notification.poll());
+      assertFalse(notification.hasValue());
       assertNull(notification.read());
 
       notification.set(6);
 
+      assertTrue(notification.peekHasValue());
+      assertEquals(6, notification.peek());
       assertTrue(notification.poll());
+      assertTrue(notification.hasValue());
       assertEquals(6, notification.read());
    }
 
@@ -54,10 +59,10 @@ public class TypedNotificationTest
 
          Stopwatch stopwatch = new Stopwatch().start();
          ThreadTools.startAThread(() ->
-                                  {
-                                     ThreadTools.sleepSeconds(secondsToSleep);
-                                     notification.set(8);
-                                  }, "SetterThread");
+         {
+            ThreadTools.sleepSeconds(secondsToSleep);
+            notification.set(8);
+         }, "SetterThread");
 
          assertEquals(8, notification.blockingPoll());
 
@@ -67,6 +72,33 @@ public class TypedNotificationTest
          assertEquals(secondsToSleep, elapsed, 0.1);
 
          assertEquals(8, notification.read());
+      });
+
+      assertTimeoutPreemptively(Duration.ofSeconds(1), () ->
+      {
+         TypedNotification<Integer> notification = new TypedNotification<>();
+
+         assertFalse(notification.poll());
+         assertNull(notification.read());
+
+         double secondsToSleep = 0.2;
+
+         Stopwatch stopwatch = new Stopwatch().start();
+         ThreadTools.startAThread(() ->
+         {
+            ThreadTools.sleepSeconds(secondsToSleep);
+            notification.set(8);
+         }, "SetterThread");
+
+         assertEquals(8, notification.blockingPeek());
+
+         double elapsed = stopwatch.totalElapsed();
+
+         LogTools.info("Elapsed: {}", elapsed);
+         assertEquals(secondsToSleep, elapsed, 0.1);
+
+         assertEquals(8, notification.peek());
+         assertNull(notification.read());
       });
    }
 
