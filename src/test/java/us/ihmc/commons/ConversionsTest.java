@@ -310,6 +310,13 @@ public class ConversionsTest
       assertEquals(-2.0, freqInHz[4], epsilon);
    }
 
+   @Test
+   public void testSecondsAndHertz()
+   {
+      assertEquals(1.0 / 250.0, Conversions.hertzToSeconds(250));
+      assertEquals(1.0 / 50.0, Conversions.secondsToHertz(50.0));
+   }
+
    public static void main(String[] args)
    {
       MutationTestFacilitator.facilitateMutationTestForClass(Conversions.class, ConversionsTest.class);

@@ -282,12 +282,34 @@ public class Conversions
    /**
     * <p>Convert angular velocity in radians per second (rad/s) to angular frequency in Hertz (Hz).</p>
     *
-    * @param angular velocity in rad/s
+    * @param radiansPerSecond angular velocity in rad/s
     * @return Angular frequency in Hz.
     */
    public static double radiansPerSecondToHertz(double radiansPerSecond)
    {
       return radiansPerSecond / TWO_PI;
+   }
+
+   /**
+    * Converts a period in seconds (s) to a frequency in hertz (Hz).
+    *
+    * @param period period in seconds (s)
+    * @return frequency in Hertz (Hz)
+    */
+   public static double secondsToHertz(double period)
+   {
+      return 1.0 / period;
+   }
+
+   /**
+    * Converts a frequency in hertz (Hz) to a period in seconds (s).
+    *
+    * @param frequency frequency in Hertz (Hz)
+    * @return period in seconds (s)
+    */
+   public static double hertzToSeconds(double frequency)
+   {
+      return 1.0 / frequency;
    }
 
    /**
