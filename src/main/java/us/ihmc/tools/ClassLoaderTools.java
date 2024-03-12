@@ -22,6 +22,7 @@ import java.util.zip.ZipOutputStream;
  *
  * @author Jesper Smith
  */
+@Deprecated // This class was only used for logging at IHMC and was moved into that respective repository
 public class ClassLoaderTools
 {
 
