@@ -39,3 +39,4 @@ jobs:
           job_summary: true
           detailed_summary: true
           require_passed_tests: true
+          annotate_notice: true
