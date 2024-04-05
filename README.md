@@ -3,6 +3,8 @@ IHMC Commons
 
 Useful tools and utilities that extend Java, Apache Commons Lang, and Apache Commons IO to make them a little more accessible and non-intrusive.
 
+[![Automated Tests](https://github.com/ihmcrobotics/ihmc-commons/actions/workflows/gradle-test.yml/badge.svg?branch=develop)](https://github.com/ihmcrobotics/ihmc-commons/actions/workflows/gradle-test.yml)
+
 ### Download
 
 In your build.gradle:
