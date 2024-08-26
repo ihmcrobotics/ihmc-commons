@@ -16,6 +16,11 @@ ihmc {
    configurePublications()
 }
 
+categories.configure("fast") {
+   junit5ParallelEnabled = true
+   jvmArguments += "-Dlog4j2.configurationFile=log4j2NoColor.yml"
+}
+
 categories.configure("allocation") {
    junit5ParallelEnabled = true
    jvmArguments += "allocationAgent"
@@ -38,4 +43,15 @@ testingDependencies {
 testDependencies {
    api(ihmc.sourceSetProject("main"))
    api(ihmc.sourceSetProject("testing"))
+}
+
+tasks.register("printJUnitXMLs")
+{
+   doLast {
+      val buildDir = ihmc.sourceSetProject("test").layout.buildDirectory
+
+      buildDir.asFile.get().walk()
+         .filter { it.isFile && it.path.matches(Regex(".*TEST-.*.xml"))}
+         .forEach { file -> logger.quiet(file.readText()) }
+   }
 }
