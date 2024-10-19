@@ -1,10 +1,11 @@
-package us.ihmc.commons.lists;
+package us.ihmc.commons.robotics.lists;
 
 import java.util.List;
 import java.util.function.Supplier;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class DenseMatrixArrayList extends RecyclingArrayList<DMatrixRMaj>
 {
