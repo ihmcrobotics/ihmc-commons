@@ -18,7 +18,6 @@ public class TimeInterval implements TimeIntervalBasics
    public TimeInterval(double startTime, double endTime)
    {
       setInterval(startTime, endTime);
-      checkInterval();
    }
 
    public double getStartTime()

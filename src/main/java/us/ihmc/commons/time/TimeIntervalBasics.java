@@ -22,7 +22,7 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
     */
    default void reset()
    {
-      setInterval(Double.NaN, Double.NaN);
+      setIntervalUnsafe(Double.NaN, Double.NaN);
    }
 
    /**
@@ -30,8 +30,7 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
     */
    default void setInterval(double startTime, double endTime)
    {
-      setStartTime(startTime);
-      setEndTime(endTime);
+      setIntervalUnsafe(startTime, endTime);
       checkInterval();
    }
 
@@ -43,13 +42,19 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
       setInterval(timeInterval.getStartTime(), timeInterval.getEndTime());
    }
 
+   default void setIntervalUnsafe(double startTime, double endTime)
+   {
+      setStartTime(startTime);
+      setEndTime(endTime);
+   }
+
    /**
     * Shifts the start and end time by {@param shiftTime}.
     * @param shiftTime time to shift, in seconds.
     */
    default TimeIntervalBasics shiftInterval(double shiftTime)
    {
-      setInterval(getStartTime() + shiftTime, getEndTime() + shiftTime);
+      setIntervalUnsafe(getStartTime() + shiftTime, getEndTime() + shiftTime);
       return this;
    }
 

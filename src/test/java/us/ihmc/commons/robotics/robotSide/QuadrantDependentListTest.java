@@ -42,16 +42,16 @@ public class QuadrantDependentListTest
          switch (i++)
          {
          case 0:
-            assertEquals("not first", "first", quadrantDependentList.get(robotQuadrant));
+            assertEquals("first", quadrantDependentList.get(robotQuadrant), "not first");
             break;
          case 1:
-            assertEquals("not second", "second", quadrantDependentList.get(robotQuadrant));
+            assertEquals("second", quadrantDependentList.get(robotQuadrant), "not second");
             break;
          case 2:
-            assertEquals("not third", "third", quadrantDependentList.get(robotQuadrant));
+            assertEquals("third", quadrantDependentList.get(robotQuadrant), "not third");
             break;
          case 3:
-            assertEquals("not fourth", "fourth", quadrantDependentList.get(robotQuadrant));
+            assertEquals("fourth", quadrantDependentList.get(robotQuadrant), "not fourthd");
             break;
          }
       }

@@ -180,17 +180,21 @@ public enum LegJointName
 
    public Axis3D getJointAxis()
    {
-      return switch (this)
+      switch (this)
       {
-         case HIP_YAW -> Axis3D.Z;
-         case HIP_ROLL -> Axis3D.X;
-         case HIP_PITCH -> Axis3D.Y;
-         case KNEE_PITCH -> Axis3D.Y;
-         case KNEE_YAW -> Axis3D.Z;
-         case ANKLE_PITCH -> Axis3D.Y;
-         case ANKLE_ROLL -> Axis3D.X;
-         default -> throw new RuntimeException("Enum constant not handled.");
-      };
+         case HIP_ROLL:
+         case ANKLE_ROLL:
+            return Axis3D.X;
+         case HIP_PITCH:
+         case KNEE_PITCH:
+         case ANKLE_PITCH:
+            return Axis3D.Y;
+         case HIP_YAW:
+         case KNEE_YAW:
+            return Axis3D.Z;
+         default:
+            throw new RuntimeException("Enum constant not handled.");
+      }
    }
 
    @Override
