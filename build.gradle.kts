@@ -37,7 +37,6 @@ roboticsDependencies {
    api("us.ihmc:euclid-geometry:0.22.0")
    api("us.ihmc:mecano:17-0.18.1")
    api("net.sf.trove4j:trove4j:3.0.3")
-   api("com.google.guava:guava:18.0")
 }
 
 testingDependencies {
@@ -52,6 +51,7 @@ testDependencies {
    api(ihmc.sourceSetProject("main"))
    api(ihmc.sourceSetProject("robotics"))
    api(ihmc.sourceSetProject("testing"))
+   api("com.google.guava:guava:18.0")
 }
 
 tasks.register("printJUnitXMLs")
