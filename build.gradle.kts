@@ -34,7 +34,7 @@ mainDependencies {
 
 roboticsDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:euclid-geometry:0.22.0")
    api("us.ihmc:mecano:17-0.18.1")
    api("net.sf.trove4j:trove4j:3.0.3")
    api("com.google.guava:guava:18.0")
