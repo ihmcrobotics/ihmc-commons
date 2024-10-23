@@ -2,28 +2,33 @@ package us.ihmc.commons.robotics.partNames;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.base.CaseFormat;
-
 public enum ArmJointName
 {
-   CLAVICLE_ROLL,
-   SHOULDER_YAW,
-   SHOULDER_ROLL,
-   SHOULDER_PITCH,
-   ELBOW_PITCH,
-   WRIST_ROLL,
-   FIRST_WRIST_PITCH,
-   SECOND_WRIST_PITCH,
-   ELBOW_ROLL,
-   ELBOW_YAW,
-   WRIST_YAW,
-   GRIPPER_YAW;
+   CLAVICLE_ROLL("clavicleRoll"),
+   SHOULDER_YAW("shoulderYaw"),
+   SHOULDER_ROLL("shoulderRoll"),
+   SHOULDER_PITCH("shoulderPitch"),
+   ELBOW_PITCH("elbowPitch"),
+   WRIST_ROLL("wristRoll"),
+   FIRST_WRIST_PITCH("firstWristPitch"),
+   SECOND_WRIST_PITCH("secondWristPitch"),
+   ELBOW_ROLL("elbowRoll"),
+   ELBOW_YAW("elbowYaw"),
+   WRIST_YAW("wristYaw"),
+   GRIPPER_YAW("gripperYaw");
 
    public static final ArmJointName[] values = values();
 
+   private final String camelCaseNameForStartOfExpression;
+
+   ArmJointName(String camelCaseNameForStartOfExpression)
+   {
+      this.camelCaseNameForStartOfExpression = camelCaseNameForStartOfExpression;
+   }
+
    public String getCamelCaseNameForStartOfExpression()
    {
-      return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name());
+      return camelCaseNameForStartOfExpression;
    }
 
    public String getCamelCaseNameForMiddleOfExpression()
