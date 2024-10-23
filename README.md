@@ -12,16 +12,28 @@ In your build.gradle:
 `compile group: "us.ihmc", name: "ihmc-commons", version: `
 [ ![ihmc-commons](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons)
 
+`compile group: "us.ihmc", name: "ihmc-commons-robotics", version: `
+[ ![ihmc-commons](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons-robotics)
+
 `testCompile group: "us.ihmc", name: "ihmc-commons-testing", version: `
 [ ![ihmc-commons-testing](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons-testing/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons-testing)
 
 ### What's Included
 
-##### Dependencies
+##### Main Dependencies
 
 - Apache Commons Lang 3
 - Apache Commons I/O
 - IHMC's Log Tools logging library providing setting log level from CLI
+
+##### Robotics Dependencies
+
+- Apache Commons Lang 3
+- Apache Commons I/O
+- IHMC's Log Tools logging library providing setting log level from CLI
+- IHMC's Euclid Geometry Library
+- Trove4j for garbage free lists of primitives
+- Google Guava for String printing
 
 ##### Main Distribution
 
@@ -31,8 +43,21 @@ In your build.gradle:
 - Epsilons for explicitness and convenience.
 - Functional exception handling including one-liner option.
 - Recycling and preallocated lists, deque.
+- Ring buffers and array sorters
 - Tools to increase threading safety.
 - Tools for defining time intervals.
+- Tools for working with Angles and arrays
+- Tools for working with deadbands.
+
+##### Robotics Distribution
+
+- RobotSide, RobotQuadrant, and RobotSextant, which extend RobotSegment definitions for conveniently defining sides for robots.
+- SegmentDependentLists, which provide conveniences for containing sided values.
+- Common enums for defining robot structure, such as ArmJointName and LegJointName.
+- Recycling lists for DenseMatrix from EJML and FrameTuple2D and 3D objects.
+- Generic holders of data, such as contactable bodies and center of mass state.
+- Holders of output data that is useful to pass between controller instances.
+- Tools for deadband
 
 ##### Testing Distribution
 
