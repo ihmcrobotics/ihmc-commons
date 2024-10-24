@@ -1,3 +1,7 @@
+# Files to ignore 
+gradlew
+gradlew.bat
+
 # Top level directories to ignore
 /build
 /classes
@@ -6,6 +10,7 @@
 /target
 /pit-reports
 /install
+/gradle
 
 # Top level directories in sub-projects
 */target
@@ -17,6 +22,7 @@
 **/bin
 **/out
 **/build
+**/gradle
 **/.gradle
 **/.project
 **/.classpath
