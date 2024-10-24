@@ -33,7 +33,6 @@ In your build.gradle:
 - IHMC's Log Tools logging library providing setting log level from CLI
 - IHMC's Euclid Geometry Library
 - Trove4j for garbage free lists of primitives
-- Google Guava for String printing
 
 ##### Main Distribution
 
