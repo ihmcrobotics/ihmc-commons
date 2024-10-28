@@ -1,5 +1,7 @@
 package us.ihmc.commons.time;
 
+import us.ihmc.commons.MathTools;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,6 +26,32 @@ public class TimeIntervalTools
       double endTimeB = b.getTimeInterval().getEndTime();
       return Double.compare(endTimeA, endTimeB);
    };
+
+   public static boolean areTimeIntervalsConsecutive(TimeIntervalProvider intervalA, TimeIntervalProvider intervalB, double epsilon)
+   {
+      return areTimeIntervalsConsecutive(intervalA.getTimeInterval(), intervalB.getTimeInterval(), epsilon);
+   }
+
+   public static boolean areTimeIntervalsConsecutive(TimeIntervalReadOnly intervalA, TimeIntervalReadOnly intervalB, double epsilon)
+   {
+      return MathTools.epsilonEquals(intervalA.getEndTime(), intervalB.getStartTime(), epsilon);
+   }
+
+   public static boolean isTimeSequenceContinuous(List<? extends TimeIntervalProvider> contactStateSequence)
+   {
+      return isTimeSequenceContinuous(contactStateSequence, 5e-3);
+   }
+
+   public static boolean isTimeSequenceContinuous(List<? extends TimeIntervalProvider> contactStateSequence, double epsilon)
+   {
+      for (int index = 0; index < contactStateSequence.size() - 1; index++)
+      {
+         if (!areTimeIntervalsConsecutive(contactStateSequence.get(index), contactStateSequence.get(index + 1), epsilon))
+            return false;
+      }
+
+      return true;
+   }
 
    /**
     * Checks whether or not interval A and interval B overlap any. That is, is the intersection between the two intervals non-empty.
