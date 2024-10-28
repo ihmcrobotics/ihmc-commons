@@ -32,13 +32,6 @@ mainDependencies {
    api("us.ihmc:log-tools:0.6.3")
 }
 
-roboticsDependencies {
-   api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:euclid-geometry:0.22.0")
-   api("us.ihmc:mecano:17-0.18.1")
-   api("net.sf.trove4j:trove4j:3.0.3")
-}
-
 testingDependencies {
    api(ihmc.sourceSetProject("main"))
    api(junit.jupiterApi())
