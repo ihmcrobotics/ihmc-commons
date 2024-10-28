@@ -31,8 +31,11 @@ In your build.gradle:
 - Epsilons for explicitness and convenience.
 - Functional exception handling including one-liner option.
 - Recycling and preallocated lists, deque.
+- Ring buffers and array sorters
 - Tools to increase threading safety.
 - Tools for defining time intervals.
+- Tools for working with Angles and arrays
+- Tools for working with deadbands.
 
 ##### Testing Distribution
 
