@@ -42,9 +42,7 @@ testingDependencies {
 
 testDependencies {
    api(ihmc.sourceSetProject("main"))
-   api(ihmc.sourceSetProject("robotics"))
    api(ihmc.sourceSetProject("testing"))
-   api("com.google.guava:guava:18.0")
 }
 
 tasks.register("printJUnitXMLs")
