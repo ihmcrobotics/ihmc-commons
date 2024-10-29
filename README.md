@@ -33,6 +33,9 @@ In your build.gradle:
 - Recycling and preallocated lists, deque.
 - Tools to increase threading safety.
 - Tools for defining time intervals.
+- Ring buffers and array sorters.
+- Tools for working with angles and arrays.
+- Tools for working with deadbands.
 
 ##### Testing Distribution
 
