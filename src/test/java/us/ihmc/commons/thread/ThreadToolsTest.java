@@ -2,9 +2,12 @@ package us.ihmc.commons.thread;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -276,6 +279,86 @@ public class ThreadToolsTest
             }
          }
       }
+   }
+
+   @Test
+   public void testParkAtLeast()
+   {
+      assertTrue(conductParkTest(0.0000000000001, false));
+      assertTrue(conductParkTest(0.5e-9, false));
+      assertTrue(conductParkTest(1e-9, false));
+      assertTrue(conductParkTest(0.1, false));
+      assertTrue(conductParkTest(0.0001, false));
+      assertTrue(conductParkTest(0.0000000005, false));
+      assertTrue(conductParkTest(1.1, false));
+      assertTrue(conductParkTest(2.0, false));
+
+      assertTrue(conductParkTest(0.0000000000001, true));
+      assertTrue(conductParkTest(0.5e-9, true));
+      assertTrue(conductParkTest(1e-9, true));
+      assertTrue(conductParkTest(0.1, true));
+      assertTrue(conductParkTest(0.0001, true));
+      assertTrue(conductParkTest(0.0000000005, true));
+      assertTrue(conductParkTest(1.1, true));
+      assertTrue(conductParkTest(2.0, true));
+   }
+
+   private boolean conductParkTest(double sleepDuration, boolean atLeast)
+   {
+      double before = Conversions.nanosecondsToSeconds(System.nanoTime());
+
+      if (atLeast)
+         ThreadTools.parkAtLeast(sleepDuration);
+      else
+         ThreadTools.park(sleepDuration);
+
+      double after = Conversions.nanosecondsToSeconds(System.nanoTime());
+
+      double overslept = (after - before) - sleepDuration;
+
+      // FIXME?
+//      LogTools.info("Overslept %f ms".formatted(Conversions.secondsToMilliseconds(overslept)));
+
+      assertTrue(overslept < 0.005); // Assert we don't oversleep more than 5 milliseconds -- typically a lot lower
+
+      return overslept > 0.0;
+   }
+
+   @Test
+   public void testCancellableScheduledTasks()
+   {
+      ScheduledExecutorService scheduler = ThreadTools.newSingleDaemonThreadScheduledExecutor("Test");
+
+      StringBuilder output = new StringBuilder();
+
+      ScheduledFuture<?> scheduledFuture1 = scheduler.schedule(() -> output.append("A"), 400, TimeUnit.MILLISECONDS);
+      ThreadTools.sleep(200);
+      scheduledFuture1.cancel(false);
+      scheduler.schedule(() -> output.append("B"), 400, TimeUnit.MILLISECONDS);
+      ThreadTools.sleep(600);
+      ScheduledFuture<StringBuilder> scheduledFuture2 = scheduler.schedule(() -> output.append("C"), 400, TimeUnit.MILLISECONDS);
+      ThreadTools.sleep(200);
+      scheduledFuture2.cancel(false);
+      ThreadTools.sleep(600);
+      scheduler.schedule(() -> output.append("D"), 400, TimeUnit.MILLISECONDS);
+      ThreadTools.sleep(600);
+
+      scheduler.schedule(() -> ExceptionTools.handle(() ->
+      {
+         output.append("E");
+         throw new NullPointerException();
+      }, DefaultExceptionHandler.PRINT_MESSAGE), 400, TimeUnit.MILLISECONDS);
+      ThreadTools.sleep(600);
+      ScheduledFuture<StringBuilder> scheduledFuture3 = scheduler.schedule(() -> output.append("F"), 400, TimeUnit.MILLISECONDS);
+      ThreadTools.sleep(200);
+      scheduledFuture3.cancel(false);
+      ThreadTools.sleep(600);
+
+      String recordedOutput = output.toString();
+      assertEquals("BDE", recordedOutput);
+      LogTools.info(recordedOutput);
+
+      scheduler.shutdown();
    }
 
    private class SleepAndVerifyDespiteWakingUpRunnable implements Runnable
