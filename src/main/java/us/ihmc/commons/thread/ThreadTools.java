@@ -128,10 +128,14 @@ public class ThreadTools
    }
 
    /**
-    * Very similar to {@link #sleepSeconds(double)}, but uses {@link LockSupport#parkNanos} to sleep.
+    * Similar to {@link #sleepSeconds(double)}, but uses {@link LockSupport#parkNanos} to sleep.
     * {@link LockSupport#parkNanos} is more accurate than {@link Thread#sleep}.
     * The requested sleep is guaranteed to be at least as long as the requested
     * amount and can be up to a nanosecond longer.
+    * <p>
+    * Also, while {@link #sleepSeconds(double)} swallows interrupts,
+    * this method will return upon being interrupted
+    * and the calling thread's interrupt status will be preserved.
     */
    public static void park(double seconds)
    {
