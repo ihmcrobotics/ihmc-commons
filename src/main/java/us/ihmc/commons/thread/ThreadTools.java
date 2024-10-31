@@ -1,6 +1,7 @@
 package us.ihmc.commons.thread;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * <p>
@@ -126,6 +128,56 @@ public class ThreadTools
    }
 
    /**
+    * Similar to {@link #sleepSeconds(double)}, but uses {@link LockSupport#parkNanos} to sleep.
+    * {@link LockSupport#parkNanos} is more accurate than {@link Thread#sleep}.
+    * The requested sleep is guaranteed to be at least as long as the requested
+    * amount and can be up to a nanosecond longer.
+    * <p>
+    * Also, while {@link #sleepSeconds(double)} swallows interrupts,
+    * this method will return upon being interrupted
+    * and the calling thread's interrupt status will be preserved.
+    */
+   public static void park(double seconds)
+   {
+      double floatingNanos = seconds * 1e9;
+      long nanoseconds = (long) floatingNanos;
+
+      if (floatingNanos > nanoseconds) // Take nanosecond ceiling instead of floor
+         ++nanoseconds;
+
+      LockSupport.parkNanos(nanoseconds); // More accurate than Thread.sleep
+   }
+
+   /**
+    * Guarantees a sleep of a minimum duration in floating point seconds
+    * using {@link LockSupport#parkNanos}. It will always sleep a little too long.
+    * The amount overslept probably varies by system, but it has been observed to
+    * be less than half a millisecond.
+    * <p>
+    * {@link #sleepSeconds} can return slightly early because it
+    * cuts off the sub-nanosecond part, allowing it to under-sleep by a nanosecond
+    * at most.
+    *
+    * @param duration to sleep in seconds
+    * @return Exactly how long it actually slept in seconds
+    */
+   public static double parkAtLeast(double duration)
+   {
+      double startTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+      double amountSlept = 0.0;
+      do
+      {
+         double nextDuration = duration - amountSlept;
+
+         park(nextDuration);
+
+         amountSlept = Conversions.nanosecondsToSeconds(System.nanoTime()) - startTime;
+      }
+      while (amountSlept < duration);
+      return amountSlept;
+   }
+
+   /**
     * Join from current thread, printing stack trace if interrupted.
     */
    public static void join()
@@ -162,6 +214,24 @@ public class ThreadTools
       daemonThread.setDaemon(true);
       daemonThread.start();
       return daemonThread;
+   }
+
+   /**
+    * Starts a user thread for a {@linkplain RunnableThatThrows}.
+    * To start a daemon thread
+    */
+   public static Thread startAThread(RunnableThatThrows runnable, ExceptionHandler exceptionHandler, String threadName)
+   {
+      return startAThread(() -> ExceptionTools.handle(runnable, exceptionHandler), threadName);
+   }
+
+   /**
+    * Starts a damon thread for a {@linkplain RunnableThatThrows}.
+    * The Java Virtual Machine exits when the only threads running are all daemon threads.
+    */
+   public static Thread startAsDaemon(RunnableThatThrows runnable, ExceptionHandler exceptionHandler, String threadName)
+   {
+      return startAsDaemon(() -> ExceptionTools.handle(runnable, exceptionHandler), threadName);
    }
 
    public static void waitUntilNextMultipleOf(long waitMultipleMS) throws InterruptedException
@@ -204,10 +274,8 @@ public class ThreadTools
     */
    public static ThreadFactory createNamedThreadFactory(String prefix)
    {
-      boolean includePoolInName = true;
-      boolean includeThreadNumberInName = true;
       boolean daemon = false;
-      return createNamedThreadFactory(prefix, includePoolInName, includeThreadNumberInName, daemon, Thread.NORM_PRIORITY);
+      return createNamedThreadFactory(prefix, daemon);
    }
 
    /**
@@ -219,10 +287,23 @@ public class ThreadTools
     */
    public static ThreadFactory createNamedDaemonThreadFactory(String prefix)
    {
+      boolean daemon = true;
+      return createNamedThreadFactory(prefix, daemon);
+   }
+
+   /**
+    * Thread factory that creates threads with normal priority
+    * with the naming scheme "name-pool-1-thread-1", "name-pool-1-thread-2", ...
+    *
+    * @param prefix useful name to identify the purpose of threads
+    * @param daemon set threads to daemon
+    * @return thread factory
+    */
+   public static ThreadFactory createNamedThreadFactory(String prefix, boolean daemon)
+   {
       boolean includePoolInName = true;
       boolean includeThreadNumberInName = true;
-      boolean daemon = true;
-      return createNamedThreadFactory(prefix, includePoolInName, includeThreadNumberInName, daemon, Thread.NORM_PRIORITY);
+      return ThreadTools.createNamedThreadFactory(prefix, includePoolInName, includeThreadNumberInName, daemon, Thread.NORM_PRIORITY);
    }
 
    /**
