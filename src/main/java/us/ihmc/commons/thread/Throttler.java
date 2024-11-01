@@ -1,4 +1,4 @@
-package us.ihmc.tools.thread;
+package us.ihmc.commons.thread;
 
 import us.ihmc.commons.Conversions;
 
@@ -8,22 +8,22 @@ import us.ihmc.commons.Conversions;
  * which returns whether or not enough time has passed to run something.
  * Alternatively, it features a waitAndRun method, which allows the
  * user to sleep until it is ready for the next thing.
- *
+ * <p>
  * This class is useful as an alternative to creating additional
  * threads when appropriate. It does not create any threads so
  * there are no concurrency issues.
- *
+ * <p>
  * Throttler's {@link #run} methods work best when polled at much higher frequencies
  * than the requested throttled frequency. We have put a mechanism in place
  * to handle poll frequencies near or lower than requested, but the result
  * will be jittery and inaccurate. In those cases, it is best to spin
- * up a separate thread. See {@link RestartableThrottledThread}.
- *
+ * up a separate thread. See us.ihmc.tools.thread.RestartableThrottledThread.
+ * <p>
  * Throttler's {@link #waitAndRun} methods have a different nature. They
  * obviously cannot be called faster than the requested frequency. They
  * are designed to handle waiting the extra time after variable amounts
  * of computation in order to run that computation at a steady rate.
- *
+ * <p>
  * Example:
  *
  * <pre>
@@ -47,7 +47,7 @@ public class Throttler
 
    /**
     * Set the period.
-    *
+    * <p>
     * Syntactic sugar to be clear about what a constant passed in would be.
     * For example, as a field:
     *
@@ -63,7 +63,7 @@ public class Throttler
 
    /**
     * Set the frequency.
-    *
+    * <p>
     * Syntactic sugar to be clear about what a constant passed in would be.
     * For example, as a field:
     *
@@ -78,11 +78,11 @@ public class Throttler
    }
 
    /**
+    * For use if the user set the period with the {@link #setPeriod} method.
+    *
     * @return Whether or not enough time has passed to run your thing again.
     *         It is recommended to call this at several times the desired throttled rate.
     *         Calling this more often is directly propotional to the resulting accuracy.
-    *
-    * For use if the user set the period with the {@link #setPeriod} method.
     */
    public boolean run()
    {
@@ -122,7 +122,7 @@ public class Throttler
 
    /**
     * Sleeps until enough time has passed to run your thing again.
-    *
+    * <p>
     * For use if the user set the period with the {@link #setPeriod} method.
     */
    public void waitAndRun()
@@ -150,7 +150,7 @@ public class Throttler
          if (overtime < 0.0)
          {
             // Guarantees to sleep at least this amount (i.e. will sleep too long)
-            currentTime += MissingThreadTools.sleepAtLeast(-overtime);
+            currentTime += ThreadTools.parkAtLeast(-overtime);
 
             calculateOvertime(period);
          }

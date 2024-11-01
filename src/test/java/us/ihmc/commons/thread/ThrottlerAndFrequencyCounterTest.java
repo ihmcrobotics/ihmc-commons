@@ -1,10 +1,11 @@
-package us.ihmc.tools.thread;
+package us.ihmc.commons.thread;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.TestTools;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.time.FrequencyCalculator;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ThrottlerAndFrequencyCounterTest
 {
@@ -20,13 +21,13 @@ public class ThrottlerAndFrequencyCounterTest
       {
          frequencyCalculator.ping();
 
-         double sleepTimeSeconds = UnitConversions.hertzToSeconds(targetFrequency);
-         MissingThreadTools.sleep(sleepTimeSeconds);
+         double sleepTimeSeconds = Conversions.hertzToSeconds(targetFrequency);
+         ThreadTools.park(sleepTimeSeconds);
       }
 
       frequencyCalculator.destroy();
 
-      TestTools.assertEpsilonEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
+      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
    }
 
    private static void testFrequencyCounterDecaying(double targetFrequency, double decayTimeSeconds, double epsilon)
@@ -41,17 +42,17 @@ public class ThrottlerAndFrequencyCounterTest
       {
          frequencyCalculator.ping();
 
-         double sleepTimeSeconds = UnitConversions.hertzToSeconds(targetFrequency);
-         MissingThreadTools.sleep(sleepTimeSeconds);
+         double sleepTimeSeconds = Conversions.hertzToSeconds(targetFrequency);
+         ThreadTools.park(sleepTimeSeconds);
       }
 
       frequencyCalculator.destroy();
 
       // Decaying sleep
-      MissingThreadTools.sleep(decayTimeSeconds);
+      ThreadTools.park(decayTimeSeconds);
 
       double targetDecayFrequency = frequencyCalculator.getFrequency() / Math.exp(decayTimeSeconds);
-      TestTools.assertEpsilonEquals(frequencyCalculator.getFrequencyDecaying(), targetDecayFrequency, epsilon);
+      assertEquals(targetDecayFrequency, frequencyCalculator.getFrequencyDecaying(), epsilon);
    }
 
    private static void testThrottlerAndFrequencyCounter(double targetFrequency, double epsilon)
@@ -75,7 +76,7 @@ public class ThrottlerAndFrequencyCounterTest
 
       frequencyCalculator.destroy();
 
-      TestTools.assertEpsilonEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
+      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
    }
 
    @Test
@@ -130,5 +131,11 @@ public class ThrottlerAndFrequencyCounterTest
    public void testThrottlerAndFrequencyCounter100HzDecaying()
    {
       testFrequencyCounterDecaying(100, 5, 2);
+   }
+
+   @Test
+   public void testThrottlerAndFrequencyCounter50HzDecaying()
+   {
+      testFrequencyCounterDecaying(50, 10, 1);
    }
 }

@@ -1,15 +1,15 @@
-package us.ihmc.tools.time;
+package us.ihmc.commons.time;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.util.UUID;
 
 /**
  * An exponential smoothing frequency calculator with an optional logging thread to print the frequency once per second.
- * <a href="https://en.wikipedia.org/wiki/Exponential_smoothing">...</a>
+ * See: <a href="https://en.wikipedia.org/wiki/Exponential_smoothing">Exponential Smoothing</a>.
+ * <p>
  * Call {@link #ping()} on each new event.
  * Call {@link #getFrequency()} to get the frequency, which will remain constant if events stop.
  * Call {@link #getFrequencyDecaying()} to get the current frequency which trends to 0 when there are no events.
@@ -36,7 +36,7 @@ public class FrequencyCalculator
             {
                LogTools.info("FrequencyCalculator[" + threadID + "] average rate: " + getFrequency());
 
-               MissingThreadTools.sleep(1.0);
+               ThreadTools.park(1.0);
             }
          }, getClass().getSimpleName() + "-" + threadID);
 
@@ -66,8 +66,8 @@ public class FrequencyCalculator
          }
          else // Events are slowing down or stopped
          {
-            double psuedoSmoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * ongoingPeriod;
-            return 1.0 / psuedoSmoothedPeriod;
+            double pseudoSmoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * ongoingPeriod;
+            return 1.0 / pseudoSmoothedPeriod;
          }
       }
    }
@@ -101,6 +101,11 @@ public class FrequencyCalculator
    public double getFrequencyDecaying()
    {
       return calculateFrequency(true);
+   }
+
+   public void setAlpha(double alpha)
+   {
+      this.alpha = alpha;
    }
 
    public void destroy()
