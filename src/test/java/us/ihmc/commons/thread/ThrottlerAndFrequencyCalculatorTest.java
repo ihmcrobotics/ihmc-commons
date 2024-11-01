@@ -1,0 +1,141 @@
+package us.ihmc.commons.thread;
+
+import org.junit.jupiter.api.Test;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.time.FrequencyCalculator;
+import us.ihmc.log.LogTools;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class ThrottlerAndFrequencyCalculatorTest
+{
+   private static void testFrequencyCounter(double targetFrequency, double epsilon)
+   {
+      LogTools.info("testFrequencyCounter targetFrequency=" + targetFrequency + " epsilon=" + epsilon);
+
+      long start = System.currentTimeMillis();
+      FrequencyCalculator frequencyCalculator = new FrequencyCalculator(true);
+
+      // Run for 5 seconds
+      while (System.currentTimeMillis() - start < 5000)
+      {
+         frequencyCalculator.ping();
+
+         double sleepTimeSeconds = Conversions.hertzToSeconds(targetFrequency);
+         ThreadTools.park(sleepTimeSeconds);
+      }
+
+      frequencyCalculator.destroy();
+
+      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
+   }
+
+   private static void testFrequencyCounterDecaying(double targetFrequency, double decayTimeSeconds, double epsilon)
+   {
+      LogTools.info("testFrequencyCounter (decaying) targetFrequency=" + targetFrequency + " decayTimeSeconds=" + decayTimeSeconds + " epsilon=" + epsilon);
+
+      long start = System.currentTimeMillis();
+      FrequencyCalculator frequencyCalculator = new FrequencyCalculator(true);
+
+      // Run for 5 seconds
+      while (System.currentTimeMillis() - start < 5000)
+      {
+         frequencyCalculator.ping();
+
+         double sleepTimeSeconds = Conversions.hertzToSeconds(targetFrequency);
+         ThreadTools.park(sleepTimeSeconds);
+      }
+
+      frequencyCalculator.destroy();
+
+      // Decaying sleep
+      ThreadTools.park(decayTimeSeconds);
+
+      double targetDecayFrequency = frequencyCalculator.getFrequency() / Math.exp(decayTimeSeconds);
+      assertEquals(targetDecayFrequency, frequencyCalculator.getFrequencyDecaying(), epsilon);
+   }
+
+   private static void testThrottlerAndFrequencyCounter(double targetFrequency, double epsilon)
+   {
+      LogTools.info("testThrottlerAndFrequencyCounter (using us.ihmc.commons.thread.Throttler) targetFrequency=" + targetFrequency + " epsilon=" + epsilon);
+
+      Throttler throttler = new Throttler();
+      throttler.setFrequency(targetFrequency);
+      throttler.waitAndRun();
+
+      long start = System.currentTimeMillis();
+      FrequencyCalculator frequencyCalculator = new FrequencyCalculator(true);
+
+      // Run for 5 seconds
+      while (System.currentTimeMillis() - start < 5000)
+      {
+         frequencyCalculator.ping();
+
+         throttler.waitAndRun();
+      }
+
+      frequencyCalculator.destroy();
+
+      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
+   }
+
+   @Test
+   public void testFrequencyCounter100Hz()
+   {
+      testFrequencyCounter(100, 2);
+   }
+
+   @Test
+   public void testThrottlerAndFrequencyCounter100Hz()
+   {
+      testThrottlerAndFrequencyCounter(100, 2);
+   }
+
+   @Test
+   public void testFrequencyCounter10Hz()
+   {
+      testFrequencyCounter(10, 0.2);
+   }
+
+   @Test
+   public void testThrottlerAndFrequencyCounter10Hz()
+   {
+      testThrottlerAndFrequencyCounter(10, 0.2);
+   }
+
+   @Test
+   public void testFrequencyCounter1Hz()
+   {
+      testFrequencyCounter(1, 0.002);
+   }
+
+   @Test
+   public void testThrottlerAndFrequencyCounter1Hz()
+   {
+      testThrottlerAndFrequencyCounter(1, 0.002);
+   }
+
+   @Test
+   public void testFrequencyCounter0_5Hz()
+   {
+      testFrequencyCounter(0.5, 0.001);
+   }
+
+   @Test
+   public void testThrottlerAndFrequencyCounter0_5Hz()
+   {
+      testThrottlerAndFrequencyCounter(0.5, 0.001);
+   }
+
+   @Test
+   public void testThrottlerAndFrequencyCounter100HzDecaying()
+   {
+      testFrequencyCounterDecaying(100, 5, 2);
+   }
+
+   @Test
+   public void testThrottlerAndFrequencyCounter50hzDecaying()
+   {
+      testFrequencyCounterDecaying(50, 5, 1);
+   }
+}
