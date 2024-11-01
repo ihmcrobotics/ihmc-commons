@@ -7,7 +7,7 @@ import us.ihmc.log.LogTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ThrottlerAndFrequencyCounterTest
+public class ThrottlerAndFrequencyCalculatorTest
 {
    private static void testFrequencyCounter(double targetFrequency, double epsilon)
    {
