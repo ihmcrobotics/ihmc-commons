@@ -23,7 +23,7 @@ import us.ihmc.commons.exception.ExceptionTools;
  * Once started, be sure to kill this thread.
  * <p>
  * If this thread is interrupted while paused, a repetition will run such that the interrupted status
- * can be handled by user code (i.e. code in the passed in task, or overridden {@link #repeat()} method).
+ * can be handled by user code (i.e. code in the passed in task, or overridden {@link #runTask()} method).
  * <p>
  * Optionally, you may set a limit to the loop frequency through {@link #setFrequencyLimit(double)},
  * or by passing the frequency limit as a parameter in the constructor.
@@ -37,10 +37,10 @@ import us.ihmc.commons.exception.ExceptionTools;
  * <ul>
  *    <li>
  *       First, by passing in a runnable (or in this case a {@link RunnableThatThrows}) to the constructor.
- *       This runnable will be called in {@link #repeat()} every repetition.
+ *       This runnable will be called in {@link #runTask()} every repetition.
  *    <li>
- *       Second, by {@code @Override}ing the {@link #repeat()} method.
- *       The code within {@link #repeat()} will run every repetition.
+ *       Second, by {@code @Override}ing the {@link #runTask()} method.
+ *       The code within {@link #runTask()} will run every repetition.
  */
 public class RepeatingTaskThread extends Thread
 {
@@ -63,16 +63,15 @@ public class RepeatingTaskThread extends Thread
     *    <li> -1 = repeat indefinitely (keep looping until told otherwise).
     *    <li> N > 0 = run the loop N more repetitions.
     */
-   private volatile int remainingRepetitions = 0;
+   private volatile long remainingRepetitions = 0L;
 
    /** Counter for the total number of repetitions completed during the lifetime of this thread. */
    private long completedRepetitions = 0L;
 
    /**
-    * Indicates whether this object is destroyed.
-    * The loop will come to a finish when {@code isRunning() == false}.
-    * Does not equate to {@link Thread#isAlive()}, as the thread may take
-    * some time to finish executing after {@code isRunning()} becomes {@code false}.
+    * Becomes {@code true} when the thread is started, and {@code false} when the thread is killed.
+    * Once {@code false}, the task loop will allow the currently executing task (if any) to complete,
+    * and the task loop is exited, allowing the thread to die.
     */
    private volatile boolean running = false;
 
@@ -81,45 +80,24 @@ public class RepeatingTaskThread extends Thread
 
    public RepeatingTaskThread(String name)
    {
-      this(UNLIMITED_FREQUENCY, name);
-   }
-
-   public RepeatingTaskThread(double loopFrequencyLimit, String name)
-   {
-      this(DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, loopFrequencyLimit, name);
+      this(DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
    }
 
    public RepeatingTaskThread(ExceptionHandler exceptionHandler, String name)
    {
-      this(exceptionHandler, UNLIMITED_FREQUENCY, name);
-   }
-
-   public RepeatingTaskThread(ExceptionHandler exceptionHandler, double loopFrequencyLimit, String name)
-   {
-      this(null, exceptionHandler, loopFrequencyLimit, name);
+      this(null, exceptionHandler, name);
    }
 
    public RepeatingTaskThread(RunnableThatThrows task, String name)
    {
-      this(task, UNLIMITED_FREQUENCY, name);
-   }
-
-   public RepeatingTaskThread(RunnableThatThrows task, double loopFrequencyLimit, String name)
-   {
-      this(task, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, loopFrequencyLimit, name);
+      this(task, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
    }
 
    public RepeatingTaskThread(RunnableThatThrows task, ExceptionHandler exceptionHandler, String name)
    {
-      this(task, exceptionHandler, UNLIMITED_FREQUENCY, name);
-   }
-
-   public RepeatingTaskThread(RunnableThatThrows task, ExceptionHandler exceptionHandler, double loopFrequencyLimit, String name)
-   {
       super(name);
       this.task = task;
       this.exceptionHandler = exceptionHandler;
-      setFrequencyLimit(loopFrequencyLimit);
    }
 
    /**
@@ -132,10 +110,13 @@ public class RepeatingTaskThread extends Thread
     * each repetition may be too slow to run at that frequency.
     *
     * @param frequencyLimit The limit for the loop frequency. If negative, the loop's frequency is not limited.
+    * @return {@code this}, such that it can be used like a
+    *       <a href="https://en.wikipedia.org/wiki/Fluent_interface">fluent interface</a>.
     */
-   public void setFrequencyLimit(double frequencyLimit)
+   public RepeatingTaskThread setFrequencyLimit(double frequencyLimit)
    {
       loopPeriodLowerLimit = Conversions.hertzToSeconds(frequencyLimit);
+      return this;
    }
 
    /**
@@ -161,7 +142,7 @@ public class RepeatingTaskThread extends Thread
     */
    public void startRepeating()
    {
-      if (!isAlive())
+      if (!running)
          start();
 
       setRepeating(true);
@@ -199,7 +180,7 @@ public class RepeatingTaskThread extends Thread
     *
     * @param repetitions The number of repetitions the thread should loop after this call.
     */
-   public void setRemaining(int repetitions)
+   public void setRemaining(long repetitions)
    {
       synchronized (loopLock)
       {
@@ -224,16 +205,16 @@ public class RepeatingTaskThread extends Thread
    {
       synchronized (loopLock)
       {
-         // If looping indefinitely, do nothing
-         if (remainingRepetitions < 0)
+         // If repeating indefinitely, do nothing
+         if (remainingRepetitions < 0L)
             return;
 
          // Add to the remaining repetition counter
          remainingRepetitions += repetitions;
 
          // Ensure remaining repetition counter doesn't become negative in case of subtraction
-         if (remainingRepetitions < 0)
-            remainingRepetitions = 0;
+         if (remainingRepetitions < 0L)
+            remainingRepetitions = 0L;
 
          loopLock.notify();
       }
@@ -242,9 +223,9 @@ public class RepeatingTaskThread extends Thread
    /**
     * Get the remaining number of repetitions this thread plans to run.
     *
-    * @return The remaining number of loops this thread plans to run.
+    * @return The remaining number of repetitions to execute.
     */
-   public int getRemainingRepetitions()
+   public long getRemaining()
    {
       return remainingRepetitions;
    }
@@ -254,37 +235,9 @@ public class RepeatingTaskThread extends Thread
     *
     * @return The total number of repetitions completed by this thread.
     */
-   public long getCompletedRepetitions()
+   public long getCompleted()
    {
       return completedRepetitions;
-   }
-
-   /**
-    * Whether this thread is running. In other words, whether this thread has not been {@link #kill()}ed.
-    * <p>
-    * The returned value of this method does not necessarily equate to {@link #isAlive()},
-    * as the loop may take some time to finish after the call to {@link #kill()},
-    * during which the thread remains alive.
-    *
-    * @return {@code false} if {@link #kill()} or {@link #blockingKill()} has been called. {@code true} otherwise.
-    */
-   public boolean isRunning()
-   {
-      return running;
-   }
-
-   /**
-    * Whether this thread is currently looping.
-    *
-    * @return {@code true} if the thread is looping.
-    *       {@code false} if the thread is paused, killed, or hasn't been started.
-    */
-   public synchronized boolean isRepeating()
-   {
-      if (!isRunning())
-         return false;
-
-      return remainingRepetitions != 0;
    }
 
    /**
@@ -329,7 +282,7 @@ public class RepeatingTaskThread extends Thread
     *       This throwable will be handled by the passed in {@link ExceptionHandler}
     *       (by default it is {@link DefaultExceptionHandler#MESSAGE_AND_STACKTRACE}).
     */
-   protected void repeat() throws Throwable
+   protected void runTask() throws Throwable
    {
       if (task != null)
          task.run();
@@ -337,7 +290,7 @@ public class RepeatingTaskThread extends Thread
 
    /**
     * The {@link Thread#run()} method, overridden to run a loop.
-    * To extend this class {@link Thread} style, override {@link #repeat()} instead.
+    * To extend this class {@link Thread} style, override {@link #runTask()} instead.
     * <p>
     * DO NOT CALL THIS METHOD. Well, you can, but why would you?
     * You are using a thread to run things asynchronously, but calling this would run the loop synchronously.
@@ -354,14 +307,14 @@ public class RepeatingTaskThread extends Thread
          {
             synchronized (loopLock)
             {  // No more runs remaining -> wait until something changes
-               if (remainingRepetitions == 0)
+               if (remainingRepetitions == 0L)
                {
                   loopLock.wait();
                   continue;
                }
 
                // Decrement the counter for the run that's about to occur
-               if (remainingRepetitions > 0)
+               if (remainingRepetitions > 0L)
                   remainingRepetitions--;
             }
 
@@ -378,13 +331,27 @@ public class RepeatingTaskThread extends Thread
             }
          }
          catch (InterruptedException interrupted)
-         {  // Maintain interrupted status so that runInLoop can handle it
+         {  // Maintain interrupted status so that runTask method can handle it
             interrupt();
          }
 
-         // Run the runInLoop method, and handle any exception it may throw.
-         ExceptionTools.handle(this::repeat, exceptionHandler);
+         // Run the runTask method, and handle any exception it may throw.
+         ExceptionTools.handle(this::runTask, exceptionHandler);
          ++completedRepetitions;
       }
+   }
+
+   /**
+    * Whether this thread is currently looping. Used for testing.
+    *
+    * @return {@code true} if the thread is looping.
+    *       {@code false} if the thread is paused, killed, or hasn't been started.
+    */
+   /* package-private */ synchronized boolean isRepeating()
+   {
+      if (!running)
+         return false;
+
+      return remainingRepetitions != 0L;
    }
 }
