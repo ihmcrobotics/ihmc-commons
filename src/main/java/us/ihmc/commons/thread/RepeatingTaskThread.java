@@ -49,31 +49,12 @@ public class RepeatingTaskThread extends Thread
 
    private final RunnableThatThrows task;
    private final ExceptionHandler exceptionHandler;
-   private final Object loopLock = new Object();
+
+   /** State of this thread */
+   private final State state = new State();
 
    /** Throttler for optionally set loop period/frequency limit */
    private final Throttler throttler = new Throttler();
-
-   /**
-    * Countdown for number of repetitions to run.
-    * The counter is decremented each time before the repetition.
-    * Once the counter hits 0, the loop is paused.
-    * <ul>
-    *    <li> 0 = pause (don't run the loop until counter value is changed).
-    *    <li> -1 = repeat indefinitely (keep looping until told otherwise).
-    *    <li> N > 0 = run the loop N more repetitions.
-    */
-   private volatile long remainingRepetitions = 0L;
-
-   /** Counter for the total number of repetitions completed during the lifetime of this thread. */
-   private long completedRepetitions = 0L;
-
-   /**
-    * Becomes {@code true} when the thread is started, and {@code false} when the thread is killed.
-    * Once {@code false}, the task loop will allow the currently executing task (if any) to complete,
-    * and the task loop is exited, allowing the thread to die.
-    */
-   private volatile boolean running = false;
 
    /** The optionally set lower limit to the loop period. A negative value indicates no limit */
    private volatile double loopPeriodLowerLimit = UNLIMITED_FREQUENCY;
@@ -131,7 +112,7 @@ public class RepeatingTaskThread extends Thread
    @Override
    public void start()
    {
-      running = true;
+      state.setRunning(true);
       super.start();
    }
 
@@ -142,7 +123,7 @@ public class RepeatingTaskThread extends Thread
     */
    public void startRepeating()
    {
-      if (!running)
+      if (!state.isRunning())
          start();
 
       setRepeating(true);
@@ -182,11 +163,7 @@ public class RepeatingTaskThread extends Thread
     */
    public void setRemaining(long repetitions)
    {
-      synchronized (loopLock)
-      {
-         this.remainingRepetitions = repetitions;
-         loopLock.notify();
-      }
+      state.setRemaining(repetitions);
    }
 
    /**
@@ -203,41 +180,17 @@ public class RepeatingTaskThread extends Thread
     */
    public void addRemaining(int repetitions)
    {
-      synchronized (loopLock)
-      {
-         // If repeating indefinitely, do nothing
-         if (remainingRepetitions < 0L)
-            return;
-
-         // Add to the remaining repetition counter
-         remainingRepetitions += repetitions;
-
-         // Ensure remaining repetition counter doesn't become negative in case of subtraction
-         if (remainingRepetitions < 0L)
-            remainingRepetitions = 0L;
-
-         loopLock.notify();
-      }
+      state.addRemaining(repetitions);
    }
 
    /**
-    * Get the remaining number of repetitions this thread plans to run.
+    * Access the state of this thread.
     *
-    * @return The remaining number of repetitions to execute.
+    * @return The state of this thread.
     */
-   public long getRemaining()
+   public State getRepetitionState()
    {
-      return remainingRepetitions;
-   }
-
-   /**
-    * Get the total number of repetitions completed by this thread.
-    *
-    * @return The total number of repetitions completed by this thread.
-    */
-   public long getCompleted()
-   {
-      return completedRepetitions;
+      return state;
    }
 
    /**
@@ -247,11 +200,7 @@ public class RepeatingTaskThread extends Thread
     */
    public void kill()
    {
-      synchronized (loopLock)
-      {
-         running = false;
-         loopLock.notify();
-      }
+      state.setRunning(false);
    }
 
    /**
@@ -301,21 +250,17 @@ public class RepeatingTaskThread extends Thread
    @Override
    public final void run()
    {
-      while (running)
+      while (state.isRunning())
       {
          try
          {
-            synchronized (loopLock)
-            {  // No more runs remaining -> wait until something changes
-               if (remainingRepetitions == 0L)
+            synchronized (state)
+            {
+               if (state.getRemaining() == 0L)
                {
-                  loopLock.wait();
+                  state.waitForChange();
                   continue;
                }
-
-               // Decrement the counter for the run that's about to occur
-               if (remainingRepetitions > 0L)
-                  remainingRepetitions--;
             }
 
             // If a period/frequency limit was set, wait until loop can run.
@@ -336,8 +281,9 @@ public class RepeatingTaskThread extends Thread
          }
 
          // Run the runTask method, and handle any exception it may throw.
+         state.beforeTaskExecution();
          ExceptionTools.handle(this::runTask, exceptionHandler);
-         ++completedRepetitions;
+         state.afterTaskExecution();
       }
    }
 
@@ -349,9 +295,195 @@ public class RepeatingTaskThread extends Thread
     */
    /* package-private */ synchronized boolean isRepeating()
    {
-      if (!running)
+      if (!state.isRunning())
          return false;
 
-      return remainingRepetitions != 0L;
+      return state.getRemaining() != 0L;
+   }
+
+   /** The state of the RepeatingTaskThread. */
+   public static class State
+   {
+      /**
+       * Becomes {@code true} when the thread is started, and {@code false} when the thread is killed.
+       * Once {@code false}, the task loop will allow the currently executing task (if any) to complete,
+       * and the task loop is exited, allowing the thread to die.
+       */
+      private boolean running = false;
+
+      /**
+       * Countdown for number of repetitions to run.
+       * The counter is decremented each time after the repetition.
+       * Once the counter hits 0, the loop is paused.
+       * <ul>
+       *    <li> 0 = pause (don't run the loop until counter value is changed).
+       *    <li> -1 = repeat indefinitely (keep looping until told otherwise).
+       *    <li> N > 0 = run the loop N more repetitions.
+       */
+      private long remainingRepetitions = 0L;
+
+      /** Whether a task is currently executing */
+      private boolean executing = false;
+
+      /** Counter for the total number of repetitions completed during the lifetime of this thread. */
+      private long completedRepetitions = 0L;
+
+      /** Call right before executing a task */
+      private synchronized void beforeTaskExecution()
+      {
+         executing = true;
+         this.notifyAll();
+      }
+
+      /** Call right after executing a task */
+      private synchronized void afterTaskExecution()
+      {
+         executing = false;
+         if (remainingRepetitions > 0)
+            remainingRepetitions--;
+         completedRepetitions++;
+         this.notifyAll();
+      }
+
+      /**
+       * Set whether the thread is running.
+       * Should become {@code true} when the thread is started,
+       * and {@code false} when the thread is signalled to die.
+       *
+       * @param running Whether the thread is/should be running.
+       */
+      private synchronized void setRunning(boolean running)
+      {
+         this.running = running;
+         this.notifyAll();
+      }
+
+      /**
+       * Get whether the thread is running.
+       * @return Whether the thread is running.
+       */
+      private synchronized boolean isRunning()
+      {
+         return running;
+      }
+
+      /**
+       * Signal the thread to loop for the passed in number of repetitions.
+       * This overrides the remaining number of repetitions, regardless of its previous value.
+       * <p>
+       * This method also accepts {@link #REPEAT_INDEFINITELY}.
+       * <p>
+       * To add or subtract to the number of repetitions the thread should loop, use {@link #addRemaining(int)}.
+       *
+       * @param repetitions The number of repetitions the thread should loop after this call.
+       */
+      private synchronized void setRemaining(long repetitions)
+      {
+         remainingRepetitions = repetitions;
+         this.notifyAll();
+      }
+
+      /**
+       * Add N repetitions to the remaining repetition counter.
+       * If the thread was paused, adding repetitions begins the loop.
+       * <p>
+       * You may also subtract from the number of remaining repetitions by passing in a negative number.
+       * If the resulting number of repetitions is 0, the loop will be paused.
+       * This method cannot cause the remaining repetition count to go below 0.
+       * <p>
+       * This method does not do anything if the thread is repeating indefinitely.
+       *
+       * @param repetitions The number of repetitions to add. This can be a negative value for subtraction.
+       */
+      private synchronized void addRemaining(int repetitions)
+      {
+         // If repeating indefinitely, do nothing
+         if (remainingRepetitions < 0L)
+            return;
+
+         // Add to the remaining repetition counter
+         remainingRepetitions += repetitions;
+
+         // Ensure remaining repetition counter doesn't become negative in case of subtraction
+         if (remainingRepetitions < 0L)
+            remainingRepetitions = 0L;
+
+         this.notifyAll();
+      }
+
+      /**
+       * Wait until a change occurs to the thread's state.
+       *
+       * @throws InterruptedException If the waiting thread is interrupted.
+       */
+      public synchronized void waitForChange() throws InterruptedException
+      {
+         this.wait();
+      }
+
+      /**
+       * Wait until the next start of a task.
+       *
+       * @throws InterruptedException If the waiting thread is interrupted.
+       */
+      public synchronized void waitForNextTaskStart() throws InterruptedException
+      {
+         do
+         {
+            waitForChange();
+         } while (!executing);
+      }
+
+      /**
+       * Wait until the next end of a task.
+       *
+       * @throws InterruptedException If the waiting thread is interrupted.
+       */
+      public synchronized void waitForNextTaskEnd() throws InterruptedException
+      {
+         long completedBefore = completedRepetitions;
+         while (completedBefore == completedRepetitions)
+            waitForChange();
+      }
+
+      /**
+       * Wait until the thread is paused.
+       *
+       * @throws InterruptedException If the waiting thread is interrupted.
+       */
+      public synchronized void waitForPause() throws InterruptedException
+      {
+         while (remainingRepetitions != 0)
+            waitForChange();
+      }
+
+      /**
+       * Get the remaining number of repetitions this thread plans to run.
+       *
+       * @return The remaining number of repetitions to execute.
+       */
+      public synchronized long getRemaining()
+      {
+         return remainingRepetitions;
+      }
+
+      /**
+       * Get whether a task is currently executing.
+       * @return Whether a task is currently executing.
+       */
+      public synchronized boolean isExecuting()
+      {
+         return executing;
+      }
+
+      /**
+       * Get the total number of repetitions completed by this thread.
+       *
+       * @return The total number of repetitions completed by this thread.
+       */
+      public synchronized long getCompleted()
+      {
+         return completedRepetitions;
+      }
    }
 }
