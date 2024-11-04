@@ -7,7 +7,7 @@ import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
 /**
- * A thread that executes code in a loop.
+ * A thread that repeats execution of a single task. It can do this N times, continuously, or at a constant rate.
  * <p>
  * This thread has 3 states: {@link #REPEAT_INDEFINITELY},
  * looping for a set number of repetitions, and paused (when remaining repetitions = 0).
