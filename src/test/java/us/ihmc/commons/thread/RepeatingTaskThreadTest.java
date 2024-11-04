@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RepeatingTaskThreadTest
 {
-   private static final String NAME = "TestLoopingThread";
+   private static final String NAME = "TestRepeatingTaskThread";
 
    @Test
    public void testStartKill() throws InterruptedException
