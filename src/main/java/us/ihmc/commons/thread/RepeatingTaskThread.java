@@ -12,7 +12,7 @@ import us.ihmc.commons.exception.ExceptionTools;
  * This thread has 3 states: {@link #REPEAT_INDEFINITELY},
  * looping for a set number of repetitions, and paused (when remaining repetitions = 0).
  * <p>
- * Upon construction, the thread will not be alive, and will have zero remaining repetitions to run.
+ * Upon construction, the thread will have zero remaining repetitions to run.
  * To start repeating the task, the number of repetitions must be set and {@link #start()} must be called
  * (the order does not matter). Alternatively, you may call {@link #startRepeating()}, which will
  * signal the thread to repeat indefinitely, and start the thread if it has not been started.
@@ -60,7 +60,7 @@ public class RepeatingTaskThread extends Thread
     * Once the counter hits 0, the loop is paused.
     * <ul>
     *    <li> 0 = pause (don't run the loop until counter value is changed).
-    *    <li> -1 = loop indefinitely (keep looping until told otherwise).
+    *    <li> -1 = repeat indefinitely (keep looping until told otherwise).
     *    <li> N > 0 = run the loop N more repetitions.
     */
    private volatile int remainingRepetitions = 0;
@@ -70,13 +70,13 @@ public class RepeatingTaskThread extends Thread
 
    /**
     * Indicates whether this object is destroyed.
-    * The loop will come to a finish when {@code isDestroyed == true}.
-    * Does not equal to {@link Thread#isAlive()}, as the thread may take
-    * some time to finish executing after {@code isDestroyed} becomes true.
+    * The loop will come to a finish when {@code isRunning() == false}.
+    * Does not equate to {@link Thread#isAlive()}, as the thread may take
+    * some time to finish executing after {@code isRunning()} becomes {@code false}.
     */
    private volatile boolean running = false;
 
-   /** The optionally set lower limit to the loop period. A zero or negative value indicates no limit */
+   /** The optionally set lower limit to the loop period. A negative value indicates no limit */
    private volatile double loopPeriodLowerLimit = UNLIMITED_FREQUENCY;
 
    public RepeatingTaskThread(String name)
@@ -123,15 +123,15 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Limit the frequency of the loop execution.
-    * To un-limit the loop frequency, pass in a number less than or equal to 0.0.
+    * Limit the frequency of the repetition execution.
+    * To un-limit the repetition frequency, use {@link #removeFrequencyLimit()},
+    * or pass in {@link #UNLIMITED_FREQUENCY} (any value less than 0.0 will work).
     * <p>
     * Setting the frequency limit only guarantees that the loop's frequency will not exceed the limit.
-    * It does not guarantee that the loop will run AT the set frequency, as the code executed within the loop
-    * may be too slow to run at that frequency.
+    * It does not guarantee that the loop will run AT the set frequency, as the code executed within
+    * each repetition may be too slow to run at that frequency.
     *
-    * @param frequencyLimit The limit for the loop frequency.
-    *                       If zero or negative, the loop's frequency is not limited.
+    * @param frequencyLimit The limit for the loop frequency. If negative, the loop's frequency is not limited.
     */
    public void setFrequencyLimit(double frequencyLimit)
    {
@@ -140,7 +140,7 @@ public class RepeatingTaskThread extends Thread
 
    /**
     * Removes any limit to the loop frequency that may have been set.
-    * Equivalent to calling {@code setFrequencyLimit(-1.0)}.
+    * Equivalent to calling {@code setFrequencyLimit(UNLIMITED_FREQUENCY)}.
     */
    public void removeFrequencyLimit()
    {
@@ -250,6 +250,16 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
+    * Get the total number of repetitions completed by this thread.
+    *
+    * @return The total number of repetitions completed by this thread.
+    */
+   public long getCompletedRepetitions()
+   {
+      return completedRepetitions;
+   }
+
+   /**
     * Whether this thread is running. In other words, whether this thread has not been {@link #kill()}ed.
     * <p>
     * The returned value of this method does not necessarily equate to {@link #isAlive()},
@@ -266,9 +276,10 @@ public class RepeatingTaskThread extends Thread
    /**
     * Whether this thread is currently looping.
     *
-    * @return {@code true} if the thread is looping. {@code false} if the thread is paused or killed.
+    * @return {@code true} if the thread is looping.
+    *       {@code false} if the thread is paused, killed, or hasn't been started.
     */
-   public synchronized boolean isLooping()
+   public synchronized boolean isRepeating()
    {
       if (!isRunning())
          return false;

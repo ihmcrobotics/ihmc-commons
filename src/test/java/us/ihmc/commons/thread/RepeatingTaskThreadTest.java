@@ -2,235 +2,152 @@ package us.ihmc.commons.thread;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.time.FrequencyCalculator;
+import us.ihmc.log.LogTools;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: fix/adjust
 public class RepeatingTaskThreadTest
 {
    private static final String NAME = "TestLoopingThread";
 
    @Test
-   public void testStartKill()
+   public void testStartKill() throws InterruptedException
    {
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
-      {
-         System.out.println("Test Thread Running");
-         Thread.sleep(500);
-      }, NAME);
+      AtomicBoolean taskRan = new AtomicBoolean(false);
+      RepeatingTaskThread thread = new RepeatingTaskThread(() -> taskRan.set(true), NAME);
 
+      // Start the thread, but don't run anything
       thread.start();
-      assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertCorrectState(thread, true, true, false);
 
+      // Kill the thread, wait for it to die
       thread.kill();
-      try
-      {
-         Thread.sleep(1000);
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }
-      assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      thread.join(1000);
+      assertCorrectState(thread, false, false, false);
+
+      // Ensure the task never ran
+      assertFalse(taskRan.get());
+      assertEquals(0L, thread.getCompletedRepetitions());
    }
 
    @Test
-   public void testStartPauseStart()
+   public void testStartRepeatKill() throws InterruptedException
    {
+      AtomicInteger repetitions = new AtomicInteger(0);
       RepeatingTaskThread thread = new RepeatingTaskThread(() ->
       {
-         System.out.println("Test Thread Running");
-         Thread.sleep(500);
+         LogTools.info("Repetition {}", repetitions.getAndIncrement());
+         Thread.sleep(10);
       }, NAME);
 
-      thread.start();
-      assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      // Set the thread to run 10 repetitions
+      int repetitionsToRun = 10;
+      thread.setRemaining(repetitionsToRun);
+      assertCorrectState(thread, false, false, false);
+      assertEquals(repetitionsToRun, thread.getRemainingRepetitions());
 
+      // Start the thread. Should start running the repetitions
+      thread.start();
+      assertCorrectState(thread, true, true, true);
+
+      // Wait a second for all repetitions to complete
+      Thread.sleep(1000);
+      assertEquals(0, thread.getRemainingRepetitions());
+      assertCorrectState(thread, true, true, false);
+
+      // Kill the thread and wait for it to die
+      thread.kill();
+      thread.join(1000);
+      assertCorrectState(thread, false, false, false);
+
+      assertEquals(repetitionsToRun, thread.getCompletedRepetitions());
+      assertEquals(repetitionsToRun, repetitions.get());
+   }
+
+   @Test
+   public void testStartPauseStart() throws InterruptedException
+   {
+      AtomicInteger repetitions = new AtomicInteger(0);
+      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
+      {
+         LogTools.info("Repetition {}", repetitions.getAndIncrement());
+         Thread.sleep(10);
+      }, NAME);
+
+      // Start repeating
+      thread.startRepeating();
+      assertCorrectState(thread, true, true, true);
+      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getRemainingRepetitions());
+
+      // Sleep a bit to allow the thread to run
+      Thread.sleep(500);
+
+      // Stop repeating
       thread.stopRepeating();
-      try
+      assertCorrectState(thread, true, true, false);
+      assertTrue(thread.getCompletedRepetitions() > 0);
+      assertEquals(0, thread.getRemainingRepetitions());
+
+      // Start again
+      thread.startRepeating();
+      assertCorrectState(thread, true, true, true);
+      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getRemainingRepetitions());
+
+      // Kill the thread
+      thread.kill();
+      thread.join(1000);
+      assertCorrectState(thread, false, false, false);
+   }
+
+   @Test
+   public void testDoubleStart() throws InterruptedException
+   {
+      AtomicInteger repetitions = new AtomicInteger(0);
+      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
       {
-         Thread.sleep(1000);
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }
-      assertFalse(thread.isLooping());
-      assertTrue(thread.isAlive());
+         LogTools.info("Repetition {}", repetitions.getAndIncrement());
+         Thread.sleep(10);
+      }, NAME);
 
       thread.startRepeating();
-      assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertCorrectState(thread, true, true, true);
+
+      thread.startRepeating();
+      assertCorrectState(thread, true, true, true);
 
       thread.kill();
-      try
-      {
-         Thread.sleep(1000);
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }
-      assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      thread.join(1000);
+      assertCorrectState(thread, false, false, false);
    }
 
    @Test
-   public void testDoubleStart()
+   public void testKillWithoutStart()
    {
+      AtomicInteger repetitions = new AtomicInteger(0);
       RepeatingTaskThread thread = new RepeatingTaskThread(() ->
       {
-         System.out.println("Test Thread Running");
-         Thread.sleep(500);
+         LogTools.info("Repetition {}", repetitions.getAndIncrement());
+         Thread.sleep(10);
       }, NAME);
 
-      thread.start();
-      assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
-
-      thread.start();
-      assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
-
-      thread.kill();
-      try
-      {
-         Thread.sleep(1000);
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }
-      assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
-   }
-
-   @Test
-   public void testDoubleDestroy()
-   {
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
-      {
-         System.out.println("Test Thread Running");
-         Thread.sleep(500);
-      }, NAME);
-
-      thread.start();
-      assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
-
-      thread.kill();
-      try
-      {
-         Thread.sleep(1000);
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }
-      assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
-
-      thread.kill();
-      try
-      {
-         Thread.sleep(1000);
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }
-      assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
-   }
-
-   @Test
-   public void testDestroyWithoutStart()
-   {
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
-      {
-         System.out.println("Test Thread Running");
-         Thread.sleep(500);
-      }, NAME);
+      assertCorrectState(thread, false, false, false);
 
       thread.blockingKill();
-      assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      assertCorrectState(thread, false, false, false);
+
+      thread.blockingKill();
+      assertCorrectState(thread, false, false, false);
    }
 
    @Test
-   public void testBlockingDestroy()
+   public void testAddRemainingRepetitions()
    {
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
-      {
-         System.out.println("Test Thread Running");
-         Thread.sleep(500);
-      }, NAME);
-
+      AtomicInteger repetitions = new AtomicInteger(0);
+      RepeatingTaskThread thread = new RepeatingTaskThread(repetitions::getAndIncrement, NAME);
       thread.start();
-      assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
-
-      thread.blockingKill();
-      assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
-   }
-
-   @Test
-   public void testLoopOnce()
-   {
-      AtomicInteger loopCounter = new AtomicInteger(0);
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
-      {
-         assert loopCounter.incrementAndGet() == 1;
-      }, NAME);
-
-      thread.setRemaining(1);
-      ThreadTools.sleep(500);
-      thread.blockingKill();
-      assertEquals(1, loopCounter.get());
-      assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
-   }
-
-   @Test
-   public void testLoopNIterations()
-   {
-      AtomicInteger loopCounter = new AtomicInteger(0);
-      Notification loopedNotification = new Notification();
-      Notification loopAssertedNotification = new Notification();
-
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
-      {
-         loopCounter.set(loopCounter.get() + 1);
-         loopedNotification.set();
-         loopAssertedNotification.blockingPoll();
-      }, NAME);
-
-      for (int targetLoops = 1; targetLoops < 25; ++targetLoops)
-      {
-         loopCounter.set(0);
-         thread.setRemaining(targetLoops);
-         for (int i = 0; i < targetLoops; ++i)
-         {
-            loopedNotification.blockingPoll();
-            assertEquals(i + 1, loopCounter.get());
-            loopAssertedNotification.set();
-         }
-      }
-
-      thread.blockingKill();
-   }
-
-   @Test
-   public void testAddIterations()
-   {
-      AtomicInteger loopCounter = new AtomicInteger(0);
-      RepeatingTaskThread thread = new RepeatingTaskThread(loopCounter::getAndIncrement, NAME);
 
       int add = 20;
       int subtract = -10;
@@ -242,7 +159,8 @@ public class RepeatingTaskThreadTest
       thread.addRemaining(increment);
       ThreadTools.sleep(500);
       thread.blockingKill();
-      assertEquals(total, loopCounter.get());
+      assertEquals(total, repetitions.get());
+      assertEquals(total, thread.getCompletedRepetitions());
    }
 
    @Test
@@ -253,14 +171,21 @@ public class RepeatingTaskThreadTest
       double targetFrequency = 5.0;
       RepeatingTaskThread thread = new RepeatingTaskThread(frequencyCalculator::ping, targetFrequency, NAME);
 
-      thread.start();
-      ThreadTools.sleep(5000);
+      // Start repeating at the target frequency
+      thread.startRepeating();
+      ThreadTools.sleep(1000);
       assertEquals(targetFrequency, frequencyCalculator.getFrequency(), 0.1);
 
+      // Increase the target frequency
       targetFrequency = 30.0;
       thread.setFrequencyLimit(targetFrequency);
-      ThreadTools.sleep(5000);
+      ThreadTools.sleep(1000);
       assertEquals(targetFrequency, frequencyCalculator.getFrequency(), 0.1);
+
+      // Un-limit the repetition frequency
+      thread.removeFrequencyLimit();
+      ThreadTools.sleep(1000);
+      assertTrue(frequencyCalculator.getFrequency() > targetFrequency + 10.0); // Ensure thread is running at higher frequency than previous limit
 
       thread.blockingKill();
    }
@@ -286,7 +211,7 @@ public class RepeatingTaskThreadTest
       }, NAME);
 
       // Test during free spin
-      thread.start();
+      thread.startRepeating();
       for (int i = 0; i < 100; ++i)
       {
          thread.interrupt();
@@ -340,8 +265,16 @@ public class RepeatingTaskThreadTest
 
       int targetLoops = 15;
       thread.setRemaining(targetLoops);
+      thread.start();
       ThreadTools.sleep(500);
       thread.blockingKill();
       assertEquals(targetLoops, loopCounter.get());
+   }
+
+   private void assertCorrectState(RepeatingTaskThread thread, boolean shouldBeAlive, boolean shouldBeRunning, boolean shouldBeRepeating)
+   {
+      assertEquals(shouldBeAlive, thread.isAlive());
+      assertEquals(shouldBeRunning, thread.isRunning());
+      assertEquals(shouldBeRepeating, thread.isRepeating());
    }
 }
