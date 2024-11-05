@@ -54,8 +54,8 @@ public class RepeatingTaskThread extends Thread
     */
    private boolean running = false;
    
-   /** State of this thread */
-   private final State state = new State();
+   /** Execution state of this thread */
+   private final ExecutionState executionState = new ExecutionState();
 
    /** Throttler for optionally set loop period/frequency limit */
    private final Throttler throttler = new Throttler();
@@ -135,7 +135,7 @@ public class RepeatingTaskThread extends Thread
 
    /**
     * Signals the thread to stop repeating once the current repetition finishes.
-    * The thread will be paused until the value of remaining repetitions changes, or the thread is killed.
+    * The thread will be paused until more repetitions are scheduled, or the thread is killed.
     */
    public void stopRepeating()
    {
@@ -150,53 +150,51 @@ public class RepeatingTaskThread extends Thread
    public void setRepeating(boolean repeating)
    {
       if (repeating)
-         setRemaining(REPEAT_INDEFINITELY);
+         setScheduled(REPEAT_INDEFINITELY);
       else
-         setRemaining(0);
+         setScheduled(0);
    }
 
    /**
     * Signal the thread to loop for the passed in number of repetitions.
-    * This overrides the remaining number of repetitions, regardless of its previous value.
+    * This overrides the number of scheduled repetitions, regardless of its previous value.
     * <p>
     * This method also accepts {@link #REPEAT_INDEFINITELY}.
     * <p>
-    * To add or subtract to the number of repetitions the thread should loop, use {@link #addRemaining(int)}.
+    * To add or subtract to the number of repetitions the thread should loop, use {@link #addScheduled(int)}.
     *
     * @param repetitions The number of repetitions the thread should loop after this call.
     */
-   public void setRemaining(long repetitions)
+   public void setScheduled(long repetitions)
    {
-      state.setRemaining(repetitions);
+      executionState.setScheduled(repetitions);
    }
 
    /**
-    * Add N repetitions to the remaining repetition counter.
+    * Add N repetitions to the scheduled repetitions
     * If the thread was paused, adding repetitions begins the loop.
     * <p>
-    * You may also subtract from the number of remaining repetitions by passing in a negative number.
+    * You may also subtract from the number of scheduled repetitions by passing in a negative number.
     * If the resulting number of repetitions is 0, the loop will be paused.
-    * This method cannot cause the remaining repetition count to go below 0.
+    * This method cannot cause the scheduled repetition count to go below 0.
     * <p>
     * This method does not do anything if the thread is repeating indefinitely.
     *
     * @param repetitions The number of repetitions to add. This can be a negative value for subtraction.
     */
-   public void addRemaining(int repetitions)
+   public void addScheduled(int repetitions)
    {
-      state.addRemaining(repetitions);
+      executionState.addScheduled(repetitions);
    }
 
    /**
-    * Get the remaining number of repetitions this thread plans to run.
-    * A repetition is counted after it finishes execution.
-    * As such, this value may include the currently executing repetition;
+    * Get the number of scheduled repetitions.
     *
-    * @return The remaining number of repetitions to execute.
+    * @return The number of scheduled repetitions.
     */
-   public long getRemaining()
+   public long getScheduled()
    {
-      return state.getRemaining();
+      return executionState.getScheduled();
    }
 
    /**
@@ -206,7 +204,7 @@ public class RepeatingTaskThread extends Thread
     */
    public boolean isExecuting()
    {
-      return state.isExecuting();
+      return executionState.isExecuting();
    }
 
    /**
@@ -216,7 +214,7 @@ public class RepeatingTaskThread extends Thread
     */
    public long getCompleted()
    {
-      return state.getCompleted();
+      return executionState.getCompleted();
    }
 
    /**
@@ -226,12 +224,12 @@ public class RepeatingTaskThread extends Thread
     */
    public void waitForNextTaskStart() throws InterruptedException
    {
-      synchronized (state)
+      synchronized (executionState)
       {
          do
          {
-            state.waitForChange();
-         } while (!state.isExecuting());
+            executionState.waitForChange();
+         } while (!executionState.isExecuting());
       }
    }
 
@@ -242,11 +240,11 @@ public class RepeatingTaskThread extends Thread
     */
    public void waitForNextTaskEnd() throws InterruptedException
    {
-      synchronized (state)
+      synchronized (executionState)
       {
-         long completedBefore = state.getCompleted();
-         while (completedBefore == state.getCompleted())
-            state.waitForChange();
+         long completedBefore = executionState.getCompleted();
+         while (completedBefore == executionState.getCompleted())
+            executionState.waitForChange();
       }
    }
 
@@ -258,10 +256,10 @@ public class RepeatingTaskThread extends Thread
     */
    public void waitForPause() throws InterruptedException
    {
-      synchronized (state)
+      synchronized (executionState)
       {
-         while (state.getRemaining() != 0)
-            state.waitForChange();
+         while (executionState.getScheduled() != 0)
+            executionState.waitForChange();
       }
    }
 
@@ -273,6 +271,10 @@ public class RepeatingTaskThread extends Thread
    public void kill()
    {
       running = false;
+      synchronized (executionState)
+      {
+         executionState.notifyAll();
+      }
    }
 
    /**
@@ -326,11 +328,11 @@ public class RepeatingTaskThread extends Thread
       {
          try
          {
-            synchronized (state)
+            synchronized (executionState)
             {
-               if (state.getRemaining() == 0L)
+               if (executionState.getScheduled() == 0L)
                {
-                  state.waitForChange();
+                  executionState.waitForChange();
                   continue;
                }
             }
@@ -353,9 +355,9 @@ public class RepeatingTaskThread extends Thread
          }
 
          // Run the runTask method, and handle any exception it may throw.
-         state.beforeTaskExecution();
+         executionState.beforeTaskExecution();
          ExceptionTools.handle(this::runTask, exceptionHandler);
-         state.afterTaskExecution();
+         executionState.afterTaskExecution();
       }
    }
 
@@ -370,11 +372,11 @@ public class RepeatingTaskThread extends Thread
       if (!running)
          return false;
 
-      return state.getRemaining() != 0L;
+      return executionState.getScheduled() != 0L;
    }
 
-   /** The state of the RepeatingTaskThread. */
-   private static class State
+   /** The execution state of the RepeatingTaskThread. */
+   private static class ExecutionState
    {
       /**
        * How many more times to execute the task.
@@ -384,7 +386,7 @@ public class RepeatingTaskThread extends Thread
        *    <li> 0 = Task will not be executed again.
        *    <li> -1 = Task will be executed repeatedly and indefinitely.
        */
-      private long remainingRepetitions = 0L;
+      private long scheduledRepetitions = 0L;
 
       /** Whether the task is currently executing */
       private boolean executing = false;
@@ -395,8 +397,8 @@ public class RepeatingTaskThread extends Thread
       /** Call right before executing the task */
       private synchronized void beforeTaskExecution()
       {
-         if (remainingRepetitions > 0)
-            --remainingRepetitions;
+         if (scheduledRepetitions > 0)
+            --scheduledRepetitions;
          executing = true;
          notifyAll();
       }
@@ -410,53 +412,51 @@ public class RepeatingTaskThread extends Thread
       }
 
       /**
-       *
-       *
        * Signal the thread to loop for the passed in number of repetitions.
-       * This overrides the remaining number of repetitions, regardless of its previous value.
+       * This overrides the current number of scheduled repetitions, regardless of its previous value.
        * <p>
        * This method also accepts {@link #REPEAT_INDEFINITELY}.
        * <p>
-       * To add or subtract to the number of repetitions the thread should loop, use {@link #addRemaining(int)}.
+       * To add or subtract to the number of repetitions the thread should loop, use {@link #addScheduled(int)}.
        *
        * @param repetitions The number of repetitions the thread should loop after this call.
        */
-      private synchronized void setRemaining(long repetitions)
+      private synchronized void setScheduled(long repetitions)
       {
-         remainingRepetitions = repetitions;
+         scheduledRepetitions = repetitions;
          notifyAll();
       }
 
       /**
-       * Add N repetitions to the remaining repetition counter.
+       * Add N repetitions to the scheduled repetitions.
        * If the thread was paused, adding repetitions begins the loop.
        * <p>
-       * You may also subtract from the number of remaining repetitions by passing in a negative number.
+       * You may also subtract from the number of scheduled repetitions by passing in a negative number.
        * If the resulting number of repetitions is 0, the loop will be paused.
-       * This method cannot cause the remaining repetition count to go below 0.
+       * This method cannot cause the scheduled repetitions to go below 0.
        * <p>
        * This method does not do anything if the thread is repeating indefinitely.
        *
        * @param repetitions The number of repetitions to add. This can be a negative value for subtraction.
        */
-      private synchronized void addRemaining(int repetitions)
+      private synchronized void addScheduled(int repetitions)
       {
          // If repeating indefinitely, do nothing
-         if (remainingRepetitions < 0L)
+         if (scheduledRepetitions < 0L)
             return;
 
-         // Add to the remaining repetition counter
-         remainingRepetitions += repetitions;
+         // Add to the scheduled repetition counter
+         scheduledRepetitions += repetitions;
 
-         // Ensure remaining repetition counter doesn't become negative in case of subtraction
-         if (remainingRepetitions < 0L)
-            remainingRepetitions = 0L;
+         // Ensure scheduled repetition counter doesn't become negative in case of subtraction
+         if (scheduledRepetitions < 0L)
+            scheduledRepetitions = 0L;
 
          notifyAll();
       }
 
       /**
-       * Wait until a change occurs to the thread's state.
+       * Wait until a change occurs to the thread's execution state.
        *
        * @throws InterruptedException If the waiting thread is interrupted.
        */
@@ -465,9 +465,9 @@ public class RepeatingTaskThread extends Thread
          wait();
       }
 
-      private synchronized long getRemaining()
+      private synchronized long getScheduled()
       {
-         return remainingRepetitions;
+         return scheduledRepetitions;
       }
 
       private synchronized boolean isExecuting()

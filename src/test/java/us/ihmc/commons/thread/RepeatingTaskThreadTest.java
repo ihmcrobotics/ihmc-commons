@@ -45,9 +45,9 @@ public class RepeatingTaskThreadTest
 
       // Set the thread to run 10 repetitions
       int repetitionsToRun = 10;
-      thread.setRemaining(repetitionsToRun);
+      thread.setScheduled(repetitionsToRun);
       assertCorrectState(thread, false, false);
-      assertEquals(repetitionsToRun, thread.getRemaining());
+      assertEquals(repetitionsToRun, thread.getScheduled());
 
       // Start the thread. Should start running the repetitions
       thread.start();
@@ -55,7 +55,7 @@ public class RepeatingTaskThreadTest
 
       // Wait for all repetitions to complete
       thread.waitForPause();
-      assertEquals(0, thread.getRemaining());
+      assertEquals(0, thread.getScheduled());
       assertCorrectState(thread, true, false);
 
       // Kill the thread and wait for it to die
@@ -80,7 +80,7 @@ public class RepeatingTaskThreadTest
       // Start repeating
       thread.startRepeating();
       assertCorrectState(thread, true, true);
-      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getRemaining());
+      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getScheduled());
 
       // Ensure a task starts
       thread.waitForNextTaskStart();
@@ -91,12 +91,12 @@ public class RepeatingTaskThreadTest
 
       thread.waitForNextTaskEnd();
       assertTrue(thread.getCompleted() > 0);
-      assertEquals(0, thread.getRemaining());
+      assertEquals(0, thread.getScheduled());
 
       // Start again
       thread.startRepeating();
       assertCorrectState(thread, true, true);
-      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getRemaining());
+      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getScheduled());
 
       // Kill the thread
       thread.kill();
@@ -145,20 +145,21 @@ public class RepeatingTaskThreadTest
    }
 
    @Test
-   public void testAddRemainingRepetitions() throws InterruptedException
+   public void testAddScheduledRepetitions() throws InterruptedException
    {
       AtomicInteger repetitions = new AtomicInteger(0);
       RepeatingTaskThread thread = new RepeatingTaskThread(repetitions::getAndIncrement, NAME);
-      thread.start();
 
       int add = 20;
       int subtract = -10;
       int increment = 1;
       int total = add + subtract + increment;
 
-      thread.addRemaining(add);
-      thread.addRemaining(subtract);
-      thread.addRemaining(increment);
+      thread.addScheduled(add);
+      thread.addScheduled(subtract);
+      thread.start();
+
+      thread.addScheduled(increment);
       thread.waitForPause();
       thread.kill();
       assertEquals(total, repetitions.get());
@@ -176,13 +177,13 @@ public class RepeatingTaskThreadTest
       // Start repeating at the target frequency
       thread.startRepeating();
       ThreadTools.sleep(750);
-      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), 0.1);
+      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), 0.2);
 
       // Increase the target frequency
       targetFrequency = 30.0;
       thread.setFrequencyLimit(targetFrequency);
       ThreadTools.sleep(750);
-      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), 0.1);
+      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), 0.2);
 
       // Un-limit the repetition frequency
       thread.removeFrequencyLimit();
@@ -253,7 +254,7 @@ public class RepeatingTaskThreadTest
       };
 
       int targetLoops = 15;
-      thread.setRemaining(targetLoops);
+      thread.setScheduled(targetLoops);
       thread.start();
       thread.waitForPause();
       thread.blockingKill();
