@@ -21,7 +21,7 @@ import us.ihmc.commons.exception.ExceptionTools;
  * Execution can be started in two ways:
  *  <ol>
  *     <li> Call {@link #startRepeating()}
- *     <li> Call {@link #start()} and {@link #setScheduled(long n)} or {@link #addScheduled(long n)} in any order.
+ *     <li> Call {@link #start()}, and {@link #setScheduled(long n)} or {@link #addScheduled(long n)} in any order.
  *  </ol>
  * <p>
  * The execution frequency may be limited with {@link #setFrequencyLimit(double)} and removed using {@link #removeFrequencyLimit()}.
@@ -148,7 +148,7 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Sets the execution schedule to {@code n} more executions.
+    * Sets the execution schedule to {@code n} executions.
     * <p>
     * If the task was not executing and {@code n > 0}, it will immediately begin executing.
     *
@@ -164,7 +164,7 @@ public class RepeatingTaskThread extends Thread
     * <p>
     * If the task was not executing and {@code n > 0}, it will immediately begin executing.
     * <p>
-    * You may also subtract from the number of scheduled repetitions by passing in a negative number.
+    * You may also subtract from the number of scheduled executions by passing in a negative number.
     * This method cannot cause the scheduled execution count to go below 0.
     * <p>
     * This method does not do anything if indefinitely repeating execution is scheduled.
@@ -178,9 +178,7 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Get the number of scheduled repetitions.
-    *
-    * @return The number of scheduled repetitions.
+    * @return The number of scheduled executions.
     */
    public long getScheduled()
    {
@@ -188,8 +186,6 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Get whether a task is currently executing.
-    *
     * @return Whether a task is currently executing.
     */
    public boolean isExecuting()
@@ -198,8 +194,6 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Get the total number of repetitions completed by this thread.
-    *
     * @return The total number of repetitions completed by this thread.
     */
    public long getCompleted()
@@ -209,8 +203,6 @@ public class RepeatingTaskThread extends Thread
 
    /**
     * Wait until the next start of a task.
-    *
-    * @throws InterruptedException If the waiting thread is interrupted.
     */
    public void waitForNextTaskStart() throws InterruptedException
    {
@@ -225,8 +217,6 @@ public class RepeatingTaskThread extends Thread
 
    /**
     * Wait until the next end of a task.
-    *
-    * @throws InterruptedException If the waiting thread is interrupted.
     */
    public void waitForNextTaskEnd() throws InterruptedException
    {
@@ -241,8 +231,6 @@ public class RepeatingTaskThread extends Thread
    /**
     * Wait until the thread is paused.
     * If the thread is currently paused, returns immediately.
-    *
-    * @throws InterruptedException If the waiting thread is interrupted.
     */
    public void waitForPause() throws InterruptedException
    {
@@ -254,9 +242,9 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Signals the thread to stop once the current repetition finishes running.
-    * The loop will be exited, and the thread will die.
-    * The thread cannot be restarted after calling this method.
+    * Signals the thread to die.
+    * <p>
+    * If the task is currently executing, it will be allowed to finish.
     */
    public void kill()
    {
@@ -268,11 +256,12 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Signals the thread to stop once the current repetition finishes running.
-    * The loop will be exited, and the thread will die.
+    * Signals the thread to die.
+    * <p>
+    * If the task is currently executing, it will be allowed to finish.
+    * <p>
     * Same as calling {@link #kill()} then {@link #join()}.
-    * InterruptedExceptions are ignored. To handle interrupted exceptions,
-    * call {@link #kill()} then {@link #join()} manually.
+    * Returns immediately if interrupted.
     */
    public void blockingKill()
    {
@@ -285,15 +274,14 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * The method that is executed repeatedly in a loop.
+    * The method that is executed repeatedly.
     * <p>
-    * You may {@code @Override} this method with the code to repeat.
-    * Alternatively, if a {@link RunnableThatThrows} was passed it, this method
-    * will call the run method in the loop.
+    * You may {@code @Override} this method with the code to execute.
+    * Otherwise, this method will execute the passed in {@link RunnableThatThrows}.
     *
-    * @throws Throwable Any throwable that the overriding code or the passed in task may throw.
-    *       This throwable will be handled by the passed in {@link ExceptionHandler}
-    *       (by default it is {@link DefaultExceptionHandler#MESSAGE_AND_STACKTRACE}).
+    * @throws Throwable Any throwable that the executed code may throw.
+    *       Will be handled by the {@link ExceptionHandler}
+    *       (default: {@link DefaultExceptionHandler#MESSAGE_AND_STACKTRACE}).
     */
    protected void runTask() throws Throwable
    {
@@ -305,11 +293,8 @@ public class RepeatingTaskThread extends Thread
     * The {@link Thread#run()} method, overridden to run a loop.
     * To extend this class {@link Thread} style, override {@link #runTask()} instead.
     * <p>
-    * DO NOT CALL THIS METHOD. Well, you can, but why would you?
-    * You are using a thread to run things asynchronously, but calling this would run the loop synchronously.
-    * Why would you want that?
-    * <p>
-    * This method is a necessary evil committed for this class to extend Thread.
+    * DO NOT CALL THIS METHOD.
+    * The existence of this method is a necessary evil for this class to extend Thread.
     */
    @Override
    public final void run()
@@ -378,7 +363,7 @@ public class RepeatingTaskThread extends Thread
        */
       private long scheduledRepetitions = 0L;
 
-      /** Whether the task is currently executing */
+      /** Whether the task is currently executing. */
       private boolean executing = false;
 
       /** The total number of times the task has completed execution during the lifetime of this thread. */
