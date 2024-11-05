@@ -7,37 +7,32 @@ import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
 /**
- * A thread that repeats execution of a single task. It can do this N times, continuously, or at a constant rate.
+ * A thread that repeats the execution of a single task. It can do this {@code n} times, continuously, or at a limited rate.
  * <p>
- * Upon construction, the thread will have zero scheduled repetitions.
- * To start repeating the task, the number of repetitions must be set and {@link #start()} must be called
- * (the order does not matter). Alternatively, you may call {@link #startRepeating()}, which will
- * signal the thread to repeat indefinitely, and start the thread if it has not been started.
- * Once the thread runs the task for the set number of repetitions,
- * it will pause and wait until more repetitions are scheduled.
+ * Unlike {@link Thread}, this class ensures that exceptions are caught and handled.
  * <p>
- * This thread does not finish running until {@link #kill()} or {@link #blockingKill()} is called.
- * Once started, be sure to kill this thread.
+ *  The task to execute may be specified in two ways:
+ *  <ol>
+ *     <li> Providing a {@link RunnableThatThrows} during construction.
+ *     <li> {@code @Override}ing the {@link #runTask()} method.
+ *  </ol>
  * <p>
- * If this thread is interrupted while paused, a repetition will run such that the interrupted status
- * can be handled by user code (i.e. code in the passed in task, or overridden {@link #runTask()} method).
+ * Upon construction, this thread will have zero scheduled task executions and the thread will not be started.
+ * Execution can be started in two ways:
+ *  <ol>
+ *     <li> Call {@link #startRepeating()}
+ *     <li> Call {@link #start()} and {@link #setScheduled(long n)} or {@link #addScheduled(long n)} in any order.
+ *  </ol>
  * <p>
- * Optionally, you may set a limit to the loop frequency through {@link #setFrequencyLimit(double)},
- * or by passing the frequency limit as a parameter in the constructor.
- * The loop frequency limit may be changed at any time. To de-limit the loop frequency,
- * use {@link #removeFrequencyLimit()}, or set the limit < 0.0.
- * Setting the frequency limit only guarantees that the loop's frequency will not exceed the limit.
- * It does not guarantee that the loop will run at the set frequency, as the code executed within the loop
- * may be too slow to run at that frequency.
+ * The execution frequency may be limited with {@link #setFrequencyLimit(double)} and removed using {@link #removeFrequencyLimit()}.
+ * The limit can be modified or removed at any time.
+ * Note that this is only an upper limit. If the task overruns the corresponding period, the task will simply execute again
+ * once its finished, resulting in a potentially jittery, slower frequency.
  * <p>
- * Like {@link Thread}, the {@link RepeatingTaskThread} may be used in two ways:
- * <ul>
- *    <li>
- *       First, by passing in a runnable (or in this case a {@link RunnableThatThrows}) to the constructor.
- *       This runnable will be called in {@link #runTask()} every repetition.
- *    <li>
- *       Second, by {@code @Override}ing the {@link #runTask()} method.
- *       The code within {@link #runTask()} will run every repetition.
+ * To support clear and concise initialization, {@link #setFrequencyLimit} returns {@code this}.
+ * <p>
+ * To allow the currently executing task to finish, if one is executing, and allow the thread to die,
+ * use {@link #kill()} or {@link #blockingKill()}.
  */
 public class RepeatingTaskThread extends Thread
 {
@@ -57,11 +52,11 @@ public class RepeatingTaskThread extends Thread
    /** Execution state of this thread */
    private final ExecutionState executionState = new ExecutionState();
 
-   /** Throttler for optionally set loop period/frequency limit */
+   /** Throttler used to limit the execution frequency. */
    private final Throttler throttler = new Throttler();
 
-   /** The optionally set lower limit to the loop period. A negative value indicates no limit */
-   private volatile double loopPeriodLowerLimit = UNLIMITED_FREQUENCY;
+   /** The period of the set frequency limit. A negative value indicates no limit. */
+   private volatile double periodLowerLimit = UNLIMITED_FREQUENCY;
 
    public RepeatingTaskThread(String name)
    {
@@ -86,27 +81,27 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Limit the frequency of the repetition execution.
-    * To un-limit the repetition frequency, use {@link #removeFrequencyLimit()},
-    * or pass in {@link #UNLIMITED_FREQUENCY} (any value less than 0.0 will work).
+    * Limits the frequency of task execution.
     * <p>
-    * Setting the frequency limit only guarantees that the loop's frequency will not exceed the limit.
-    * It does not guarantee that the loop will run AT the set frequency, as the code executed within
-    * each repetition may be too slow to run at that frequency.
+    * This is only an upper limit. If the task overruns the corresponding period, the task will simply execute again
+    * once its finished, resulting in a potentially jittery, slower frequency.
+    * <p>
+    * To remove the limit, use {@link #removeFrequencyLimit()} or set to {@link #UNLIMITED_FREQUENCY}.
     *
-    * @param frequencyLimit The limit for the loop frequency. If negative, the loop's frequency is not limited.
+    * @param frequencyLimit The frequency limit or {@link #UNLIMITED_FREQUENCY}.
     * @return {@code this}, such that it can be used like a
     *       <a href="https://en.wikipedia.org/wiki/Fluent_interface">fluent interface</a>.
     */
    public RepeatingTaskThread setFrequencyLimit(double frequencyLimit)
    {
-      loopPeriodLowerLimit = Conversions.hertzToSeconds(frequencyLimit);
+      periodLowerLimit = Conversions.hertzToSeconds(frequencyLimit);
       return this;
    }
 
    /**
-    * Removes any limit to the loop frequency that may have been set.
-    * Equivalent to calling {@code setFrequencyLimit(UNLIMITED_FREQUENCY)}.
+    * Removes the frequency limit.
+    * <p>
+    * Equivalent to {@code setFrequencyLimit(UNLIMITED_FREQUENCY)}.
     */
    public void removeFrequencyLimit()
    {
@@ -121,9 +116,7 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Signals the thread to start repeating indefinitely.
-    * If the thread has not been started yet, calling this
-    * method will also start the thread.
+    * Ensures the thread is started and schedules indefinitely repeating execution.
     */
    public void startRepeating()
    {
@@ -134,8 +127,8 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Signals the thread to stop repeating once the current repetition finishes.
-    * The thread will be paused until more repetitions are scheduled, or the thread is killed.
+    * Clears the execution schedule. If the task is currently executing,
+    * it is allowed to complete.
     */
    public void stopRepeating()
    {
@@ -143,9 +136,8 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Signal the thread to repeat indefinitely, or to stop repeating.
-    *
-    * @param repeating Whether the thread should be repeating.
+    * @param repeating If {@code true}, schedules indefinitely repeating execution.
+    *                  If {@code false}, clears the execution schedule.
     */
    public void setRepeating(boolean repeating)
    {
@@ -156,35 +148,33 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Signal the thread to loop for the passed in number of repetitions.
-    * This overrides the number of scheduled repetitions, regardless of its previous value.
+    * Sets the execution schedule to {@code n} more executions.
     * <p>
-    * This method also accepts {@link #REPEAT_INDEFINITELY}.
-    * <p>
-    * To add or subtract to the number of repetitions the thread should loop, use {@link #addScheduled(int)}.
+    * If the task was not executing and {@code n > 0}, it will immediately begin executing.
     *
-    * @param repetitions The number of repetitions the thread should loop after this call.
+    * @param n The updated number of scheduled executions.
     */
-   public void setScheduled(long repetitions)
+   public void setScheduled(long n)
    {
-      executionState.setScheduled(repetitions);
+      executionState.setScheduled(n);
    }
 
    /**
-    * Add N repetitions to the scheduled repetitions
-    * If the thread was paused, adding repetitions begins the loop.
+    * Schedules {@code n} more executions.
+    * <p>
+    * If the task was not executing and {@code n > 0}, it will immediately begin executing.
     * <p>
     * You may also subtract from the number of scheduled repetitions by passing in a negative number.
-    * If the resulting number of repetitions is 0, the loop will be paused.
-    * This method cannot cause the scheduled repetition count to go below 0.
+    * This method cannot cause the scheduled execution count to go below 0.
     * <p>
-    * This method does not do anything if the thread is repeating indefinitely.
+    * This method does not do anything if indefinitely repeating execution is scheduled.
     *
-    * @param repetitions The number of repetitions to add. This can be a negative value for subtraction.
+    * @param n If {@code n > 0}, the number of executions to schedule.
+    *          If {@code n < 0}, the number of executions to unschedule.
     */
-   public void addScheduled(int repetitions)
+   public void addScheduled(long n)
    {
-      executionState.addScheduled(repetitions);
+      executionState.addScheduled(n);
    }
 
    /**
@@ -338,7 +328,7 @@ public class RepeatingTaskThread extends Thread
             }
 
             // If a period/frequency limit was set, wait until loop can run.
-            if (loopPeriodLowerLimit > 0.0)
+            if (periodLowerLimit > 0.0)
             {
                /*
                 * This call must not swallow interrupts.
@@ -346,7 +336,7 @@ public class RepeatingTaskThread extends Thread
                 * Although the throttler will block until the period has elapsed, the thread
                 * remains interrupted.
                 */
-               throttler.waitAndRun(loopPeriodLowerLimit);
+               throttler.waitAndRun(periodLowerLimit);
             }
          }
          catch (InterruptedException interrupted)
@@ -394,7 +384,6 @@ public class RepeatingTaskThread extends Thread
       /** The total number of times the task has completed execution during the lifetime of this thread. */
       private long completedRepetitions = 0L;
 
-      /** Call right before executing the task */
       private synchronized void beforeTaskExecution()
       {
          if (scheduledRepetitions > 0)
@@ -403,7 +392,6 @@ public class RepeatingTaskThread extends Thread
          notifyAll();
       }
 
-      /** Call right after executing the task */
       private synchronized void afterTaskExecution()
       {
          executing = false;
@@ -411,35 +399,13 @@ public class RepeatingTaskThread extends Thread
          notifyAll();
       }
 
-      /**
-       * Signal the thread to loop for the passed in number of repetitions.
-       * This overrides the current number of scheduled repetitions, regardless of its previous value.
-       * <p>
-       * This method also accepts {@link #REPEAT_INDEFINITELY}.
-       * <p>
-       * To add or subtract to the number of repetitions the thread should loop, use {@link #addScheduled(int)}.
-       *
-       * @param repetitions The number of repetitions the thread should loop after this call.
-       */
       private synchronized void setScheduled(long repetitions)
       {
          scheduledRepetitions = repetitions;
          notifyAll();
       }
 
-      /**
-       * Add N repetitions to the scheduled repetitions.
-       * If the thread was paused, adding repetitions begins the loop.
-       * <p>
-       * You may also subtract from the number of scheduled repetitions by passing in a negative number.
-       * If the resulting number of repetitions is 0, the loop will be paused.
-       * This method cannot cause the scheduled repetitions to go below 0.
-       * <p>
-       * This method does not do anything if the thread is repeating indefinitely.
-       *
-       * @param repetitions The number of repetitions to add. This can be a negative value for subtraction.
-       */
-      private synchronized void addScheduled(int repetitions)
+      private synchronized void addScheduled(long repetitions)
       {
          // If repeating indefinitely, do nothing
          if (scheduledRepetitions < 0L)
