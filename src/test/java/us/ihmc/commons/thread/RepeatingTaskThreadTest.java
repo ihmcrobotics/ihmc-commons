@@ -30,7 +30,7 @@ public class RepeatingTaskThreadTest
 
       // Ensure the task never ran
       assertFalse(taskRan.get());
-      assertEquals(0L, thread.getRepetitionState().getCompleted());
+      assertEquals(0L, thread.getCompleted());
    }
 
    @Test
@@ -47,15 +47,15 @@ public class RepeatingTaskThreadTest
       int repetitionsToRun = 10;
       thread.setRemaining(repetitionsToRun);
       assertCorrectState(thread, false, false);
-      assertEquals(repetitionsToRun, thread.getRepetitionState().getRemaining());
+      assertEquals(repetitionsToRun, thread.getRemaining());
 
       // Start the thread. Should start running the repetitions
       thread.start();
       assertCorrectState(thread, true, true);
 
       // Wait for all repetitions to complete
-      thread.getRepetitionState().waitForPause();
-      assertEquals(0, thread.getRepetitionState().getRemaining());
+      thread.waitForPause();
+      assertEquals(0, thread.getRemaining());
       assertCorrectState(thread, true, false);
 
       // Kill the thread and wait for it to die
@@ -63,7 +63,7 @@ public class RepeatingTaskThreadTest
       thread.join(1000);
       assertCorrectState(thread, false, false);
 
-      assertEquals(repetitionsToRun, thread.getRepetitionState().getCompleted());
+      assertEquals(repetitionsToRun, thread.getCompleted());
       assertEquals(repetitionsToRun, repetitions.get());
    }
 
@@ -80,23 +80,23 @@ public class RepeatingTaskThreadTest
       // Start repeating
       thread.startRepeating();
       assertCorrectState(thread, true, true);
-      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getRepetitionState().getRemaining());
+      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getRemaining());
 
       // Ensure a task starts
-      thread.getRepetitionState().waitForNextTaskStart();
+      thread.waitForNextTaskStart();
 
       // Stop repeating
       thread.stopRepeating();
       assertCorrectState(thread, true, false);
 
-      thread.getRepetitionState().waitForNextTaskEnd();
-      assertTrue(thread.getRepetitionState().getCompleted() > 0);
-      assertEquals(0, thread.getRepetitionState().getRemaining());
+      thread.waitForNextTaskEnd();
+      assertTrue(thread.getCompleted() > 0);
+      assertEquals(0, thread.getRemaining());
 
       // Start again
       thread.startRepeating();
       assertCorrectState(thread, true, true);
-      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getRepetitionState().getRemaining());
+      assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getRemaining());
 
       // Kill the thread
       thread.kill();
@@ -159,10 +159,10 @@ public class RepeatingTaskThreadTest
       thread.addRemaining(add);
       thread.addRemaining(subtract);
       thread.addRemaining(increment);
-      thread.getRepetitionState().waitForPause();
+      thread.waitForPause();
       thread.kill();
       assertEquals(total, repetitions.get());
-      assertEquals(total, thread.getRepetitionState().getCompleted());
+      assertEquals(total, thread.getCompleted());
    }
 
    @Test
@@ -213,7 +213,7 @@ public class RepeatingTaskThreadTest
       for (int i = 0; i < 25; ++i)
       {
          thread.interrupt();
-         thread.getRepetitionState().waitForNextTaskEnd();
+         thread.waitForNextTaskEnd();
          assertEquals(i + 1, interruptCount.get());
       }
 
@@ -223,7 +223,7 @@ public class RepeatingTaskThreadTest
       for (int i = 0; i < 25; ++i)
       {
          thread.interrupt();
-         thread.getRepetitionState().waitForNextTaskEnd();
+         thread.waitForNextTaskEnd();
          assertEquals(i + 1, interruptCount.get());
       }
 
@@ -233,7 +233,7 @@ public class RepeatingTaskThreadTest
       for (int i = 0; i < 25; ++i)
       {
          thread.interrupt();
-         thread.getRepetitionState().waitForNextTaskEnd();
+         thread.waitForNextTaskEnd();
          assertEquals(i + 1, interruptCount.get());
       }
       thread.blockingKill();
@@ -255,7 +255,7 @@ public class RepeatingTaskThreadTest
       int targetLoops = 15;
       thread.setRemaining(targetLoops);
       thread.start();
-      thread.getRepetitionState().waitForPause();
+      thread.waitForPause();
       thread.blockingKill();
       assertEquals(targetLoops, loopCounter.get());
    }

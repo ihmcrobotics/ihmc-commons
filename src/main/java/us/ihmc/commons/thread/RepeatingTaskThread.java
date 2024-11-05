@@ -184,13 +184,81 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Access the state of this thread.
+    * Get the remaining number of repetitions this thread plans to run.
+    * A repetition is counted after it finishes execution.
+    * As such, this value may include the currently executing repetition;
     *
-    * @return The state of this thread.
+    * @return The remaining number of repetitions to execute.
     */
-   public State getRepetitionState()
+   public long getRemaining()
    {
-      return state;
+      return state.getRemaining();
+   }
+
+   /**
+    * Get whether a task is currently executing.
+    *
+    * @return Whether a task is currently executing.
+    */
+   public boolean isExecuting()
+   {
+      return state.isExecuting();
+   }
+
+   /**
+    * Get the total number of repetitions completed by this thread.
+    *
+    * @return The total number of repetitions completed by this thread.
+    */
+   public long getCompleted()
+   {
+      return state.getCompleted();
+   }
+
+   /**
+    * Wait until the next start of a task.
+    *
+    * @throws InterruptedException If the waiting thread is interrupted.
+    */
+   public void waitForNextTaskStart() throws InterruptedException
+   {
+      synchronized (state)
+      {
+         do
+         {
+            state.waitForChange();
+         } while (!state.isExecuting());
+      }
+   }
+
+   /**
+    * Wait until the next end of a task.
+    *
+    * @throws InterruptedException If the waiting thread is interrupted.
+    */
+   public void waitForNextTaskEnd() throws InterruptedException
+   {
+      synchronized (state)
+      {
+         long completedBefore = state.getCompleted();
+         while (completedBefore == state.getCompleted())
+            state.waitForChange();
+      }
+   }
+
+   /**
+    * Wait until the thread is paused.
+    * If the thread is currently paused, returns immediately.
+    *
+    * @throws InterruptedException If the waiting thread is interrupted.
+    */
+   public void waitForPause() throws InterruptedException
+   {
+      synchronized (state)
+      {
+         while (state.getRemaining() != 0)
+            state.waitForChange();
+      }
    }
 
    /**
@@ -302,7 +370,7 @@ public class RepeatingTaskThread extends Thread
    }
 
    /** The state of the RepeatingTaskThread. */
-   public static class State
+   private static class State
    {
       /**
        * Becomes {@code true} when the thread is started, and {@code false} when the thread is killed.
@@ -416,45 +484,9 @@ public class RepeatingTaskThread extends Thread
        *
        * @throws InterruptedException If the waiting thread is interrupted.
        */
-      public synchronized void waitForChange() throws InterruptedException
+      private synchronized void waitForChange() throws InterruptedException
       {
          this.wait();
-      }
-
-      /**
-       * Wait until the next start of a task.
-       *
-       * @throws InterruptedException If the waiting thread is interrupted.
-       */
-      public synchronized void waitForNextTaskStart() throws InterruptedException
-      {
-         do
-         {
-            waitForChange();
-         } while (!executing);
-      }
-
-      /**
-       * Wait until the next end of a task.
-       *
-       * @throws InterruptedException If the waiting thread is interrupted.
-       */
-      public synchronized void waitForNextTaskEnd() throws InterruptedException
-      {
-         long completedBefore = completedRepetitions;
-         while (completedBefore == completedRepetitions)
-            waitForChange();
-      }
-
-      /**
-       * Wait until the thread is paused.
-       *
-       * @throws InterruptedException If the waiting thread is interrupted.
-       */
-      public synchronized void waitForPause() throws InterruptedException
-      {
-         while (remainingRepetitions != 0)
-            waitForChange();
       }
 
       /**
@@ -462,7 +494,7 @@ public class RepeatingTaskThread extends Thread
        *
        * @return The remaining number of repetitions to execute.
        */
-      public synchronized long getRemaining()
+      private synchronized long getRemaining()
       {
          return remainingRepetitions;
       }
@@ -471,7 +503,7 @@ public class RepeatingTaskThread extends Thread
        * Get whether a task is currently executing.
        * @return Whether a task is currently executing.
        */
-      public synchronized boolean isExecuting()
+      private synchronized boolean isExecuting()
       {
          return executing;
       }
@@ -481,7 +513,7 @@ public class RepeatingTaskThread extends Thread
        *
        * @return The total number of repetitions completed by this thread.
        */
-      public synchronized long getCompleted()
+      private synchronized long getCompleted()
       {
          return completedRepetitions;
       }
