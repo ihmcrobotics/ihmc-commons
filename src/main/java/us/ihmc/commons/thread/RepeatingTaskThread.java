@@ -9,12 +9,12 @@ import us.ihmc.commons.exception.ExceptionTools;
 /**
  * A thread that repeats execution of a single task. It can do this N times, continuously, or at a constant rate.
  * <p>
- * Upon construction, the thread will have zero remaining repetitions to run.
+ * Upon construction, the thread will have zero scheduled repetitions.
  * To start repeating the task, the number of repetitions must be set and {@link #start()} must be called
  * (the order does not matter). Alternatively, you may call {@link #startRepeating()}, which will
  * signal the thread to repeat indefinitely, and start the thread if it has not been started.
  * Once the thread runs the task for the set number of repetitions,
- * it will pause and wait until the number of remaining repetitions is changed.
+ * it will pause and wait until more repetitions are scheduled.
  * <p>
  * This thread does not finish running until {@link #kill()} or {@link #blockingKill()} is called.
  * Once started, be sure to kill this thread.
@@ -258,7 +258,7 @@ public class RepeatingTaskThread extends Thread
    {
       synchronized (executionState)
       {
-         while (executionState.getScheduled() != 0)
+         while (executionState.getScheduled() != 0 || executionState.isExecuting())
             executionState.waitForChange();
       }
    }
