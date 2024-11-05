@@ -9,9 +9,6 @@ import us.ihmc.commons.exception.ExceptionTools;
 /**
  * A thread that repeats execution of a single task. It can do this N times, continuously, or at a constant rate.
  * <p>
- * This thread has 3 states: {@link #REPEAT_INDEFINITELY},
- * looping for a set number of repetitions, and paused (when remaining repetitions = 0).
- * <p>
  * Upon construction, the thread will have zero remaining repetitions to run.
  * To start repeating the task, the number of repetitions must be set and {@link #start()} must be called
  * (the order does not matter). Alternatively, you may call {@link #startRepeating()}, which will
@@ -50,6 +47,13 @@ public class RepeatingTaskThread extends Thread
    private final RunnableThatThrows task;
    private final ExceptionHandler exceptionHandler;
 
+   /**
+    * Becomes {@code true} when the thread is started, and {@code false} when the thread is killed.
+    * Once {@code false}, the task loop will allow the currently executing task (if any) to complete,
+    * and the task loop is exited, allowing the thread to die.
+    */
+   private boolean running = false;
+   
    /** State of this thread */
    private final State state = new State();
 
@@ -112,7 +116,7 @@ public class RepeatingTaskThread extends Thread
    @Override
    public void start()
    {
-      state.setRunning(true);
+      running = true;
       super.start();
    }
 
@@ -123,7 +127,7 @@ public class RepeatingTaskThread extends Thread
     */
    public void startRepeating()
    {
-      if (!state.isRunning())
+      if (!running)
          start();
 
       setRepeating(true);
@@ -268,7 +272,7 @@ public class RepeatingTaskThread extends Thread
     */
    public void kill()
    {
-      state.setRunning(false);
+      running = false;
    }
 
    /**
@@ -318,7 +322,7 @@ public class RepeatingTaskThread extends Thread
    @Override
    public final void run()
    {
-      while (state.isRunning())
+      while (running)
       {
          try
          {
@@ -363,7 +367,7 @@ public class RepeatingTaskThread extends Thread
     */
    /* package-private */ synchronized boolean isRepeating()
    {
-      if (!state.isRunning())
+      if (!running)
          return false;
 
       return state.getRemaining() != 0L;
@@ -373,69 +377,41 @@ public class RepeatingTaskThread extends Thread
    private static class State
    {
       /**
-       * Becomes {@code true} when the thread is started, and {@code false} when the thread is killed.
-       * Once {@code false}, the task loop will allow the currently executing task (if any) to complete,
-       * and the task loop is exited, allowing the thread to die.
-       */
-      private boolean running = false;
-
-      /**
-       * Countdown for number of repetitions to run.
-       * The counter is decremented each time after the repetition.
-       * Once the counter hits 0, the loop is paused.
+       * How many more times to execute the task.
+       *
        * <ul>
-       *    <li> 0 = pause (don't run the loop until counter value is changed).
-       *    <li> -1 = repeat indefinitely (keep looping until told otherwise).
-       *    <li> N > 0 = run the loop N more repetitions.
+       *    <li> n > 0 = Task will be executed n more times.
+       *    <li> 0 = Task will not be executed again.
+       *    <li> -1 = Task will be executed repeatedly and indefinitely.
        */
       private long remainingRepetitions = 0L;
 
-      /** Whether a task is currently executing */
+      /** Whether the task is currently executing */
       private boolean executing = false;
 
-      /** Counter for the total number of repetitions completed during the lifetime of this thread. */
+      /** The total number of times the task has completed execution during the lifetime of this thread. */
       private long completedRepetitions = 0L;
 
-      /** Call right before executing a task */
+      /** Call right before executing the task */
       private synchronized void beforeTaskExecution()
       {
+         if (remainingRepetitions > 0)
+            --remainingRepetitions;
          executing = true;
-         this.notifyAll();
+         notifyAll();
       }
 
-      /** Call right after executing a task */
+      /** Call right after executing the task */
       private synchronized void afterTaskExecution()
       {
          executing = false;
-         if (remainingRepetitions > 0)
-            remainingRepetitions--;
-         completedRepetitions++;
-         this.notifyAll();
+         ++completedRepetitions;
+         notifyAll();
       }
 
       /**
-       * Set whether the thread is running.
-       * Should become {@code true} when the thread is started,
-       * and {@code false} when the thread is signalled to die.
        *
-       * @param running Whether the thread is/should be running.
-       */
-      private synchronized void setRunning(boolean running)
-      {
-         this.running = running;
-         this.notifyAll();
-      }
-
-      /**
-       * Get whether the thread is running.
-       * @return Whether the thread is running.
-       */
-      private synchronized boolean isRunning()
-      {
-         return running;
-      }
-
-      /**
+       *
        * Signal the thread to loop for the passed in number of repetitions.
        * This overrides the remaining number of repetitions, regardless of its previous value.
        * <p>
@@ -448,7 +424,7 @@ public class RepeatingTaskThread extends Thread
       private synchronized void setRemaining(long repetitions)
       {
          remainingRepetitions = repetitions;
-         this.notifyAll();
+         notifyAll();
       }
 
       /**
@@ -476,7 +452,7 @@ public class RepeatingTaskThread extends Thread
          if (remainingRepetitions < 0L)
             remainingRepetitions = 0L;
 
-         this.notifyAll();
+         notifyAll();
       }
 
       /**
@@ -486,33 +462,19 @@ public class RepeatingTaskThread extends Thread
        */
       private synchronized void waitForChange() throws InterruptedException
       {
-         this.wait();
+         wait();
       }
 
-      /**
-       * Get the remaining number of repetitions this thread plans to run.
-       *
-       * @return The remaining number of repetitions to execute.
-       */
       private synchronized long getRemaining()
       {
          return remainingRepetitions;
       }
 
-      /**
-       * Get whether a task is currently executing.
-       * @return Whether a task is currently executing.
-       */
       private synchronized boolean isExecuting()
       {
          return executing;
       }
 
-      /**
-       * Get the total number of repetitions completed by this thread.
-       *
-       * @return The total number of repetitions completed by this thread.
-       */
       private synchronized long getCompleted()
       {
          return completedRepetitions;
