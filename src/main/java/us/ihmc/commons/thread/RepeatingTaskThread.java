@@ -396,12 +396,8 @@ public class RepeatingTaskThread extends Thread
          if (scheduledRepetitions < 0L)
             return;
 
-         // Add to the scheduled repetition counter
-         scheduledRepetitions += repetitions;
-
-         // Ensure scheduled repetition counter doesn't become negative in case of subtraction
-         if (scheduledRepetitions < 0L)
-            scheduledRepetitions = 0L;
+         // Add to the scheduled repetition counter, ensuring it doesn't become negative
+         scheduledRepetitions = Math.max(scheduledRepetitions + repetitions, 0L);
 
          notifyAll();
       }
