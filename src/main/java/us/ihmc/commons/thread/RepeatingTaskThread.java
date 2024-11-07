@@ -361,13 +361,13 @@ public class RepeatingTaskThread extends Thread
        *    <li> 0 = Task will not be executed again.
        *    <li> -1 = Task will be executed repeatedly and indefinitely.
        */
-      private long scheduledRepetitions = 0L;
+      private volatile long scheduledRepetitions = 0L;
 
       /** Whether the task is currently executing. */
-      private boolean executing = false;
+      private volatile boolean executing = false;
 
       /** The total number of times the task has completed execution during the lifetime of this thread. */
-      private long completedRepetitions = 0L;
+      private volatile long completedRepetitions = 0L;
 
       private synchronized void beforeTaskExecution()
       {
@@ -416,17 +416,17 @@ public class RepeatingTaskThread extends Thread
          wait();
       }
 
-      private synchronized long getScheduled()
+      private long getScheduled()
       {
          return scheduledRepetitions;
       }
 
-      private synchronized boolean isExecuting()
+      private boolean isExecuting()
       {
          return executing;
       }
 
-      private synchronized long getCompleted()
+      private long getCompleted()
       {
          return completedRepetitions;
       }
