@@ -352,7 +352,7 @@ public class RepeatingTaskThread extends Thread
             throttler.waitAndRun(periodLowerLimit);
          }
 
-         // clear interruption status
+         // clear interrupted status
          interrupted();
 
          // Run the runTask method, and handle any exception it may throw.
