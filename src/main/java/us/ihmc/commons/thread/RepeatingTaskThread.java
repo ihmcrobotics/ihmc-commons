@@ -194,6 +194,15 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
+    * @return {@code true} if the thread has been started via {@link #start}
+    *          and not yet killed via {@link #kill} or {@link #blockingKill}.
+    */
+   public boolean isRunning()
+   {
+      return running;
+   }
+
+   /**
     * @return The total number of task executions completed by this thread.
     */
    public long getCompleted()
@@ -203,41 +212,58 @@ public class RepeatingTaskThread extends Thread
 
    /**
     * Block until the next start of the task.
+    * @return {@code true} if interrupted.
     */
-   public void blockUntilNextTaskExecution()
+   public boolean blockUntilNextTaskExecution()
    {
       synchronized (executionState)
       {
          do
          {
-            executionState.waitForChange();
+            if (executionState.waitForChange())
+               return true;
+
          } while (!executionState.isExecuting());
       }
+
+      return false;
    }
 
    /**
     * Block until the next completion of the task.
+    * @return {@code true} if interrupted.
     */
-   public void blockUntilNextTaskCompletion()
+   public boolean blockUntilNextTaskCompletion()
    {
       synchronized (executionState)
       {
          long completedBefore = executionState.getCompleted();
          while (completedBefore == executionState.getCompleted())
-            executionState.waitForChange();
+         {
+            if (executionState.waitForChange())
+               return true;
+         }
       }
+
+      return false;
    }
 
    /**
     * Block until there are no scheduled task executions, which may be immediately.
+    * @return {@code true} if interrupted.
     */
-   public void blockUntilNoScheduledTasks()
+   public boolean blockUntilNoScheduledTasks()
    {
       synchronized (executionState)
       {
          while (executionState.getScheduled() != 0 || executionState.isExecuting())
-            executionState.waitForChange();
+         {
+            if (executionState.waitForChange())
+               return true;
+         }
       }
+
+      return false;
    }
 
    /**
@@ -260,7 +286,7 @@ public class RepeatingTaskThread extends Thread
     * This class cannot be reused after this point.
     * <p>
     * Same as calling {@link #kill()} then {@link #join()}.
-    * Returns {@code true} if interrupted.
+    * @return {@code true} if interrupted.
     */
    public boolean blockingKill()
    {
@@ -278,7 +304,7 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * The method that is executed repeatedly.
+    * The task that is executed repeatedly.
     * <p>
     * You may {@code @Override} this method with the code to execute.
     * Otherwise, this method will execute the passed in {@link RunnableThatThrows}.
@@ -333,20 +359,6 @@ public class RepeatingTaskThread extends Thread
          ExceptionTools.handle(this::runTask, exceptionHandler);
          executionState.afterTaskExecution();
       }
-   }
-
-   /**
-    * Whether this thread is currently looping. Used for testing.
-    *
-    * @return {@code true} if the thread is looping.
-    *       {@code false} if the thread is paused, killed, or hasn't been started.
-    */
-   /* package-private */ synchronized boolean isRepeating()
-   {
-      if (!running)
-         return false;
-
-      return executionState.getScheduled() != 0L;
    }
 
    /** The execution state of the RepeatingTaskThread. */
@@ -404,7 +416,7 @@ public class RepeatingTaskThread extends Thread
       /**
        * Wait until a change occurs to the thread's execution state.
        *
-       * @return if was interrupted
+       * @return {@code true} if interrupted.
        */
       private synchronized boolean waitForChange()
       {
