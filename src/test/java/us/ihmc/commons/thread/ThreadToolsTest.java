@@ -295,7 +295,7 @@ public class ThreadToolsTest
          public void run()
          {
             interruptedBefore.setValue(isInterrupted());
-            ThreadTools.park(0.5);
+            ThreadTools.park(1.0);
             interruptedAfter.setValue(interrupted());
             interruptedAfterClear.setValue(isInterrupted());
          }
@@ -303,6 +303,7 @@ public class ThreadToolsTest
       thread.start();
       ThreadTools.park(0.25);
       thread.interrupt();
+      assertDoesNotThrow(() -> thread.join());
 
       assertFalse(interruptedBefore.booleanValue());
       assertTrue(interruptedAfter.booleanValue());
