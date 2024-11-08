@@ -47,7 +47,7 @@ public class RepeatingTaskThread extends Thread
     * Once {@code false}, the task loop will allow the currently executing task (if any) to complete,
     * and the task loop is exited, allowing the thread to die.
     */
-   private boolean running = false;
+   private volatile boolean running = false;
    
    /** Execution state of this thread */
    private final ExecutionState executionState = new ExecutionState();
@@ -331,19 +331,17 @@ public class RepeatingTaskThread extends Thread
    {
       while (running)
       {
-         boolean interrupted = false;
          synchronized (executionState)
          {
             if (executionState.getScheduled() == 0L)
             {
-               interrupted = executionState.waitForChange();
-               if (!interrupted)
-                  continue;
+               executionState.waitForChange();
+               continue;
             }
          }
 
          // If a period/frequency limit was set, wait until loop can run.
-         if (!interrupted && periodLowerLimit > 0.0)
+         if (periodLowerLimit > 0.0)
          {
             /*
              * This call must not swallow interrupts.
@@ -354,9 +352,8 @@ public class RepeatingTaskThread extends Thread
             throttler.waitAndRun(periodLowerLimit);
          }
 
-         // Maintain interrupted status so that runTask method can handle
-         if (interrupted)
-            interrupt();
+         // clear interruption status
+         interrupted();
 
          // Run the runTask method, and handle any exception it may throw.
          executionState.beforeTaskExecution();
