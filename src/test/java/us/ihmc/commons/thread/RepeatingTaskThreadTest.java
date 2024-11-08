@@ -197,46 +197,54 @@ public class RepeatingTaskThreadTest
    public void testInterrupt()
    {
       AtomicInteger interruptCount = new AtomicInteger(0);
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
+      RepeatingTaskThread thread = new RepeatingTaskThread(NAME)
       {
-         try
+         @Override
+         protected void runTask() throws Throwable
          {
-            Thread.sleep(10);
-         }
-         catch (InterruptedException interruptedException)
-         {
-            interruptCount.incrementAndGet();
-         }
-      }, NAME);
+            ThreadTools.park(0.01);
 
-      // Test during free spin
+            if (interrupted())
+               interruptCount.incrementAndGet();
+         }
+      };
+
+      LogTools.info("Test during free spin");
       thread.startRepeating();
       for (int i = 0; i < 25; ++i)
       {
+         thread.blockUntilNextTaskExecution();
          thread.interrupt();
          thread.blockUntilNextTaskCompletion();
          assertEquals(i + 1, interruptCount.get());
       }
 
-      // Test during throttled looping
+      LogTools.info("Test during throttled looping");
       interruptCount.set(0);
-      thread.setFrequencyLimit(5.0);
+      thread.setFrequencyLimit(200.0);
       for (int i = 0; i < 25; ++i)
       {
+         thread.blockUntilNextTaskExecution();
          thread.interrupt();
          thread.blockUntilNextTaskCompletion();
          assertEquals(i + 1, interruptCount.get());
       }
 
-      // Test during pause
-      interruptCount.set(0);
       thread.stopRepeating();
+
+      LogTools.info("Test one by one");
+      interruptCount.set(0);
       for (int i = 0; i < 25; ++i)
       {
+         thread.addScheduled(1);
+         thread.blockUntilNextTaskExecution();
          thread.interrupt();
          thread.blockUntilNextTaskCompletion();
          assertEquals(i + 1, interruptCount.get());
       }
+
+      LogTools.info("Completed test");
+
       thread.blockingKill();
    }
 
