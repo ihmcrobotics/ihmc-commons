@@ -1,11 +1,14 @@
 package us.ihmc.commons.thread;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.log.LogTools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -201,7 +204,7 @@ public class RepeatingTaskThreadTest
       RepeatingTaskThread thread = new RepeatingTaskThread(NAME)
       {
          @Override
-         protected void runTask() throws Throwable
+         protected void runTask()
          {
             ThreadTools.park(0.01);
 
@@ -247,6 +250,121 @@ public class RepeatingTaskThreadTest
       LogTools.info("Completed test");
 
       thread.blockingKill();
+   }
+
+   @Test
+   public void testImmediateShutdown()
+   {
+      RunnableThatThrows wasteTime = () ->
+      {
+         try
+         {  // Sleep for half a second
+            Thread.sleep((long) Conversions.secondsToMilliseconds(0.5));
+         } catch (InterruptedException ignored) {}
+      };
+
+      LogTools.info("Test during free spin");
+      for (int millisToSleep = 0; millisToSleep < 500; millisToSleep += 100)
+      {
+         // Create a new thread
+         RepeatingTaskThread thread = new RepeatingTaskThread(wasteTime, NAME);
+
+         // Start free spin
+         thread.startRepeating();
+         ThreadTools.sleep(millisToSleep);
+
+         // Time the shutdown duration
+         long shutdownStart = System.nanoTime();
+         thread.kill();
+         thread.interrupt();
+         assertDoesNotThrow(() -> thread.join(500));
+         long shutdownComplete = System.nanoTime();
+
+         double shutdownDuration = Conversions.nanosecondsToSeconds(shutdownComplete - shutdownStart);
+         LogTools.info("Shutdown Duration: {}", shutdownDuration);
+         assertTrue(shutdownDuration < 0.01);
+      }
+
+      /*
+       * TODO: This fails because throttler keeps on throttling even when interrupted.
+       * It's not an issue immediately, but it'd be nice if it passed too
+       */
+      //      LogTools.info("Test during throttled looping");
+      //      for (int millisToSleep = 0; millisToSleep < 1000; millisToSleep += 50)
+      //      {
+      //         // Create a new throttled thread
+      //         RepeatingTaskThread thread = new RepeatingTaskThread(wasteTime, NAME).setFrequencyLimit(1.0);
+      //
+      //         // Start throttled spin
+      //         thread.startRepeating();
+      //         ThreadTools.sleep(millisToSleep);
+      //
+      //         // Time the shutdown duration
+      //         long shutdownStart = System.nanoTime();
+      //         thread.kill();
+      //         thread.interrupt();
+      //         assertDoesNotThrow(() -> thread.join(500));
+      //         long shutdownComplete = System.nanoTime();
+      //
+      //         double shutdownDuration = Conversions.nanosecondsToSeconds(shutdownComplete - shutdownStart);
+      //         LogTools.info("Shutdown Duration: {}", shutdownDuration);
+      //         assertTrue(shutdownDuration < 0.01);
+      //      }
+
+      LogTools.info("Test during pause");
+      for (int millisToSleep = 0; millisToSleep < 500; millisToSleep += 100)
+      {
+         // Create a new throttled thread
+         RepeatingTaskThread thread = new RepeatingTaskThread(wasteTime, NAME);
+
+         // Start throttled spin
+         thread.start();
+         ThreadTools.sleep(millisToSleep);
+
+         // Time the shutdown duration
+         long shutdownStart = System.nanoTime();
+         thread.kill();
+         // No interrupted necessary in this case
+         assertDoesNotThrow(() -> thread.join(500));
+         long shutdownComplete = System.nanoTime();
+
+         double shutdownDuration = Conversions.nanosecondsToSeconds(shutdownComplete - shutdownStart);
+         LogTools.info("Shutdown Duration: {}", shutdownDuration);
+         assertTrue(shutdownDuration < 0.01);
+      }
+   }
+
+   @Test
+   public void testImmediateShutdownRace()
+   {
+      RunnableThatThrows wasteTime = () ->
+      {
+         try
+         {  // Sleep for 5 seconds
+            Thread.sleep(5000);
+         } catch (InterruptedException ignored) {}
+      };
+
+      for (int i = 0; i < 5000; ++i)
+      {
+         // Create a new thread
+         RepeatingTaskThread thread = new RepeatingTaskThread(wasteTime, NAME);
+
+         // Start free spin
+         thread.startRepeating();
+         LockSupport.parkNanos(5);
+
+         // Time the shutdown duration
+         long shutdownStart = System.nanoTime();
+         thread.kill();
+         thread.interrupt();
+         assertDoesNotThrow(() -> thread.join(500));
+         long shutdownComplete = System.nanoTime();
+
+         double shutdownDuration = Conversions.nanosecondsToSeconds(shutdownComplete - shutdownStart);
+         LogTools.info("Shutdown Duration: {}", shutdownDuration);
+         assertTrue(shutdownDuration < 0.01);
+      }
    }
 
    @Test
