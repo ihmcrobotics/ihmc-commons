@@ -14,7 +14,7 @@ public class RepeatingTaskThreadTest
    private static final String NAME = "TestRepeatingTaskThread";
 
    @Test
-   public void testStartKill() throws InterruptedException
+   public void testStartKill()
    {
       AtomicBoolean taskRan = new AtomicBoolean(false);
       RepeatingTaskThread thread = new RepeatingTaskThread(() -> taskRan.set(true), NAME);
@@ -25,7 +25,7 @@ public class RepeatingTaskThreadTest
 
       // Kill the thread, wait for it to die
       thread.kill();
-      thread.join(1000);
+      assertDoesNotThrow(() -> thread.join(1000));
       assertCorrectState(thread, false, false);
 
       // Ensure the task never ran
@@ -34,7 +34,7 @@ public class RepeatingTaskThreadTest
    }
 
    @Test
-   public void testStartRepeatKill() throws InterruptedException
+   public void testStartRepeatKill()
    {
       AtomicInteger repetitions = new AtomicInteger(0);
       RepeatingTaskThread thread = new RepeatingTaskThread(() ->
@@ -60,7 +60,7 @@ public class RepeatingTaskThreadTest
 
       // Kill the thread and wait for it to die
       thread.kill();
-      thread.join(1000);
+      assertDoesNotThrow(() -> thread.join(1000));
       assertCorrectState(thread, false, false);
 
       assertEquals(repetitionsToRun, thread.getCompleted());
@@ -68,7 +68,7 @@ public class RepeatingTaskThreadTest
    }
 
    @Test
-   public void testStartPauseStart() throws InterruptedException
+   public void testStartPauseStart()
    {
       AtomicInteger repetitions = new AtomicInteger(0);
       RepeatingTaskThread thread = new RepeatingTaskThread(() ->
@@ -100,12 +100,12 @@ public class RepeatingTaskThreadTest
 
       // Kill the thread
       thread.kill();
-      thread.join(1000);
+      assertDoesNotThrow(() -> thread.join(1000));
       assertCorrectState(thread, false, false);
    }
 
    @Test
-   public void testDoubleStart() throws InterruptedException
+   public void testDoubleStart()
    {
       AtomicInteger repetitions = new AtomicInteger(0);
       RepeatingTaskThread thread = new RepeatingTaskThread(() ->
@@ -121,7 +121,7 @@ public class RepeatingTaskThreadTest
       assertCorrectState(thread, true, true);
 
       thread.kill();
-      thread.join(1000);
+      assertDoesNotThrow(() -> thread.join(1000));
       assertCorrectState(thread, false, false);
    }
 
@@ -145,7 +145,7 @@ public class RepeatingTaskThreadTest
    }
 
    @Test
-   public void testAddScheduledRepetitions() throws InterruptedException
+   public void testAddScheduledRepetitions()
    {
       AtomicInteger repetitions = new AtomicInteger(0);
       RepeatingTaskThread thread = new RepeatingTaskThread(repetitions::getAndIncrement, NAME);
@@ -194,7 +194,7 @@ public class RepeatingTaskThreadTest
    }
 
    @Test
-   public void testInterrupt() throws InterruptedException
+   public void testInterrupt()
    {
       AtomicInteger interruptCount = new AtomicInteger(0);
       RepeatingTaskThread thread = new RepeatingTaskThread(() ->
@@ -241,7 +241,7 @@ public class RepeatingTaskThreadTest
    }
 
    @Test
-   public void testOverride() throws InterruptedException
+   public void testOverride()
    {
       AtomicInteger loopCounter = new AtomicInteger(0);
       RepeatingTaskThread thread = new RepeatingTaskThread(NAME)
