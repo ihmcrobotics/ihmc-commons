@@ -264,6 +264,6 @@ public class RepeatingTaskThreadTest
    private void assertCorrectState(RepeatingTaskThread thread, boolean shouldBeAlive, boolean shouldBeRepeating)
    {
       assertEquals(shouldBeAlive, thread.isAlive());
-      assertEquals(shouldBeRepeating, thread.isRepeating());
+      assertEquals(shouldBeRepeating, thread.isRunning() && thread.getScheduled() != 0L);
    }
 }
