@@ -194,7 +194,7 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * @return The total number of repetitions completed by this thread.
+    * @return The total number of task executions completed by this thread.
     */
    public long getCompleted()
    {
@@ -202,9 +202,9 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Wait until the next start of a task.
+    * Block until the next start of the task.
     */
-   public void waitForNextTaskStart() throws InterruptedException
+   public void blockUntilNextTaskExecution()
    {
       synchronized (executionState)
       {
@@ -216,9 +216,9 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Wait until the next end of a task.
+    * Block until the next completion of the task.
     */
-   public void waitForNextTaskEnd() throws InterruptedException
+   public void blockUntilNextTaskCompletion()
    {
       synchronized (executionState)
       {
@@ -229,10 +229,9 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Wait until the thread is paused.
-    * If the thread is currently paused, returns immediately.
+    * Block until there are no scheduled task executions, which may be immediately.
     */
-   public void waitForPause() throws InterruptedException
+   public void blockUntilNoScheduledTasks()
    {
       synchronized (executionState)
       {
@@ -242,9 +241,9 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Signals the thread to die.
-    * <p>
-    * If the task is currently executing, it will be allowed to finish.
+    * Allows the thread to die.
+    * Any currently executing task will first be allowed to finish.
+    * This class cannot be reused after this point.
     */
    public void kill()
    {
@@ -256,21 +255,26 @@ public class RepeatingTaskThread extends Thread
    }
 
    /**
-    * Signals the thread to die.
-    * <p>
-    * If the task is currently executing, it will be allowed to finish.
+    * Allows the thread to die and blocks until it does.
+    * Any currently executing task will first be allowed to finish.
+    * This class cannot be reused after this point.
     * <p>
     * Same as calling {@link #kill()} then {@link #join()}.
-    * Returns immediately if interrupted.
+    * Returns {@code true} if interrupted.
     */
-   public void blockingKill()
+   public boolean blockingKill()
    {
       kill();
       try
       {
          join();
       }
-      catch (InterruptedException ignored) {}
+      catch (InterruptedException e)
+      {
+         return true;
+      }
+
+      return false;
    }
 
    /**
@@ -301,32 +305,27 @@ public class RepeatingTaskThread extends Thread
    {
       while (running)
       {
-         try
+         synchronized (executionState)
          {
-            synchronized (executionState)
+            if (executionState.getScheduled() == 0L)
             {
-               if (executionState.getScheduled() == 0L)
-               {
-                  executionState.waitForChange();
-                  continue;
-               }
-            }
+               if (executionState.waitForChange())
+                  interrupt(); // Maintain interrupted status so that runTask method can handle it
 
-            // If a period/frequency limit was set, wait until loop can run.
-            if (periodLowerLimit > 0.0)
-            {
-               /*
-                * This call must not swallow interrupts.
-                * As of writing this comment (Nov, 2024), LockSupport.parkNanos() is used internally to block.
-                * Although the throttler will block until the period has elapsed, the thread
-                * remains interrupted.
-                */
-               throttler.waitAndRun(periodLowerLimit);
+               continue;
             }
          }
-         catch (InterruptedException interrupted)
-         {  // Maintain interrupted status so that runTask method can handle it
-            interrupt();
+
+         // If a period/frequency limit was set, wait until loop can run.
+         if (periodLowerLimit > 0.0)
+         {
+            /*
+             * This call must not swallow interrupts.
+             * As of writing this comment (Nov, 2024), LockSupport.parkNanos() is used internally to block.
+             * Although the throttler will block until the period has elapsed, the thread
+             * remains interrupted.
+             */
+            throttler.waitAndRun(periodLowerLimit);
          }
 
          // Run the runTask method, and handle any exception it may throw.
@@ -405,11 +404,20 @@ public class RepeatingTaskThread extends Thread
       /**
        * Wait until a change occurs to the thread's execution state.
        *
-       * @throws InterruptedException If the waiting thread is interrupted.
+       * @return if was interrupted
        */
-      private synchronized void waitForChange() throws InterruptedException
+      private synchronized boolean waitForChange()
       {
-         wait();
+         try
+         {
+            wait();
+         }
+         catch (InterruptedException e)
+         {
+            return true;
+         }
+
+         return false;
       }
 
       private long getScheduled()
