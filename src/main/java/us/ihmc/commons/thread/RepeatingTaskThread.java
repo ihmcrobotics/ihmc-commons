@@ -331,19 +331,19 @@ public class RepeatingTaskThread extends Thread
    {
       while (running)
       {
+         boolean interrupted = false;
          synchronized (executionState)
          {
             if (executionState.getScheduled() == 0L)
             {
-               if (executionState.waitForChange())
-                  interrupt(); // Maintain interrupted status so that runTask method can handle it
-
-               continue;
+               interrupted = executionState.waitForChange();
+               if (!interrupted)
+                  continue;
             }
          }
 
          // If a period/frequency limit was set, wait until loop can run.
-         if (periodLowerLimit > 0.0)
+         if (!interrupted && periodLowerLimit > 0.0)
          {
             /*
              * This call must not swallow interrupts.
@@ -353,6 +353,10 @@ public class RepeatingTaskThread extends Thread
              */
             throttler.waitAndRun(periodLowerLimit);
          }
+
+         // Maintain interrupted status so that runTask method can handle
+         if (interrupted)
+            interrupt();
 
          // Run the runTask method, and handle any exception it may throw.
          executionState.beforeTaskExecution();
