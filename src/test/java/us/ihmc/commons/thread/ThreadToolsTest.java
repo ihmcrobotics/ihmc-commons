@@ -1,5 +1,6 @@
 package us.ihmc.commons.thread;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -279,6 +280,33 @@ public class ThreadToolsTest
             }
          }
       }
+   }
+
+   @Test
+   public void testParkInterrupt()
+   {
+      MutableBoolean interruptedBefore = new MutableBoolean(false);
+      MutableBoolean interruptedAfter = new MutableBoolean(false);
+      MutableBoolean interruptedAfterClear = new MutableBoolean(false);
+
+      Thread thread = new Thread("Test")
+      {
+         @Override
+         public void run()
+         {
+            interruptedBefore.setValue(isInterrupted());
+            ThreadTools.park(0.5);
+            interruptedAfter.setValue(interrupted());
+            interruptedAfterClear.setValue(isInterrupted());
+         }
+      };
+      thread.start();
+      ThreadTools.park(0.25);
+      thread.interrupt();
+
+      assertFalse(interruptedBefore.booleanValue());
+      assertTrue(interruptedAfter.booleanValue());
+      assertFalse(interruptedAfterClear.booleanValue());
    }
 
    @Test
