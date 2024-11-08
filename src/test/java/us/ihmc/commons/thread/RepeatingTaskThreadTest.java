@@ -54,7 +54,7 @@ public class RepeatingTaskThreadTest
       assertCorrectState(thread, true, true);
 
       // Wait for all repetitions to complete
-      thread.waitForPause();
+      thread.blockUntilNoScheduledTasks();
       assertEquals(0, thread.getScheduled());
       assertCorrectState(thread, true, false);
 
@@ -83,13 +83,13 @@ public class RepeatingTaskThreadTest
       assertEquals(RepeatingTaskThread.REPEAT_INDEFINITELY, thread.getScheduled());
 
       // Ensure a task starts
-      thread.waitForNextTaskStart();
+      thread.blockUntilNextTaskExecution();
 
       // Stop repeating
       thread.stopRepeating();
       assertCorrectState(thread, true, false);
 
-      thread.waitForNextTaskEnd();
+      thread.blockUntilNextTaskCompletion();
       assertTrue(thread.getCompleted() > 0);
       assertEquals(0, thread.getScheduled());
 
@@ -160,7 +160,7 @@ public class RepeatingTaskThreadTest
       thread.start();
 
       thread.addScheduled(increment);
-      thread.waitForPause();
+      thread.blockUntilNoScheduledTasks();
       thread.kill();
       assertEquals(total, repetitions.get());
       assertEquals(total, thread.getCompleted());
@@ -214,7 +214,7 @@ public class RepeatingTaskThreadTest
       for (int i = 0; i < 25; ++i)
       {
          thread.interrupt();
-         thread.waitForNextTaskEnd();
+         thread.blockUntilNextTaskCompletion();
          assertEquals(i + 1, interruptCount.get());
       }
 
@@ -224,7 +224,7 @@ public class RepeatingTaskThreadTest
       for (int i = 0; i < 25; ++i)
       {
          thread.interrupt();
-         thread.waitForNextTaskEnd();
+         thread.blockUntilNextTaskCompletion();
          assertEquals(i + 1, interruptCount.get());
       }
 
@@ -234,7 +234,7 @@ public class RepeatingTaskThreadTest
       for (int i = 0; i < 25; ++i)
       {
          thread.interrupt();
-         thread.waitForNextTaskEnd();
+         thread.blockUntilNextTaskCompletion();
          assertEquals(i + 1, interruptCount.get());
       }
       thread.blockingKill();
@@ -256,7 +256,7 @@ public class RepeatingTaskThreadTest
       int targetLoops = 15;
       thread.setScheduled(targetLoops);
       thread.start();
-      thread.waitForPause();
+      thread.blockUntilNoScheduledTasks();
       thread.blockingKill();
       assertEquals(targetLoops, loopCounter.get());
    }
