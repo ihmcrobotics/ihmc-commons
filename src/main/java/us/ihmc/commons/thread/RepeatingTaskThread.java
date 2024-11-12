@@ -328,14 +328,8 @@ public class RepeatingTaskThread extends Thread
    {
       while (running)
       {
-         synchronized (executionState)
-         {
-            if (executionState.getScheduled() == 0L)
-            {
-               executionState.waitForChange();
-               continue;
-            }
-         }
+         if (executionState.getScheduled() == 0L)
+            executionState.waitForChange();
 
          // If a period/frequency limit was set, wait until loop can run.
          if (periodLowerLimit > 0.0)
@@ -345,9 +339,9 @@ public class RepeatingTaskThread extends Thread
             throttler.waitAndRun(periodLowerLimit);
 
             // If throttler was interrupted, clear interrupted status (we're handling it here)
-            // If we have no scheduled tasks, then wrap around to wait,
+            // If we have no scheduled tasks or kill has been called, then wrap around to wait,
             // else immediately execute the next task.
-            if (interrupted() && executionState.getScheduled() == 0L)
+            if (interrupted() && (!running || executionState.getScheduled() == 0L))
                continue;
          }
 
@@ -415,31 +409,34 @@ public class RepeatingTaskThread extends Thread
        *
        * @return {@code true} if interrupted.
        */
-      private synchronized boolean waitForChange()
+      private boolean waitForChange()
       {
-         try
+         synchronized (this)
          {
-            wait();
-         }
-         catch (InterruptedException e)
-         {
-            return true;
+            try
+            {
+               wait();
+            }
+            catch (InterruptedException e)
+            {
+               return true;
+            }
          }
 
          return false;
       }
 
-      private long getScheduled()
+      private synchronized long getScheduled()
       {
          return scheduledRepetitions;
       }
 
-      private boolean isExecuting()
+      private synchronized boolean isExecuting()
       {
          return executing;
       }
 
-      private long getCompleted()
+      private synchronized long getCompleted()
       {
          return completedRepetitions;
       }
