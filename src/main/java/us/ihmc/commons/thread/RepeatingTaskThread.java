@@ -56,24 +56,24 @@ public class RepeatingTaskThread extends Thread
    private final Throttler throttler = new Throttler();
 
    /** The period of the set frequency limit. A negative value indicates no limit. */
-   private volatile double periodLowerLimit = UNLIMITED_FREQUENCY;
+   private double periodLowerLimit = UNLIMITED_FREQUENCY;
 
    public RepeatingTaskThread(String name)
    {
-      this(DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
+      this(name, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
-   public RepeatingTaskThread(ExceptionHandler exceptionHandler, String name)
+   public RepeatingTaskThread(String name, ExceptionHandler exceptionHandler)
    {
-      this(null, exceptionHandler, name);
+      this(name, null, exceptionHandler);
    }
 
-   public RepeatingTaskThread(RunnableThatThrows task, String name)
+   public RepeatingTaskThread(String name, RunnableThatThrows task)
    {
-      this(task, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
+      this(name, task, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
-   public RepeatingTaskThread(RunnableThatThrows task, ExceptionHandler exceptionHandler, String name)
+   public RepeatingTaskThread(String name, RunnableThatThrows task, ExceptionHandler exceptionHandler)
    {
       super(name);
       this.task = task;
@@ -345,7 +345,7 @@ public class RepeatingTaskThread extends Thread
             throttler.waitAndRun(periodLowerLimit);
          }
 
-         // 1. Clears the interrupt status so we don't run the task with it.
+         // 1. Clears the interrupt status, so we don't run the task with it.
          // 2. Allows the user to use interrupt to get the throttler to stop waiting.
          // 3. We won't execute the task if there's nothing scheduled or kill has been called.
          // 4. Otherwise, we'll go ahead and execute the next task.

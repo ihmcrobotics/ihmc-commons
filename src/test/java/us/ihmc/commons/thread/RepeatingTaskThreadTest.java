@@ -20,7 +20,7 @@ public class RepeatingTaskThreadTest
    public void testStartKill()
    {
       AtomicBoolean taskRan = new AtomicBoolean(false);
-      RepeatingTaskThread thread = new RepeatingTaskThread(() -> taskRan.set(true), NAME);
+      RepeatingTaskThread thread = new RepeatingTaskThread(NAME, () -> taskRan.set(true));
 
       // Start the thread, but don't run anything
       thread.start();
@@ -40,11 +40,11 @@ public class RepeatingTaskThreadTest
    public void testStartRepeatKill()
    {
       AtomicInteger repetitions = new AtomicInteger(0);
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
+      RepeatingTaskThread thread = new RepeatingTaskThread(NAME, () ->
       {
          LogTools.info("Repetition {}", repetitions.getAndIncrement());
          Thread.sleep(10);
-      }, NAME);
+      });
 
       // Set the thread to run 10 repetitions
       int repetitionsToRun = 10;
@@ -72,11 +72,11 @@ public class RepeatingTaskThreadTest
    public void testStartPauseStart()
    {
       AtomicInteger repetitions = new AtomicInteger(0);
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
+      RepeatingTaskThread thread = new RepeatingTaskThread(NAME, () ->
       {
          LogTools.info("Repetition {}", repetitions.getAndIncrement());
          ThreadTools.park(0.01);
-      }, NAME);
+      });
 
       // Start repeating
       thread.startRepeating();
@@ -110,11 +110,11 @@ public class RepeatingTaskThreadTest
    public void testDoubleStart()
    {
       AtomicInteger repetitions = new AtomicInteger(0);
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
+      RepeatingTaskThread thread = new RepeatingTaskThread(NAME, () ->
       {
          LogTools.info("Repetition {}", repetitions.getAndIncrement());
          ThreadTools.park(0.01);
-      }, NAME);
+      });
 
       thread.startRepeating();
       assertState(thread, true, true, RepeatingTaskThread.REPEAT_INDEFINITELY, false, 0);
@@ -133,11 +133,11 @@ public class RepeatingTaskThreadTest
    public void testKillWithoutStart()
    {
       AtomicInteger repetitions = new AtomicInteger(0);
-      RepeatingTaskThread thread = new RepeatingTaskThread(() ->
+      RepeatingTaskThread thread = new RepeatingTaskThread(NAME, () ->
       {
          LogTools.info("Repetition {}", repetitions.getAndIncrement());
          Thread.sleep(10);
-      }, NAME);
+      });
 
       assertState(thread, false, false, 0, false, 0);
 
@@ -149,10 +149,38 @@ public class RepeatingTaskThreadTest
    }
 
    @Test
+   public void testInvalidStarts()
+   {
+      AtomicInteger repetitions = new AtomicInteger(0);
+      RunnableThatThrows runnable = () ->
+      {
+         LogTools.info("Repetition {}", repetitions.getAndIncrement());
+         Thread.sleep(10);
+      };
+
+      // Cannot call start when the thread is already running
+      RepeatingTaskThread thread1 = new RepeatingTaskThread(NAME, runnable);
+      thread1.startRepeating();
+      assertThrows(IllegalThreadStateException.class, thread1::start);
+      thread1.kill();
+
+      // Cannot restart after killing
+      RepeatingTaskThread thread2 = new RepeatingTaskThread(NAME, runnable);
+      thread2.startRepeating();
+      thread2.blockingKill();
+      assertThrows(IllegalThreadStateException.class, thread2::startRepeating);
+
+      // Can start after kill if the thread hasn't been started yet???
+//      RepeatingTaskThread thread0 = new RepeatingTaskThread(NAME, runnable);
+//      thread0.kill();
+//      assertThrows(IllegalThreadStateException.class, thread0::startRepeating);
+   }
+
+   @Test
    public void testAddScheduledRepetitions()
    {
       AtomicInteger repetitions = new AtomicInteger(0);
-      RepeatingTaskThread thread = new RepeatingTaskThread(repetitions::getAndIncrement, NAME);
+      RepeatingTaskThread thread = new RepeatingTaskThread(NAME, repetitions::getAndIncrement);
 
       int add = 20;
       int subtract = -10;
@@ -176,7 +204,7 @@ public class RepeatingTaskThreadTest
       FrequencyCalculator frequencyCalculator = new FrequencyCalculator();
 
       double targetFrequency = 5.0;
-      RepeatingTaskThread thread = new RepeatingTaskThread(frequencyCalculator::ping, NAME).setFrequencyLimit(targetFrequency);
+      RepeatingTaskThread thread = new RepeatingTaskThread(NAME, frequencyCalculator::ping).setFrequencyLimit(targetFrequency);
 
       // Start repeating at the target frequency
       thread.startRepeating();
@@ -267,7 +295,7 @@ public class RepeatingTaskThreadTest
       for (int millisToSleep = 0; millisToSleep < 500; millisToSleep += 100)
       {
          // Create a new thread
-         RepeatingTaskThread thread = new RepeatingTaskThread(wasteTime, NAME);
+         RepeatingTaskThread thread = new RepeatingTaskThread(NAME, wasteTime);
 
          // Start free spin
          thread.startRepeating();
@@ -285,37 +313,33 @@ public class RepeatingTaskThreadTest
          assertTrue(shutdownDuration < 0.01);
       }
 
-      /*
-       * TODO: This fails because throttler keeps on throttling even when interrupted.
-       * It's not an issue immediately, but it'd be nice if it passed too
-       */
-      //      LogTools.info("Test during throttled looping");
-      //      for (int millisToSleep = 0; millisToSleep < 1000; millisToSleep += 50)
-      //      {
-      //         // Create a new throttled thread
-      //         RepeatingTaskThread thread = new RepeatingTaskThread(wasteTime, NAME).setFrequencyLimit(1.0);
-      //
-      //         // Start throttled spin
-      //         thread.startRepeating();
-      //         ThreadTools.sleep(millisToSleep);
-      //
-      //         // Time the shutdown duration
-      //         long shutdownStart = System.nanoTime();
-      //         thread.kill();
-      //         thread.interrupt();
-      //         assertDoesNotThrow(() -> thread.join(500));
-      //         long shutdownComplete = System.nanoTime();
-      //
-      //         double shutdownDuration = Conversions.nanosecondsToSeconds(shutdownComplete - shutdownStart);
-      //         LogTools.info("Shutdown Duration: {}", shutdownDuration);
-      //         assertTrue(shutdownDuration < 0.01);
-      //      }
+      LogTools.info("Test during throttled looping");
+      for (int millisToSleep = 0; millisToSleep < 1000; millisToSleep += 50)
+      {
+         // Create a new throttled thread
+         RepeatingTaskThread thread = new RepeatingTaskThread(NAME, wasteTime).setFrequencyLimit(1.0);
+
+         // Start throttled spin
+         thread.startRepeating();
+         ThreadTools.sleep(millisToSleep);
+
+         // Time the shutdown duration
+         long shutdownStart = System.nanoTime();
+         thread.kill();
+         thread.interrupt();
+         assertDoesNotThrow(() -> thread.join(500));
+         long shutdownComplete = System.nanoTime();
+
+         double shutdownDuration = Conversions.nanosecondsToSeconds(shutdownComplete - shutdownStart);
+         LogTools.info("Shutdown Duration: {}", shutdownDuration);
+         assertTrue(shutdownDuration < 0.01);
+      }
 
       LogTools.info("Test during pause");
       for (int millisToSleep = 0; millisToSleep < 500; millisToSleep += 100)
       {
          // Create a new throttled thread
-         RepeatingTaskThread thread = new RepeatingTaskThread(wasteTime, NAME);
+         RepeatingTaskThread thread = new RepeatingTaskThread(NAME, wasteTime);
 
          // Start throttled spin
          thread.start();
@@ -348,7 +372,7 @@ public class RepeatingTaskThreadTest
       for (int i = 0; i < 5000; ++i)
       {
          // Create a new thread
-         RepeatingTaskThread thread = new RepeatingTaskThread(wasteTime, NAME);
+         RepeatingTaskThread thread = new RepeatingTaskThread(NAME, wasteTime);
 
          // Start free spin
          thread.startRepeating();
