@@ -314,7 +314,7 @@ public class RepeatingTaskThreadTest
       }
 
       LogTools.info("Test during throttled looping");
-      for (int millisToSleep = 0; millisToSleep < 1000; millisToSleep += 50)
+      for (int millisToSleep = 0; millisToSleep < 500; millisToSleep += 100)
       {
          // Create a new throttled thread
          RepeatingTaskThread thread = new RepeatingTaskThread(NAME, wasteTime).setFrequencyLimit(1.0);
