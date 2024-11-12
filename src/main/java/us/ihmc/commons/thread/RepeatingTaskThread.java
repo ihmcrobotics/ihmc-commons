@@ -328,22 +328,29 @@ public class RepeatingTaskThread extends Thread
    {
       while (running)
       {
-         if (executionState.getScheduled() == 0L)
-            executionState.waitForChange();
+         synchronized (executionState)
+         {
+            if (executionState.getScheduled() == 0L)
+            {
+               executionState.waitForChange();
+               continue;
+            }
+         }
 
-         // If a period/frequency limit was set, wait until loop can run.
+         // If a period/frequency limit was set, wait until the next period has started.
          if (periodLowerLimit > 0.0)
          {
             // Uses ThreadTools.parkAtLeast, which will not throw InterruptedException, but
             // will return early when this thread is interrupted.
             throttler.waitAndRun(periodLowerLimit);
-
-            // If throttler was interrupted, clear interrupted status (we're handling it here)
-            // If we have no scheduled tasks or kill has been called, then wrap around to wait,
-            // else immediately execute the next task.
-            if (interrupted() && (!running || executionState.getScheduled() == 0L))
-               continue;
          }
+
+         // 1. Clears the interrupt status so we don't run the task with it.
+         // 2. Allows the user to use interrupt to get the throttler to stop waiting.
+         // 3. We won't execute the task if there's nothing scheduled or kill has been called.
+         // 4. Otherwise, we'll go ahead and execute the next task.
+         if (interrupted() && (!running || executionState.getScheduled() == 0L))
+            continue;
 
          // Run the runTask method, and handle any exception it may throw.
          executionState.beforeTaskExecution();
@@ -409,34 +416,31 @@ public class RepeatingTaskThread extends Thread
        *
        * @return {@code true} if interrupted.
        */
-      private boolean waitForChange()
+      private synchronized boolean waitForChange()
       {
-         synchronized (this)
+         try
          {
-            try
-            {
-               wait();
-            }
-            catch (InterruptedException e)
-            {
-               return true;
-            }
+            wait();
+         }
+         catch (InterruptedException e)
+         {
+            return true;
          }
 
          return false;
       }
 
-      private synchronized long getScheduled()
+      private long getScheduled()
       {
          return scheduledRepetitions;
       }
 
-      private synchronized boolean isExecuting()
+      private boolean isExecuting()
       {
          return executing;
       }
 
-      private synchronized long getCompleted()
+      private long getCompleted()
       {
          return completedRepetitions;
       }
