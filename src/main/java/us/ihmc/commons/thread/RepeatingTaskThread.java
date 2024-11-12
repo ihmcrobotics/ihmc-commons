@@ -274,10 +274,7 @@ public class RepeatingTaskThread extends Thread
    public void kill()
    {
       running = false;
-      synchronized (executionState)
-      {
-         executionState.notifyAll();
-      }
+      executionState.setScheduled(0);
    }
 
    /**
@@ -347,7 +344,9 @@ public class RepeatingTaskThread extends Thread
             // will return early when this thread is interrupted.
             throttler.waitAndRun(periodLowerLimit);
 
-            // clears interrupted status from
+            // If throttler was interrupted, clear interrupted status (we're handling it here)
+            // If we have no scheduled tasks, then wrap around to wait,
+            // else immediately execute the next task.
             if (interrupted() && executionState.getScheduled() == 0L)
                continue;
          }
