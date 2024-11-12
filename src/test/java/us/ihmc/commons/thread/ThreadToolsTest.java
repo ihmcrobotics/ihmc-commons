@@ -322,6 +322,7 @@ public class ThreadToolsTest
          {
             interruptedBefore.setValue(isInterrupted());
             ThreadTools.park(1.0);
+            ThreadTools.park(1.0); // Test that the 2nd one also returns immediately
             interruptedAfter.setValue(interrupted());
             interruptedAfterClear.setValue(isInterrupted());
          }
