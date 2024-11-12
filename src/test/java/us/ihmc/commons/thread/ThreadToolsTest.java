@@ -289,6 +289,7 @@ public class ThreadToolsTest
       MutableBoolean interruptedAfter = new MutableBoolean(false);
       MutableBoolean interruptedAfterClear = new MutableBoolean(false);
 
+      LogTools.info("Test park interrupted early return");
       Thread thread = new Thread("Test")
       {
          @Override
@@ -300,12 +301,41 @@ public class ThreadToolsTest
             interruptedAfterClear.setValue(isInterrupted());
          }
       };
+      Stopwatch stopwatch = new Stopwatch().start();
       thread.start();
       ThreadTools.park(0.25);
       thread.interrupt();
       assertDoesNotThrow(() -> thread.join());
+      double elapsed = stopwatch.totalElapsed();
+
+      assertTrue(elapsed > 0.2 && elapsed < 0.3);
 
       assertFalse(interruptedBefore.booleanValue());
+      assertTrue(interruptedAfter.booleanValue());
+      assertFalse(interruptedAfterClear.booleanValue());
+
+      LogTools.info("Test park immediate return if already interrupted");
+      Thread thread2 = new Thread("Test2")
+      {
+         @Override
+         public void run()
+         {
+            interruptedBefore.setValue(isInterrupted());
+            ThreadTools.park(1.0);
+            interruptedAfter.setValue(interrupted());
+            interruptedAfterClear.setValue(isInterrupted());
+         }
+      };
+      thread2.interrupt();
+
+      stopwatch = new Stopwatch().start();
+      thread2.start();
+      assertDoesNotThrow(() -> thread2.join());
+      elapsed = stopwatch.totalElapsed();
+
+      assertTrue(elapsed < 0.1);
+
+      assertTrue(interruptedBefore.booleanValue());
       assertTrue(interruptedAfter.booleanValue());
       assertFalse(interruptedAfterClear.booleanValue());
    }
