@@ -150,13 +150,19 @@ public class ThreadTools
 
    /**
     * Guarantees a sleep of a minimum duration in floating point seconds
-    * using {@link LockSupport#parkNanos}. It will always sleep a little too long.
+    * using {@link LockSupport#parkNanos} unless the thread is interrupted.
+    * Otherwise, it will always sleep a little too long.
     * The amount overslept probably varies by system, but it has been observed to
     * be less than half a millisecond.
+    * When interrupted, this will return as soon as {@link LockSupport#parkNanos} does.
     * <p>
     * {@link #sleepSeconds} can return slightly early because it
     * cuts off the sub-nanosecond part, allowing it to under-sleep by a nanosecond
     * at most.
+    * <p>
+    * Also, while {@link #sleepSeconds(double)} swallows interrupts,
+    * this method will return upon being interrupted
+    * and the calling thread's interrupt status will be preserved.
     *
     * @param duration to sleep in seconds
     * @return Exactly how long it actually slept in seconds
@@ -173,7 +179,7 @@ public class ThreadTools
 
          amountSlept = Conversions.nanosecondsToSeconds(System.nanoTime()) - startTime;
       }
-      while (amountSlept < duration);
+      while (!Thread.currentThread().isInterrupted() && amountSlept < duration);
       return amountSlept;
    }
 
