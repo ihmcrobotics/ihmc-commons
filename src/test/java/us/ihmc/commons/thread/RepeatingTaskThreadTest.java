@@ -101,9 +101,9 @@ public class RepeatingTaskThreadTest
 
       // Kill the thread
       thread.kill();
-      assertState(thread, false, true, RepeatingTaskThread.REPEAT_INDEFINITELY, true, 1);
+      assertState(thread, false, true, 0, true, 1);
       assertDoesNotThrow(() -> thread.join(1000));
-      assertState(thread, false, false, RepeatingTaskThread.REPEAT_INDEFINITELY, false, 2);
+      assertState(thread, false, false, 0, false, 2);
    }
 
    @Test
@@ -126,7 +126,7 @@ public class RepeatingTaskThreadTest
 
       thread.kill();
       assertDoesNotThrow(() -> thread.join(1000));
-      assertState(thread, false, false, RepeatingTaskThread.REPEAT_INDEFINITELY, false, 1);
+      assertState(thread, false, false, 0, false, 1);
    }
 
    @Test
