@@ -343,17 +343,14 @@ public class RepeatingTaskThread extends Thread
          // If a period/frequency limit was set, wait until loop can run.
          if (periodLowerLimit > 0.0)
          {
-            /*
-             * This call must not swallow interrupts.
-             * As of writing this comment (Nov, 2024), LockSupport.parkNanos() is used internally to block.
-             * Although the throttler will block until the period has elapsed, the thread
-             * remains interrupted.
-             */
+            // Uses ThreadTools.parkAtLeast, which will not throw InterruptedException, but
+            // will return early when this thread is interrupted.
             throttler.waitAndRun(periodLowerLimit);
-         }
 
-         // clear interrupted status
-         interrupted();
+            // clears interrupted status from
+            if (interrupted() && executionState.getScheduled() == 0L)
+               continue;
+         }
 
          // Run the runTask method, and handle any exception it may throw.
          executionState.beforeTaskExecution();
