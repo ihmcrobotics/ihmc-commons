@@ -123,6 +123,8 @@ public class Throttler
    /**
     * Sleeps until enough time has passed to run your thing again.
     * <p>
+    * Will return early when interrupted. See {@link ThreadTools#parkAtLeast}.
+    * <p>
     * For use if the user set the period with the {@link #setPeriod} method.
     */
    public void waitAndRun()
@@ -132,6 +134,8 @@ public class Throttler
 
    /**
     * Sleeps until enough time has passed to run your thing again.
+    * <p>
+    * Will return early when interrupted. See {@link ThreadTools#parkAtLeast}.
     *
     * @param period for passing in dynamically calculated periods
     */

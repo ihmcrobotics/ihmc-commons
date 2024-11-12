@@ -1,5 +1,6 @@
 package us.ihmc.commons.thread;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -279,6 +280,116 @@ public class ThreadToolsTest
             }
          }
       }
+   }
+
+   @Test
+   public void testParkInterrupt()
+   {
+      MutableBoolean interruptedBefore = new MutableBoolean(false);
+      MutableBoolean interruptedAfter = new MutableBoolean(false);
+      MutableBoolean interruptedAfterClear = new MutableBoolean(false);
+
+      LogTools.info("Test park interrupted early return");
+      Thread thread = new Thread("Test")
+      {
+         @Override
+         public void run()
+         {
+            interruptedBefore.setValue(isInterrupted());
+            ThreadTools.park(1.0);
+            interruptedAfter.setValue(interrupted());
+            interruptedAfterClear.setValue(isInterrupted());
+         }
+      };
+      Stopwatch stopwatch = new Stopwatch().start();
+      thread.start();
+      ThreadTools.park(0.25);
+      thread.interrupt();
+      assertDoesNotThrow(() -> thread.join());
+      double elapsed = stopwatch.totalElapsed();
+
+      assertTrue(elapsed > 0.2 && elapsed < 0.3);
+
+      assertFalse(interruptedBefore.booleanValue());
+      assertTrue(interruptedAfter.booleanValue());
+      assertFalse(interruptedAfterClear.booleanValue());
+
+      LogTools.info("Test park immediate return if already interrupted");
+      Thread thread2 = new Thread("Test2")
+      {
+         @Override
+         public void run()
+         {
+            interruptedBefore.setValue(isInterrupted());
+            ThreadTools.park(1.0);
+            ThreadTools.park(1.0); // Test that the 2nd one also returns immediately
+            interruptedAfter.setValue(interrupted());
+            interruptedAfterClear.setValue(isInterrupted());
+         }
+      };
+      thread2.interrupt();
+
+      stopwatch = new Stopwatch().start();
+      thread2.start();
+      assertDoesNotThrow(() -> thread2.join());
+      elapsed = stopwatch.totalElapsed();
+
+      assertTrue(elapsed < 0.1);
+
+      assertTrue(interruptedBefore.booleanValue());
+      assertTrue(interruptedAfter.booleanValue());
+      assertFalse(interruptedAfterClear.booleanValue());
+
+      LogTools.info("Test parkAtLeast interrupted early return");
+      Thread thread3 = new Thread("Test")
+      {
+         @Override
+         public void run()
+         {
+            interruptedBefore.setValue(isInterrupted());
+            ThreadTools.parkAtLeast(1.0);
+            interruptedAfter.setValue(interrupted());
+            interruptedAfterClear.setValue(isInterrupted());
+         }
+      };
+      stopwatch = new Stopwatch().start();
+      thread3.start();
+      ThreadTools.park(0.25);
+      thread3.interrupt();
+      assertDoesNotThrow(() -> thread3.join());
+      elapsed = stopwatch.totalElapsed();
+
+      assertTrue(elapsed > 0.2 && elapsed < 0.3);
+
+      assertFalse(interruptedBefore.booleanValue());
+      assertTrue(interruptedAfter.booleanValue());
+      assertFalse(interruptedAfterClear.booleanValue());
+
+      LogTools.info("Test parkAtLeast when interrupted");
+      Thread thread4 = new Thread("Test2")
+      {
+         @Override
+         public void run()
+         {
+            interruptedBefore.setValue(isInterrupted());
+            ThreadTools.parkAtLeast(1.0);
+            ThreadTools.parkAtLeast(1.0); // Test that the 2nd one also returns immediately
+            interruptedAfter.setValue(interrupted());
+            interruptedAfterClear.setValue(isInterrupted());
+         }
+      };
+      thread4.interrupt();
+
+      stopwatch = new Stopwatch().start();
+      thread4.start();
+      assertDoesNotThrow(() -> thread4.join());
+      elapsed = stopwatch.totalElapsed();
+
+      assertTrue(elapsed < 0.1);
+
+      assertTrue(interruptedBefore.booleanValue());
+      assertTrue(interruptedAfter.booleanValue());
+      assertFalse(interruptedAfterClear.booleanValue());
    }
 
    @Test
