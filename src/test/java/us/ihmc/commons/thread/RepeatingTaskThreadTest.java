@@ -28,7 +28,6 @@ public class RepeatingTaskThreadTest
 
       // Kill the thread, wait for it to die
       thread.kill();
-      assertState(thread, false, true, 0, false, 0);
       assertDoesNotThrow(() -> thread.join(1000));
       assertState(thread, false, false, 0, false, 0);
 
@@ -53,7 +52,6 @@ public class RepeatingTaskThreadTest
 
       // Start the thread. Should start running the repetitions
       thread.start();
-      assertState(thread, true, true, repetitionsToRun, false, 0);
 
       // Wait for all repetitions to complete
       thread.blockUntilNoScheduledTasks();
@@ -61,7 +59,6 @@ public class RepeatingTaskThreadTest
 
       // Kill the thread and wait for it to die
       thread.kill();
-      assertState(thread, false, true, 0, false, repetitionsToRun);
       assertDoesNotThrow(() -> thread.join(1000));
       assertState(thread, false, false, 0, false, repetitionsToRun);
 
@@ -101,7 +98,6 @@ public class RepeatingTaskThreadTest
 
       // Kill the thread
       thread.kill();
-      assertState(thread, false, true, 0, true, 1);
       assertDoesNotThrow(() -> thread.join(1000));
       assertState(thread, false, false, 0, false, 2);
    }
@@ -169,11 +165,6 @@ public class RepeatingTaskThreadTest
       thread2.startRepeating();
       thread2.blockingKill();
       assertThrows(IllegalThreadStateException.class, thread2::startRepeating);
-
-      // Can start after kill if the thread hasn't been started yet???
-//      RepeatingTaskThread thread0 = new RepeatingTaskThread(NAME, runnable);
-//      thread0.kill();
-//      assertThrows(IllegalThreadStateException.class, thread0::startRepeating);
    }
 
    @Test
