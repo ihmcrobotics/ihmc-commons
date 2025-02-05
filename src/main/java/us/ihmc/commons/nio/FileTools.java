@@ -1,26 +1,37 @@
 package us.ihmc.commons.nio;
 
-import org.apache.commons.io.FileUtils;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.ExceptionHandler;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>A collection of tools to extend Java's NIO.2 API and
- * Apache Commons Lang. Tools here should fit one of
+ * <p>A collection of tools to extend Java's NIO.2 API. Tools here should fit one of
  * the following categories:</p>
  *
- * <ol>Provide a commonly needed method not provided by Apache Commons Lang or Java's NIO.2. API.</ol>
+ * <ol>Provide a commonly needed method not provided by Java's NIO.2. API.</ol>
  * <ol>Provide a wrapper around a commonly used method that uses a {@link ExceptionHandler}.</ol>
- * <ol>Provide a bridge between Java's NIO.2 API and Apache Commons Lang.</ol>
  */
 public class FileTools
 {
@@ -31,14 +42,49 @@ public class FileTools
    private static final byte NEWLINE = '\n';
 
    /**
-    * Delete a file or directory recursively and quietly. A bridge from Java's NIO.2 to Apache Commons IO.
+    * Delete a file or directory recursively and quietly.
     *
     * @param path file or directory to be deleted
-    * @see {@link FileUtils#deleteQuietly(File)}
     */
    public static void deleteQuietly(Path path)
    {
-      FileUtils.deleteQuietly(path.toFile());
+      try
+      {
+         Files.walkFileTree(path, new SimpleFileVisitor<>()
+         {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+               try
+               {
+                  Files.delete(file);
+               }
+               catch (IOException e)
+               {
+                  // Silently ignore any errors
+               }
+               return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+            {
+               try
+               {
+                  Files.delete(dir);
+               }
+               catch (IOException e)
+               {
+                  // Silently ignore any errors
+               }
+               return FileVisitResult.CONTINUE;
+            }
+         });
+      }
+      catch (IOException e)
+      {
+         // Silently ignore any errors
+      }
    }
 
    /**

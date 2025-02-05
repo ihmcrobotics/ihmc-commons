@@ -1,25 +1,30 @@
 package us.ihmc.commons.nio;
 
-import org.apache.commons.io.FilenameUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.BasicPathVisitor.PathType;
 import us.ihmc.log.LogTools;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
 /**
- * <p>A collection of tools to extend Java's NIO.2 API and
- * Apache Commons Lang. Tools here should fit one of
+ * <p>A collection of tools to extend Java's NIO.2 API. Tools here should fit one of
  * the following categories:</p>
  *
- * <ol>Provide a commonly needed method not provided by Apache Commons Lang or Java's NIO.2. API.</ol>
+ * <ol>Provide a commonly needed method not provided by Java's NIO.2. API.</ol>
  * <ol>Provide a wrapper around a commonly used method that uses a {@link DefaultExceptionHandler}.</ol>
- * <ol>Provide a bridge between Java's NIO.2 API and Apache Commons Lang.</ol>
  */
 public class PathTools
 {
@@ -27,25 +32,43 @@ public class PathTools
    private static final String REGEX_SYNTAX_PREFIX = "regex:";
 
    /**
-    * Get the base name of a file. A bridge from Java's NIO.2 to Apache Commons IO.
+    * Get the base name of a file.
     *
     * @param path path
     * @return baseName the base name, minus the full path and extension, from a full filename
     */
    public static String getBaseName(Path path)
    {
-      return FilenameUtils.getBaseName(path.toString());
+      if (path == null)
+         return null;
+
+      String fileName = path.getFileName().toString();
+      int extensionIndex = fileName.lastIndexOf('.');
+      return (extensionIndex > 0) ? fileName.substring(0, extensionIndex) : fileName;
    }
 
    /**
-    * Get the extension of a file. A bridge from Java's NIO.2 to Apache Commons IO.
+    * Get the extension of a file.
     *
     * @param path path
     * @return extension the extension of a file name
     */
    public static String getExtension(Path path)
    {
-      return FilenameUtils.getExtension(path.toString());
+      if (path == null)
+         return "";
+
+      String fileName = path.getFileName().toString();
+      int dotIndex = fileName.lastIndexOf('.');
+
+      if (dotIndex == -1 || dotIndex == fileName.length() - 1)
+      {
+         return ""; // No extension found or filename ends with a dot
+      }
+      else
+      {
+         return fileName.substring(dotIndex + 1);
+      }
    }
 
    public static Path systemTemporaryDirectory()
